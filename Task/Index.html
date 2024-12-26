@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>API HTML Application</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="icon" href="assets/favicon.png" type="image/png">
+</head>
+<body>
+  <div id="preloader"></div>
+
+  <h1>API Lookup Tool</h1>
+  <table>
+    <thead>
+      <tr>
+        <th>API Name</th>
+        <th>API Description</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>StreetNameLookUp</td>
+        <td>
+          Enter street name: <input type="text" id="streetName" placeholder="Street Name">
+        </td>
+        <td><button onclick="lookupStreet()">Submit</button></td>
+      </tr>
+      <tr>
+        <td>Weather</td>
+        <td>
+          Enter location: <input type="text" id="location" placeholder="Location">
+        </td>
+        <td><button onclick="getWeather()">Submit</button></td>
+      </tr>
+      <tr>
+        <td>CountryCode</td>
+        <td>
+          Enter country name: <input type="text" id="countryName" placeholder="Country Name">
+        </td>
+        <td><button onclick="getCountryCode()">Submit</button></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <script src="js/script.js"></script>
+</body>
+</html>
+

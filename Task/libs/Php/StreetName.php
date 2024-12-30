@@ -9,7 +9,7 @@ $executionStartTime = microtime(true);
 // Construct API URL using $_REQUEST parameters
 $url = 'http://api.geonames.org/findNearbyStreetsJSON?lat=' . $_REQUEST['lat'] .
     '&lng=' . $_REQUEST['lng'] .
-    '&username=your_geonames_username';
+    '&username=joedrumm12';
 
 // Initialize cURL
 $ch = curl_init();

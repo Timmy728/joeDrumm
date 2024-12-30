@@ -1,0 +1,27 @@
+$('#btnWeather').click(function () {
+    $.ajax({
+        url: "libs/php/weather.php",
+        type: 'POST',
+        dataType: 'json',
+        data: {
+            north: $('#txtNorth').val(),
+            south: $('#txtSouth').val(),
+            east: $('#txtEast').val(),
+            west: $('#txtWest').val()
+        },
+        success: function (result) {
+            console.log(result);
+
+            if (result.status.name === "ok") {
+                $('#txtWeatherStation').html(result['data'][0]['stationName']);
+                $('#txtTemperature').html(result['data'][0]['temperature']);
+                $('#txtHumidity').html(result['data'][0]['humidity']);
+                $('#txtWindSpeed').html(result['data'][0]['windSpeed']);
+            }
+        },
+        error: function (jqXHR, textStatus, errorThrown) {
+            console.error("Error:", textStatus, errorThrown);
+        }
+    });
+});
+

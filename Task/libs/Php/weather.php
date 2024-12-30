@@ -11,7 +11,7 @@ $url = 'http://api.geonames.org/weatherJSON?formatted=true&north=' . $_REQUEST['
     '&south=' . $_REQUEST['south'] .
     '&east=' . $_REQUEST['east'] .
     '&west=' . $_REQUEST['west'] .
-    '&username=your_geonames_username';
+    '&username=joedrumm12';
 
 // Initialize cURL
 $ch = curl_init();

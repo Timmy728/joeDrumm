@@ -14,7 +14,7 @@ document.getElementById("btnStreetLookUp").addEventListener("click", function() 
       console.log(result);
       if (result.status.name === "ok") {
         document.getElementById("txtStreetResult").innerHTML =
-          result.data[0].streetDetails || "No details found."; // Example field
+          result.data[0].streetDetails || "No details found.";
       }
     })
     .catch((error) => console.error("error:", error));
@@ -26,7 +26,7 @@ document.getElementById("btnWeather").addEventListener("click", function() {
 
     fetch("libs/php/weather.php", {
         method: "POST",
-        headers {
+        headers: {
         "Content-Type": "application/json",
 },
  body: JSON.stringify({ location: location}),
@@ -36,12 +36,29 @@ document.getElementById("btnWeather").addEventListener("click", function() {
         console.log(result);
         if (result.status.name === "ok") {
             document.getElementById("txtWeatherResult").innerHTML =
-                result.data[0].weatherInfo || "weather information not found."; // Example
+                result.data[0].weatherInfo || "weather information not found.";
         }
     })
     .catch((error) => console.log("Error:", error));
 });
 
 // Country Code LookUp API Functionality
+document.getElementById("btnCountryCode").addEventListener("click", function() {
+    const countryName = document.getElementById("countryName".value;
 
-
+fetch("libs/php/countryCodeLookUp.php", {
+    method: "POST", 
+    headers: { "countent-Type": "application/json",
+    },
+    body: JSON.stringify({ countryName: countryName }),
+})
+    .then((response) => response.json())
+    .then((result) => {
+        console.log(result);
+        if (result.status.name === "ok" {
+            document.getElementById("txtCountryCodeResult").innerHTML = result.data[0].countryCode || "country code not found";
+        }
+    })
+    .catch((error) => console.log("Error:", error));
+});
+                                                        

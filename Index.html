@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>API HTML Application</title>
+  <link rel="stylesheet" href="css/Style.css">
+  <link rel="icon" href="assets/favicon.png" type="image/png">
+</head>
+<body>
+  <div id="preloader"></div>
+
+  <h1>My HTML Application</h1>
+  <table>
+    <thead>
+      <tr>
+        <th>API Name</th>
+        <th>API Description</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>StreetNameLookUp</td>
+        <td>
+          Enter street name: <input type="text" id="streetName" placeholder="Street Name">
+        </td>
+        <td><button onclick="lookupStreet()">Submit</button></td>
+      </tr>
+      <tr>
+        <td>Weather</td>
+        <td>
+          Enter location: <input type="text" id="location" placeholder="Location">
+        </td>
+        <td><button onclick="getWeather()">Submit</button></td>
+      </tr>
+      <tr>
+        <td>CountryCode</td>
+        <td>
+          Enter country name: <input type="text" id="countryName" placeholder="Country Name">
+        </td>
+        <td><button onclick="getCountryCode()">Submit</button></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- Included JavaScript.js files -->
+  
+  <script src="js/streetName.js"></script>
+  <script src="js/weather.js"></script>
+  <script src="js/countryCode.js"></script>
+</body>
+</html>

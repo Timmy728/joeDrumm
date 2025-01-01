@@ -9,7 +9,7 @@ document.getElementById("btnStreetLookUp").addEventListener("click", function() 
         },
         body: JSON.stringify({ streetName: streetName }),
     })
-    then((response) => response.json())
+    .then((response) => response.json())
     .then((result) => {
       console.log(result);
       if (result.status.name === "ok") {
@@ -27,16 +27,16 @@ document.getElementById("btnWeather").addEventListener("click", function() {
     fetch("libs/php/weather.php", {
         method: "POST",
         headers: {
-        "Content-Type": "application/json",
-},
- body: JSON.stringify({ location: location}),
-})
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ location: location }),
+    })
     .then((response) => response.json())
     .then((result) => {
         console.log(result);
         if (result.status.name === "ok") {
             document.getElementById("txtWeatherResult").innerHTML =
-                result.data[0].weatherInfo || "weather information not found.";
+                result.data[0].weatherInfo || "Weather information not found.";
         }
     })
     .catch((error) => console.log("Error:", error));
@@ -44,20 +44,23 @@ document.getElementById("btnWeather").addEventListener("click", function() {
 
 // Country Code LookUp API Functionality
 document.getElementById("btnCountryCode").addEventListener("click", function() {
-    const countryName = document.getElementById("countryName".value;
+    const countryName = document.getElementById("countryName").value;
 
-fetch("libs/php/countryCodeLookUp.php", {
-    method: "POST", 
-    headers: { "countent-Type": "application/json",
-    },
-    body: JSON.stringify({ countryName: countryName }),
-})
+    fetch("libs/php/countryCodeLookUp.php", {
+        method: "POST", 
+        headers: { 
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ countryName: countryName }),
+    })
     .then((response) => response.json())
     .then((result) => {
         console.log(result);
-        if (result.status.name === "ok" {
-            document.getElementById("txtCountryCodeResult").innerHTML = result.data[0].countryCode || "country code not found";
+        if (result.status.name === "ok") {
+            document.getElementById("txtCountryCodeResult").innerHTML = 
+                result.data[0].countryCode || "Country code not found.";
         }
     })
     .catch((error) => console.log("Error:", error));
 });
+

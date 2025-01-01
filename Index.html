@@ -19,33 +19,60 @@
       </tr>
     </thead>
     <tbody>
+      <!-- Street Name Lookup -->
       <tr>
         <td>StreetNameLookUp</td>
         <td>
-          Enter street name: <input type="text" id="streetName" placeholder="Street Name">
+          Enter street name:
+          <input type="text" id="streetName" placeholder="Street Name">
         </td>
-        <td><button onclick="lookupStreet()">Submit</button></td>
+        <td>
+          <button id="btnStreetLookUp">Submit</button>
+        </td>
       </tr>
+
+      <!-- Weather Lookup -->
       <tr>
         <td>Weather</td>
         <td>
-          Enter location: <input type="text" id="location" placeholder="Location">
+          Enter location:
+          <input type="text" id="location" placeholder="Location">
         </td>
-        <td><button onclick="getWeather()">Submit</button></td>
+        <td>
+          <button id="btnWeather">Submit</button>
+        </td>
       </tr>
+
+      <!-- Country Code Lookup -->
       <tr>
         <td>CountryCode</td>
         <td>
-          Enter country name: <input type="text" id="countryName" placeholder="Country Name">
+          Enter country name:
+          <input type="text" id="countryName" placeholder="Country Name">
         </td>
-        <td><button onclick="getCountryCode()">Submit</button></td>
+        <td>
+          <button id="btnCountryCode">Submit</button>
+        </td>
       </tr>
     </tbody>
   </table>
 
-  <!-- Included JavaScript.js files -->
- 
-<script src="Task/libs/Js/Script.js"></script>
+  <!-- Results Section -->
+  <h2>Results</h2>
+  <div>
+    <h3>Street Lookup Result</h3>
+    <div id="txtStreetResult">No results yet.</div>
+  </div>
+  <div>
+    <h3>Weather Result</h3>
+    <div id="txtWeatherResult">No results yet.</div>
+  </div>
+  <div>
+    <h3>Country Code Result</h3>
+    <div id="txtCountryCodeResult">No results yet.</div>
+  </div>
 
+  <!-- JavaScript -->
+  <script src="Task/libs/Js/Script.js"></script>
 </body>
 </html>

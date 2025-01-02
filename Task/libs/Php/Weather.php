@@ -3,10 +3,27 @@
 ini_set('display_errors', 'On');
 error_reporting(E_ALL);
 
-//Measure execution time
-$executionStartTime = mocrotime(true);
+// Measure execution time
+$executionStartTime = microtime(true);
 
-//Construct API URL using the $_REQUEST parameters
+// Check for missing parameters
+if (!isset($_REQUEST['north']) || !isset($_REQUEST['south']) || !isset($_REQUEST['east']) || !isset($_REQUEST['west'])) {
+    $output = [
+        'status' => [
+            'code' => 400,
+            'name' => 'fail',
+            'description' => 'Missing required parameters: north, south, east, and west',
+        ],
+        'data' => null
+    ];
+
+    // Return JSON response
+    header('Content-Type: application/json; charset=UTF-8');
+    echo json_encode($output);
+    exit;
+}
+
+// Construct API URL using the $_REQUEST parameters
 $url = 'http://api.geonames.org/weatherJSON?formatted=true&north=' . $_REQUEST['north'] .
     '&south=' . $_REQUEST['south'] .
     '&east=' . $_REQUEST['east'] .
@@ -16,10 +33,10 @@ $url = 'http://api.geonames.org/weatherJSON?formatted=true&north=' . $_REQUEST['
 // Initialize cURL
 $ch = curl_init();
 curl_setopt($ch, CURLOPT_URL, $url);
-curl_setopt($ch, CURLOPT_RETURNTRANSER, true);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
 
-//Execute & close cURL
+// Execute and close cURL
 $result = curl_exec($ch);
 curl_close($ch);
 

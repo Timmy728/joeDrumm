@@ -3,7 +3,7 @@ document.addEventListener("DOMContentLoaded", function() {
     document.getElementById("btnStreetLookUp").addEventListener("click", function() {
         const streetName = document.getElementById("streetName").value;
 
-        fetch("Task/Task/libs/php/StreetName/StreetName.php", {  // Updated file path
+        fetch("Task/libs/Php/StreetName/streetNameLookUp", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -25,7 +25,7 @@ document.addEventListener("DOMContentLoaded", function() {
     document.getElementById("btnWeather").addEventListener("click", function() {
         const location = document.getElementById("location").value;
 
-        fetch("Task/Task/libs/php/Weather/weather.php", {  // Updated file path
+        fetch("Task/libs/Php/Weather/weather", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -47,7 +47,7 @@ document.addEventListener("DOMContentLoaded", function() {
     document.getElementById("btnCountryCode").addEventListener("click", function() {
         const countryName = document.getElementById("countryName").value;
 
-        fetch("Task/Task/libs/php/CountryCode/CountryCode.php", {  // Updated file path
+        fetch("Task/libs/Php/CountryCode/countryCodeLookUp", {
             method: "POST", 
             headers: { 
                 "Content-Type": "application/json",

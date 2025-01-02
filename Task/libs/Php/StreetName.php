@@ -6,6 +6,23 @@ error_reporting(E_ALL);
 // Measure execution time
 $executionStartTime = microtime(true);
 
+// Check for missing parameters
+if (!isset($_REQUEST['lat']) || !isset($_REQUEST['lng'])) {
+    $output = [
+        'status' => [
+            'code' => 400,
+            'name' => 'fail',
+            'description' => 'Missing required parameters: lat and lng',
+        ],
+        'data' => null
+    ];
+
+    // Return JSON response
+    header('Content-Type: application/json; charset=UTF-8');
+    echo json_encode($output);
+    exit;
+}
+
 // Construct API URL using $_REQUEST parameters
 $url = 'http://api.geonames.org/findNearbyStreetsJSON?lat=' . $_REQUEST['lat'] .
     '&lng=' . $_REQUEST['lng'] .

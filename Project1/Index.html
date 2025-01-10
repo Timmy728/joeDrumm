@@ -1,1 +1,123 @@
-<!DOCTYPE HTML>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Gazetteer</title>
+
+ <!-- The Bootstrap CSS -->
+  <link href="node_modules/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Leaflet CSS for the map -->
+  <link href="node_modules/leaflet/dist/leaflet.css" rel="stylesheet">
+  
+  <!-- Leaflet MarkerCluster CSS -->
+  <link href="node_modules/leaflet.markercluster/dist/MarkerCluster.css" rel="stylesheet">
+  <link href="node_modules/leaflet.markercluster/dist/MarkerCluster.Default.css" rel="stylesheet">
+
+  <!-- Leaflet EasyButton CSS -->
+  <link href="node_modules/leaflet-easybutton/src/easy-button.css" rel="stylesheet">
+
+  <!-- Leaflet ExtraMarkers CSS -->
+  <link href="node_modules/leaflet-extra-markers/dist/css/leaflet.extra-markers.min.css" rel="stylesheet"/>
+
+  <!-- Font Awesome -->
+  <link href="node_modules/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
+
+  <!-- Custom styles -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+  <!-- Country Selector -->
+  <div id="selectContainer">
+    <select id="countrySelect" class="form-select shadow-sm">
+      <!-- Countries will be dynamically populated here -->
+    </select>
+  </div>
+
+  <!-- Map Container -->
+  <div id="map"></div>
+  <div id="alertPlaceholder" class="position-fixed top-50 start-50 translate-middle"></div>
+
+  <!-- Country Info Modal -->
+  <div class="modal fade" id="countryModal" tabindex="-1" aria-labelledby="countryModalLabel" aria-hidden="true" data-bs-backdrop="false" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+      <div class="modal-content fw-bold">
+        <div class="modal-header bg-info bg-opacity-25">
+          <h5 class="modal-title text-uppercase" id="countryModalLabel">Country Information</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-2">
+          <table class="table table-striped">
+            <tbody class="align-middle">
+              <tr>
+                <td class="text-center"><i class="fas fa-flag"></i></td>
+                <td>Country Name</td>
+                <td id="countryName"></td>
+              </tr>
+              <!-- Additional fields here -->
+            </tbody>
+          </table>
+        </div>
+        <div class="modal-footer bg-info bg-opacity-25">
+          <button type="button" class="btn btn-outline-dark fw-bold" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Currency Calculator Modal -->
+  <div class="modal fade" id="currencyModal" tabindex="-1" aria-labelledby="currencyModalLabel" aria-hidden="true" data-bs-backdrop="false" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+      <div class="modal-content fw-bold">
+        <div class="modal-header bg-success bg-opacity-50">
+          <h5 class="modal-title text-uppercase fw-bold" id="currencyModalLabel">Currency Calculator</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-2 pt-0">
+          <table class="table table-striped mt-1">
+            <thead>
+              <tr>
+                <th class="text-center p-1" id="baseCurrencyCodeConverter">USD</th>
+                <th class="text-center p-1" id="curenCurrencyCodeConverter"></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><input type="number" id="baseCurrencyAmount" class="form-control" value="1" min="1"></td>
+                <td><input type="number" id="currentCurencyAmount" class="form-control" min="1"></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="modal-footer bg-success bg-opacity-50">
+          <button type="button" class="btn btn-outline-dark fw-bold" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Weather Modal -->
+  <div class="modal fade" id="weatherModal" tabindex="-1" aria-labelledby="weatherModalLabel" aria-hidden="true" data-bs-backdrop="false" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header bg-success bg-opacity-25">
+          <h5 class="modal-title" id="weatherModalLabel">
+            <span id="weather-point-name">NAME</span> <span id="current-date-time" class="fw-light fs-6"></span>
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-1">
+          <!-- Weather Details -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- JavaScript Files -->
+  <script src="node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="node_modules/leaflet/dist/leaflet.js"></script>
+  <script src="js/script.js"></script>
+</body>
+</html>

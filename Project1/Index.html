@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Gazetteer</title>
 
- <!-- The Bootstrap CSS -->
+  <!-- Bootstrap CSS -->
   <link href="node_modules/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
 
   <!-- Leaflet CSS for the map -->
@@ -32,7 +32,7 @@
   <!-- Country Selector -->
   <div id="selectContainer">
     <select id="countrySelect" class="form-select shadow-sm">
-      <!-- Countries will be dynamically populated here -->
+      <?php include 'php/populate_countries.php'; ?>
     </select>
   </div>
 
@@ -51,12 +51,7 @@
         <div class="modal-body p-2">
           <table class="table table-striped">
             <tbody class="align-middle">
-              <tr>
-                <td class="text-center"><i class="fas fa-flag"></i></td>
-                <td>Country Name</td>
-                <td id="countryName"></td>
-              </tr>
-              <!-- Additional fields here -->
+              <?php include 'php/country_info.php'; ?>
             </tbody>
           </table>
         </div>
@@ -72,7 +67,9 @@
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
       <div class="modal-content fw-bold">
         <div class="modal-header bg-success bg-opacity-50">
-          <h5 class="modal-title text-uppercase fw-bold" id="currencyModalLabel">Currency Calculator</h5>
+          <h5 class="modal-title text-uppercase fw-bold" id="currencyModalLabel">
+            <img src="images/currency.png" alt="Currency Icon" class="icon"> Currency Calculator
+          </h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body p-2 pt-0">
@@ -90,6 +87,7 @@
               </tr>
             </tbody>
           </table>
+          <?php include 'php/currency_converter.php'; ?>
         </div>
         <div class="modal-footer bg-success bg-opacity-50">
           <button type="button" class="btn btn-outline-dark fw-bold" data-bs-dismiss="modal">Close</button>
@@ -104,15 +102,55 @@
       <div class="modal-content">
         <div class="modal-header bg-success bg-opacity-25">
           <h5 class="modal-title" id="weatherModalLabel">
-            <span id="weather-point-name">NAME</span> <span id="current-date-time" class="fw-light fs-6"></span>
+            <img src="images/weather.png" alt="Weather Icon" class="icon"> <span id="weather-point-name">NAME</span> <span id="current-date-time" class="fw-light fs-6"></span>
           </h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body p-1">
-          <!-- Weather Details -->
+          <?php include 'php/weather_info.php'; ?>
         </div>
       </div>
     </div>
+  </div>
+
+  <!-- Earthquake Info Section -->
+  <div id="earthquakeSection" class="mt-3">
+    <h2 class="text-center">
+      <img src="images/earthquakes.png" alt="Earthquake Icon" class="icon"> Recent Earthquakes
+    </h2>
+    <?php include 'php/earthquakes.php'; ?>
+  </div>
+
+  <!-- Wiki Links Section -->
+  <div id="wikiLinksSection" class="mt-3">
+    <h2 class="text-center">
+      <img src="images/wiki.png" alt="Wiki Icon" class="icon"> Wikipedia Links
+    </h2>
+    <?php include 'php/wiki_links.php'; ?>
+  </div>
+
+  <!-- Capital Cities Section -->
+  <div id="capitalCitiesSection" class="mt-3">
+    <h2 class="text-center">
+      <img src="images/cities.png" alt="Cities Icon" class="icon"> Capital Cities
+    </h2>
+    <?php include 'php/capital_cities.php'; ?>
+  </div>
+
+  <!-- Timezone Section -->
+  <div id="timezoneSection" class="mt-3">
+    <h2 class="text-center">
+      <img src="images/cities.png" alt="Timezone Icon" class="icon"> Timezone Information
+    </h2>
+    <?php include 'php/timezone.php'; ?>
+  </div>
+
+  <!-- Country Name and Population Section -->
+  <div id="countryPopulationSection" class="mt-3">
+    <h2 class="text-center">
+      <img src="images/cities.png" alt="Population Icon" class="icon"> Country Name and Population
+    </h2>
+    <?php include 'php/country_name_population.php'; ?>
   </div>
 
   <!-- JavaScript Files -->

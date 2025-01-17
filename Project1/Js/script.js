@@ -1,7 +1,3 @@
-// ---------------------------------------------------------
-// GLOBAL DECLARATIONS
-// ---------------------------------------------------------
-
 var map, layerControl;
 var bordersLayerGroup = L.layerGroup();
 var airportClusterGroup = L.markerClusterGroup({

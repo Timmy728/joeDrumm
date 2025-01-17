@@ -15,43 +15,30 @@
   <!-- Font Awesome -->
   <link href="node_modules/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
 
-  <!-- Leaflet Marker Cluster CSS -->
-  <link href="node_modules/leaflet.markercluster/dist/MarkerCluster.css" rel="stylesheet">
-  <link href="node_modules/leaflet.markercluster/dist/MarkerCluster.Default.css" rel="stylesheet">
-
-  <!-- Leaflet EasyButton CSS -->
-  <link href="node_modules/leaflet-easybutton/src/easy-button.css" rel="stylesheet">
-
   <!-- Custom styles -->
   <link rel="stylesheet" href="css/style.css">
-  
-  <style>
-    body, html {
-      margin: 0;
-      padding: 0;
-      height: 100%;
-    }
-
-    #map {
-      height: 100vh; /* Full viewport height for the map */
-    }
-  </style>
-
 </head>
 
 <body>
+  <!-- Preloader -->
+  <div id="preloader" class="d-flex justify-content-center align-items-center">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+  </div>
+
   <!-- Country Selector -->
   <div id="selectContainer" class="mb-4">
     <select id="countrySelect" class="form-select shadow-sm">
       <!-- PHP will populate the countries here -->
-      <?php include 'php/populate_countries.php'; ?>
+      <?php include 'php/countryName.php'; ?>
     </select>
   </div>
 
   <!-- Map Container -->
-  <div id="map"></div>
+  <div id="map" style="height: 500px;"></div>
+  <div id="alertPlaceholder" class="position-fixed top-50 start-50 translate-middle"></div>
 
-  <!-- Modals for Country Info, Currency, Weather, Wikipedia, Earthquakes -->
   <!-- Country Info Modal -->
   <div class="modal fade" id="countryModal" tabindex="-1" aria-labelledby="countryModalLabel" aria-hidden="true" data-bs-backdrop="false" data-bs-keyboard="false">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
@@ -63,11 +50,55 @@
         <div class="modal-body p-2">
           <table class="table table-striped">
             <tbody class="align-middle">
-              <?php include 'php/Country.php'; ?>
-              <?php include 'php/Population.php'; ?>
-              <?php include 'php/Timezone.php'; ?>
-              <?php include 'php/CapitalCities.php'; ?>
-              <?php include 'php/CountryName.php'; ?>
+              <!-- Populate country details dynamically -->
+              <tr>
+                <td class="text-nowrap">Country Name</td>
+                <td id="countryName"></td>
+              </tr>
+              <tr>
+                <td class="text-nowrap">Official Name</td>
+                <td id="officialName"></td>
+              </tr>
+              <tr>
+                <td class="text-nowrap">Capital</td>
+                <td id="capital"></td>
+              </tr>
+              <tr>
+                <td class="text-nowrap">Population</td>
+                <td id="population"></td>
+              </tr>
+              <tr>
+                <td class="text-nowrap">Currency</td>
+                <td id="currency"></td>
+              </tr>
+              <tr>
+                <td class="text-nowrap">Region</td>
+                <td id="region"></td>
+              </tr>
+              <tr>
+                <td class="text-nowrap">Languages</td>
+                <td id="languages"></td>
+              </tr>
+              <tr>
+                <td class="text-nowrap">Area</td>
+                <td id="area"></td>
+              </tr>
+              <tr>
+                <td class="text-nowrap">Timezones</td>
+                <td id="timezones"></td>
+              </tr>
+              <tr>
+                <td class="text-nowrap">Flag</td>
+                <td id="flag"></td>
+              </tr>
+              <tr>
+                <td class="text-nowrap">Flag Description</td>
+                <td id="flagDescription"></td>
+              </tr>
+              <tr>
+                <td class="text-nowrap">Coat of Arms</td>
+                <td id="coatOfArms"></td>
+              </tr>
             </tbody>
           </table>
         </div>
@@ -84,7 +115,7 @@
       <div class="modal-content fw-bold">
         <div class="modal-header bg-success bg-opacity-50">
           <h5 class="modal-title text-uppercase fw-bold" id="currencyModalLabel">
-            <img src="images/currency.png" alt="Currency Icon" class="icon"> Currency Calculator
+            Currency Calculator
           </h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
@@ -92,14 +123,14 @@
           <table class="table table-striped mt-1">
             <thead>
               <tr>
-                <th class="text-center p-1" id="baseCurrencyCodeConverter">USD</th>
-                <th class="text-center p-1" id="curenCurrencyCodeConverter"></th>
+                <th class="text-center">Base Currency</th>
+                <th class="text-center">Converted Currency</th>
               </tr>
             </thead>
             <tbody>
               <tr>
                 <td><input type="number" id="baseCurrencyAmount" class="form-control" value="1" min="1"></td>
-                <td><input type="number" id="currentCurencyAmount" class="form-control" min="1"></td>
+                <td><input type="number" id="currentCurrencyAmount" class="form-control" min="1"></td>
               </tr>
             </tbody>
           </table>
@@ -118,7 +149,7 @@
       <div class="modal-content">
         <div class="modal-header bg-success bg-opacity-25">
           <h5 class="modal-title" id="weatherModalLabel">
-            <img src="images/weather.png" alt="Weather Icon" class="icon"> <span id="weather-point-name">NAME</span> <span id="current-date-time" class="fw-light fs-6"></span>
+            Weather Information
           </h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
@@ -132,116 +163,10 @@
     </div>
   </div>
 
-  <!-- Wikipedia Modal -->
-  <div class="modal fade" id="wikiModal" tabindex="-1" aria-labelledby="wikiModalLabel" aria-hidden="true" data-bs-backdrop="false" data-bs-keyboard="false">
-    <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
-      <div class="modal-content">
-        <div class="modal-header bg-primary text-white">
-          <h5 class="modal-title" id="wikiModalLabel">Wikipedia Information</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body fw-bold">
-          <div id="wikiContent">
-            <h6 class="fs-5 text-center"><span id="wiki-country-name"></span></h6>
-            <p id="wiki-intro"></p>
-            <img id="wiki-image" class="img-fluid my-3" alt="Country Image">
-            <a href="#" target="_blank" id="wiki-link" class="text-decoration-none">Read full article</a>
-          </div>
-        </div>
-        <div class="modal-footer bg-primary text-white">
-          <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Close</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Earthquakes Modal -->
-  <div class="modal fade" id="earthquakeModal" tabindex="-1" aria-labelledby="earthquakeModalLabel" aria-hidden="true" data-bs-backdrop="false" data-bs-keyboard="false">
-    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-      <div class="modal-content">
-        <div class="modal-header bg-danger bg-opacity-25">
-          <h5 class="modal-title" id="earthquakeModalLabel">Recent Earthquakes</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body p-1">
-          <?php include 'php/earthquakes.php'; ?>
-        </div>
-        <div class="modal-footer bg-danger bg-opacity-25">
-          <button type="button" class="btn btn-outline-dark fw-bold" data-bs-dismiss="modal">Close</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
   <!-- JavaScript Files -->
+  <script src="node_modules/jquery/dist/jquery.min.js"></script>
   <script src="node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
   <script src="node_modules/leaflet/dist/leaflet.js"></script>
-  <script src="node_modules/leaflet.markercluster/dist/leaflet.markercluster-src.js"></script>
-  <script src="node_modules/leaflet-easybutton/src/easy-button.js"></script>
   <script src="js/script.js"></script>
-
-  <script>
-    // Initialize the map and set the initial view
-    var map = L.map('map').setView([51.505, -0.09], 13); // Set a default view (e.g., London)
-
-    // Add OpenStreetMap tiles
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-    }).addTo(map);
-
-    // Marker Cluster Group
-    var markers = L.markerClusterGroup();
-
-    // Example GeoJSON data (replace this with real data)
-    var geojsonData = {
-      "type": "FeatureCollection",
-      "features": [
-        {
-          "type": "Feature",
-          "geometry": {
-            "type": "Point",
-            "coordinates": [-0.09, 51.5]
-          },
-          "properties": {
-            "name": "Marker 1",
-            "description": "A pretty CSS popup.<br> Easily customizable."
-          }
-        },
-        {
-          "type": "Feature",
-          "geometry": {
-            "type": "Point",
-            "coordinates": [-0.12, 51.51]
-          },
-          "properties": {
-            "name": "Marker 2",
-            "description": "Another pretty popup.<br> More customizable."
-          }
-        }
-      ]
-    };
-
-    // Add GeoJSON data to the map
-    L.geoJSON(geojsonData, {
-      onEachFeature: function (feature, layer) {
-        if (feature.properties && feature.properties.name) {
-          layer.bindPopup('<b>' + feature.properties.name + '</b><br>' + feature.properties.description);
-        }
-        markers.addLayer(layer); // Add to cluster group
-      }
-    }).addTo(map);
-
-    // Add marker clustering to the map
-    map.addLayer(markers);
-
-    // Adjust the map bounds to fit all markers
-    map.fitBounds(markers.getBounds());
-
-    // Example: Add custom easy button (e.g., reset view)
-    L.easyButton('fa-globe', function () {
-      map.setView([51.505, -0.09], 13); // Reset to initial view
-    }).addTo(map);
-  </script>
 </body>
-
 </html>

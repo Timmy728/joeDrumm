@@ -1,5 +1,6 @@
 <!doctype html>
 <html lang="en">
+
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -10,34 +11,26 @@
 
   <!-- Leaflet CSS for the map -->
   <link href="node_modules/leaflet/dist/leaflet.css" rel="stylesheet">
-  
-  <!-- Leaflet MarkerCluster CSS -->
-  <link href="node_modules/leaflet.markercluster/dist/MarkerCluster.css" rel="stylesheet">
-  <link href="node_modules/leaflet.markercluster/dist/MarkerCluster.Default.css" rel="stylesheet">
-
-  <!-- Leaflet EasyButton CSS -->
-  <link href="node_modules/leaflet-easybutton/src/easy-button.css" rel="stylesheet">
-
-  <!-- Leaflet ExtraMarkers CSS -->
-  <link href="node_modules/leaflet-extra-markers/dist/css/leaflet.extra-markers.min.css" rel="stylesheet"/>
 
   <!-- Font Awesome -->
   <link href="node_modules/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
 
   <!-- Custom styles -->
   <link rel="stylesheet" href="css/style.css">
+
 </head>
 
 <body>
   <!-- Country Selector -->
-  <div id="selectContainer">
+  <div id="selectContainer" class="mb-4">
     <select id="countrySelect" class="form-select shadow-sm">
+      <!-- PHP will populate the countries here -->
       <?php include 'php/populate_countries.php'; ?>
     </select>
   </div>
 
   <!-- Map Container -->
-  <div id="map"></div>
+  <div id="map" style="height: 500px;"></div>
   <div id="alertPlaceholder" class="position-fixed top-50 start-50 translate-middle"></div>
 
   <!-- Country Info Modal -->
@@ -51,7 +44,12 @@
         <div class="modal-body p-2">
           <table class="table table-striped">
             <tbody class="align-middle">
-              <?php include 'php/country_info.php'; ?>
+              <!-- Dynamically populate country details using PHP -->
+              <?php include 'php/Country.php'; ?>
+              <?php include 'php/Population.php'; ?>
+              <?php include 'php/Timezone.php'; ?>
+              <?php include 'php/CapitalCities.php'; ?>
+              <?php include 'php/CountryName.php'; ?>
             </tbody>
           </table>
         </div>
@@ -87,7 +85,8 @@
               </tr>
             </tbody>
           </table>
-          <?php include 'php/currency_converter.php'; ?>
+          <!-- PHP will dynamically populate currency rates -->
+          <?php include 'php/Currency.php'; ?>
         </div>
         <div class="modal-footer bg-success bg-opacity-50">
           <button type="button" class="btn btn-outline-dark fw-bold" data-bs-dismiss="modal">Close</button>
@@ -107,50 +106,57 @@
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body p-1">
-          <?php include 'php/weather_info.php'; ?>
+          <!-- PHP will dynamically populate weather data -->
+          <?php include 'php/getWeather.php'; ?>
+        </div>
+        <div class="modal-footer bg-success bg-opacity-25">
+          <button type="button" class="btn btn-outline-dark fw-bold" data-bs-dismiss="modal">Close</button>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Earthquake Info Section -->
-  <div id="earthquakeSection" class="mt-3">
-    <h2 class="text-center">
-      <img src="images/earthquakes.png" alt="Earthquake Icon" class="icon"> Recent Earthquakes
-    </h2>
-    <?php include 'php/earthquakes.php'; ?>
+  <!-- Wikipedia Modal -->
+  <div class="modal fade" id="wikiModal" tabindex="-1" aria-labelledby="wikiModalLabel" aria-hidden="true" data-bs-backdrop="false" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header bg-primary text-white">
+          <h5 class="modal-title" id="wikiModalLabel">Wikipedia Information</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body fw-bold">
+          <!-- PHP will populate Wikipedia content here -->
+          <div id="wikiContent">
+            <h6 class="fs-5 text-center"><span id="wiki-country-name"></span></h6>
+            <p id="wiki-intro"></p>
+            <img id="wiki-image" class="img-fluid my-3" alt="Country Image">
+            <a href="#" target="_blank" id="wiki-link" class="text-decoration-none">Read full article</a>
+          </div>
+        </div>
+        <div class="modal-footer bg-primary text-white">
+          <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <!-- Wiki Links Section -->
-  <div id="wikiLinksSection" class="mt-3">
-    <h2 class="text-center">
-      <img src="images/wiki.png" alt="Wiki Icon" class="icon"> Wikipedia Links
-    </h2>
-    <?php include 'php/wiki_links.php'; ?>
-  </div>
-
-  <!-- Capital Cities Section -->
-  <div id="capitalCitiesSection" class="mt-3">
-    <h2 class="text-center">
-      <img src="images/cities.png" alt="Cities Icon" class="icon"> Capital Cities
-    </h2>
-    <?php include 'php/capital_cities.php'; ?>
-  </div>
-
-  <!-- Timezone Section -->
-  <div id="timezoneSection" class="mt-3">
-    <h2 class="text-center">
-      <img src="images/cities.png" alt="Timezone Icon" class="icon"> Timezone Information
-    </h2>
-    <?php include 'php/timezone.php'; ?>
-  </div>
-
-  <!-- Country Name and Population Section -->
-  <div id="countryPopulationSection" class="mt-3">
-    <h2 class="text-center">
-      <img src="images/cities.png" alt="Population Icon" class="icon"> Country Name and Population
-    </h2>
-    <?php include 'php/country_name_population.php'; ?>
+  <!-- Earthquakes Modal -->
+  <div class="modal fade" id="earthquakeModal" tabindex="-1" aria-labelledby="earthquakeModalLabel" aria-hidden="true" data-bs-backdrop="false" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header bg-danger bg-opacity-25">
+          <h5 class="modal-title" id="earthquakeModalLabel">Recent Earthquakes</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-1">
+          <!-- PHP will dynamically populate earthquake data -->
+          <?php include 'php/earthquakes.php'; ?>
+        </div>
+        <div class="modal-footer bg-danger bg-opacity-25">
+          <button type="button" class="btn btn-outline-dark fw-bold" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- JavaScript Files -->

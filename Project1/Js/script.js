@@ -1,4 +1,3 @@
-// Global variables and layers
 var map, layerControl;
 var bordersLayerGroup = L.layerGroup();
 var cityMarkersCluster = L.markerClusterGroup({
@@ -8,73 +7,82 @@ var cityMarkersCluster = L.markerClusterGroup({
         color: "#000",
         weight: 2,
         opacity: 1,
-        fillOpacity: 0.5,
-    },
+        fillOpacity: 0.5
+    }
 });
 var adminCityClusterGroup = L.markerClusterGroup({
-    maxClusterRadius: 25,
+    maxClusterRadius: 25
 });
-var countryBorderLayerRef = { specificCountry: null };
-var activeCoordinates = { lat: null, lon: null };
+var placeMarker = null; // Marker to indicate selected places
 
 // Tile layers
-var streets = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+var streets = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 19,
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
 });
 
-var satellite = L.tileLayer(
-    "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-    {
-        attribution:
-            "Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community",
-    }
-);
+var satellite = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", {
+    attribution: "Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community"
+});
 
 var baseMaps = {
-    Streets: streets,
-    Satellite: satellite,
+    "Streets": streets,
+    "Satellite": satellite,
 };
 
 var overlayMaps = {
     "Administrative Cities": adminCityClusterGroup,
-    Cities: cityMarkersCluster,
+    "Cities": cityMarkersCluster,
 };
 
-// Buttons
+var countryBorderLayerRef = { specificCountry: null };
+var activeCoordinates = { lat: null, lon: null };
+
+// ---------------------------------------------------------
+// BUTTONS
+// ---------------------------------------------------------
+
+// Location Button
 var locationBtn = L.easyButton('<img src="Images/cities.png" width="20" height="20">', function (btn, map) {
     map.locate({ setView: false });
 });
 
+// Country Info Button
 var infoBtn = L.easyButton('<img src="Images/Wiki.png" width="20" height="20">', function () {
-    const countryModal = new bootstrap.Modal($("#countryModal")[0]);
+    const countryModal = new bootstrap.Modal($('#countryModal')[0]);
     countryModal.show();
 });
 
+// Currency Button
 var currencyBtn = L.easyButton('<img src="Images/currency.png" width="20" height="20">', function () {
-    const currencyCode = $("#curenCurrencyCodeConverter").text();
+    const currencyCode = $('#curenCurrencyCodeConverter').text();
     if (!currencyCode) {
-        showAlert("Currency data is not available. Please try again later.", "warning");
+        showAlert('Currency data is not available. Please try again later.', 'warning');
         return;
     }
     getCurrencyData(currencyCode);
-    const currencyModal = new bootstrap.Modal($("#currencyModal")[0]);
+    const currencyModal = new bootstrap.Modal($('#currencyModal')[0]);
     currencyModal.show();
 });
 
+// Weather Button
 var weatherModalBtn = L.easyButton('<img src="Images/weather.png" width="20" height="20">', function () {
     if (activeCoordinates.lat && activeCoordinates.lon) {
-        getWeatherData(activeCoordinates.lat, activeCoordinates.lon, "");
+        getWeatherData(activeCoordinates.lat, activeCoordinates.lon, '');
     } else {
-        showAlert("Sorry, the location is not defined.", "danger");
+        showAlert('Sorry, the location is not defined.', 'danger');
     }
-    const weatherModal = new bootstrap.Modal($("#weatherModal")[0]);
+    const weatherModal = new bootstrap.Modal($('#weatherModal')[0]);
     weatherModal.show();
 });
 
+// ---------------------------------------------------------
+// EVENT HANDLERS
+// ---------------------------------------------------------
+
 // Initialize map after the DOM is ready
 $(document).ready(function () {
-    $("#preloader").show();
+    $('#preloader').show();
 
     // Initialize the map
     map = L.map("map", {
@@ -96,86 +104,93 @@ $(document).ready(function () {
         setView: true,
         maxZoom: 6,
         watch: false,
-        enableHighAccuracy: true,
+        enableHighAccuracy: true
     });
 
-    $(window).on("load", function () {
+    $(window).on('load', function () {
         // Hide preloader once the page is fully loaded
-        $("#preloader").fadeOut("slow", function () {
+        $('#preloader').fadeOut('slow', function () {
             $(this).remove();
         });
     });
 
     // When location is found
-    map.on("locationfound", function (e) {
+    map.on('locationfound', function (e) {
         handleUserLocation(e.latlng.lat, e.latlng.lng);
         activeCoordinates.lat = e.latlng.lat;
         activeCoordinates.lon = e.latlng.lng;
-        $("#preloader").fadeOut("slow", function () {
+        $('#preloader').fadeOut('slow', function () {
             $(this).remove();
         });
     });
 
     // Handle location errors
-    map.on("locationerror", function (e) {
-        showAlert(e.message, "warning");
-        $("#preloader").fadeOut("slow", function () {
+    map.on('locationerror', function (e) {
+        showAlert(e.message, 'warning');
+        $('#preloader').fadeOut('slow', function () {
             $(this).remove();
         });
     });
 
     // Change event for country dropdown
-    $("#countrySelect").on("change", function () {
+    $('#countrySelect').on('change', function () {
         const isoCode = $(this).val();
         getCountrySpecificBorders(isoCode)
             .then(() => {
                 loadCitiesForCountry(isoCode);
             })
             .catch((error) => {
-                showAlert("Error fetching borders:", "danger");
+                showAlert('Error fetching borders:', 'danger');
             });
         setCountryInform(isoCode);
     });
 });
 
-// Functions
+// ---------------------------------------------------------
+// FUNCTIONS
+// ---------------------------------------------------------
 
+// Handle user location
 function handleUserLocation(lat, lon) {
     $.ajax({
-        url: "Php/countryName.php", // Fetch location details
-        method: "GET",
+        url: 'Php/getWeather.php', // Fetch weather for current location
+        method: 'GET',
         data: { lat: lat, lon: lon },
-        dataType: "json",
+        dataType: 'json',
         success: function (data) {
             const isoCode = data.countryISO;
-            $("#countrySelect").val(isoCode).change();
+            $('#countrySelect').val(isoCode).change();
+            $('#preloader').fadeOut('slow');
         },
         error: function () {
-            showAlert("Error fetching location.", "danger");
-        },
+            showAlert('Error fetching location', 'danger');
+            $('#preloader').fadeOut('slow');
+        }
     });
 }
 
+// Load country borders
 function getCountrySpecificBorders(isoCode) {
     return new Promise((resolve, reject) => {
         $.ajax({
-            url: "Data/countryBorders.geo.json",
-            method: "GET",
-            dataType: "json",
+            url: 'Data/countryBorders.geo.json', // Your GeoJSON file
+            method: 'GET',
+            dataType: 'json',
             success: function (data) {
                 const specificCountryLayer = L.geoJSON(data, {
                     filter: function (feature) {
                         return feature.properties.iso_a2 === isoCode;
                     },
                     style: {
-                        color: "#0000FF",
+                        color: '#0000FF',
                         weight: 2,
                         fillOpacity: 0.2,
-                    },
+                    }
                 });
 
                 if (countryBorderLayerRef.specificCountry) {
                     map.removeLayer(countryBorderLayerRef.specificCountry);
+                    countryBorderLayerRef.specificCountry = null;
                 }
 
                 countryBorderLayerRef.specificCountry = specificCountryLayer.addTo(map);
@@ -184,49 +199,52 @@ function getCountrySpecificBorders(isoCode) {
             },
             error: function (error) {
                 reject(error);
-            },
+            }
         });
     });
 }
 
+// Set country information
 function setCountryInform(isoCode) {
     $.ajax({
-        url: "Php/countryName.php",
-        method: "GET",
+        url: 'Php/countryName.php', // Fetch country info
+        method: 'GET',
         data: { isoCode: isoCode },
-        dataType: "json",
+        dataType: 'json',
         success: function (data) {
-            $("#countryName").text(data.name);
-            $("#capital").text(data.capital);
-            $("#population").text(data.population);
-            $("#currency").text(data.currency);
-            $("#timezone").text(data.timezones);
+            $('#countryName').text(data.name);
+            $('#capital').text(data.capital);
+            $('#population').text(data.population);
+            $('#currency').text(data.currency);
+            $('#timezone').text(data.timezones);
         },
         error: function () {
-            showAlert("Error fetching country info.", "danger");
-        },
+            showAlert('Error fetching country info', 'danger');
+        }
     });
 }
 
+// Fetch weather data
 function getWeatherData(lat, lon, locationName) {
     $.ajax({
-        url: "Php/getWeather.php",
-        method: "GET",
+        url: 'Php/getWeather.php',
+        method: 'GET',
         data: { lat: lat, lon: lon },
-        dataType: "json",
+        dataType: 'json',
         success: function (data) {
-            $("#weather-point-name").text(locationName || data.name);
-            $("#weather-description").text(data.weatherDescription);
-            $("#weather-temp").text(data.temp + " °C");
+            $('#weather-point-name').text(locationName || data.name);
+            $('#weather-description').text(data.weatherDescription);
+            $('#weather-temp').text(data.temp + ' °C');
         },
         error: function () {
-            showAlert("Error fetching weather data.", "danger");
-        },
+            showAlert('Error fetching weather data.', 'danger');
+        }
     });
 }
 
-function showAlert(message, alertType = "success") {
-    const $alertPlaceholder = $("#alertPlaceholder");
+// Helper function to show alerts
+function showAlert(message, alertType = 'success') {
+    const $alertPlaceholder = $('#alertPlaceholder');
     const $alertHtml = $(`<div class="alert alert-${alertType}">${message}</div>`);
     $alertPlaceholder.html($alertHtml);
     setTimeout(() => $alertPlaceholder.empty(), 3000);

@@ -7,8 +7,12 @@
   <title>Gazetteer</title>
 
   <!-- Leaflet CSS -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-xodZBNTC5n17Xt2dD9Jyo64C6+XpC1ZqIqf9e+0rwU8=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   
+  <!-- Leaflet.markercluster CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.Default.css" />
+
   <!-- Bootstrap CSS -->
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 
@@ -49,27 +53,11 @@
         <div class="modal-body">
           <table class="table table-striped">
             <tbody>
-              <!-- Dynamically populated -->
-              <tr>
-                <td>Country Name</td>
-                <td id="countryName"></td>
-              </tr>
-              <tr>
-                <td>Capital</td>
-                <td id="capital"></td>
-              </tr>
-              <tr>
-                <td>Population</td>
-                <td id="population"></td>
-              </tr>
-              <tr>
-                <td>Currency</td>
-                <td id="currency"></td>
-              </tr>
-              <tr>
-                <td>Timezone</td>
-                <td id="timezone"></td>
-              </tr>
+              <tr><td>Country Name</td><td id="countryName"></td></tr>
+              <tr><td>Capital</td><td id="capital"></td></tr>
+              <tr><td>Population</td><td id="population"></td></tr>
+              <tr><td>Currency</td><td id="currency"></td></tr>
+              <tr><td>Timezone</td><td id="timezone"></td></tr>
             </tbody>
           </table>
         </div>
@@ -105,9 +93,9 @@
 
   <!-- JS Files -->
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-o5PHQt5HhXh7nnXizZ77VihUC1O8kYfIaQoIScJ4bQA=" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
   <script src="Js/script.js"></script>
 </body>
-
 </html>

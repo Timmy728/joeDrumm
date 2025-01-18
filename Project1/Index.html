@@ -1,16 +1,16 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Gazetteer</title>
 
-  <!-- Bootstrap CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-
   <!-- Leaflet CSS -->
-  <link href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-xodZBNTC5n17Xt2dD9Jyo64C6+XpC1ZqIqf9e+0rwU8=" crossorigin="anonymous">
+  
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 
   <!-- Custom CSS -->
   <link rel="stylesheet" href="Css/style.css">
@@ -20,33 +20,36 @@
   <!-- Preloader -->
   <div id="preloader" class="d-flex justify-content-center align-items-center">
     <div class="spinner-border text-primary" role="status">
-      <span class="visually-hidden">Loading...</span>
+      <span class="sr-only">Loading...</span>
     </div>
   </div>
 
   <!-- Country Selector -->
-  <div id="selectContainer" class="mb-4">
+  <div id="selectContainer" class="p-3">
     <select id="countrySelect" class="form-select shadow-sm">
+      <!-- Populated dynamically via PHP -->
       <?php include 'Php/countryName.php'; ?>
     </select>
   </div>
 
   <!-- Map Container -->
-  <div id="map" style="height: 500px;"></div>
+  <div id="map" style="height: 500px; width: 100%;"></div>
+
+  <!-- Alert Placeholder -->
   <div id="alertPlaceholder" class="position-fixed top-50 start-50 translate-middle"></div>
 
-  <!-- Modals -->
-  <!-- Country Information Modal -->
+  <!-- Country Info Modal -->
   <div class="modal fade" id="countryModal" tabindex="-1" aria-labelledby="countryModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-      <div class="modal-content fw-bold">
-        <div class="modal-header bg-info bg-opacity-25">
+      <div class="modal-content">
+        <div class="modal-header bg-info">
           <h5 class="modal-title text-uppercase" id="countryModalLabel">Country Information</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
           <table class="table table-striped">
             <tbody>
+              <!-- Dynamically populated -->
               <tr>
                 <td>Country Name</td>
                 <td id="countryName"></td>
@@ -70,17 +73,41 @@
             </tbody>
           </table>
         </div>
-        <div class="modal-footer bg-info bg-opacity-25">
-          <button type="button" class="btn btn-outline-dark fw-bold" data-bs-dismiss="modal">Close</button>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Close</button>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- JavaScript -->
-  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+  <!-- Weather Modal -->
+  <div class="modal fade" id="weatherModal" tabindex="-1" aria-labelledby="weatherModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header bg-success">
+          <h5 class="modal-title" id="weatherModalLabel">Weather Information</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p id="weather-point-name"></p>
+          <p id="weather-description"></p>
+          <p id="weather-temp"></p>
+          <p>Humidity: <span id="humidity"></span>%</p>
+          <p>Wind Speed: <span id="wind-speed"></span> m/s</p>
+          <p>Pressure: <span id="pressure"></span> hPa</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- JS Files -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-o5PHQt5HhXh7nnXizZ77VihUC1O8kYfIaQoIScJ4bQA=" crossorigin="anonymous"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
   <script src="Js/script.js"></script>
 </body>
+
 </html>

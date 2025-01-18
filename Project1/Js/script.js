@@ -1,5 +1,6 @@
+// Map and Layer Definitions
 var map, layerControl;
-var bordersLayerGroup = L.layerGroup();  // Layer to hold country borders
+var bordersLayerGroup = L.layerGroup();
 var cityMarkersCluster = L.markerClusterGroup({
     maxClusterRadius: 50,
     polygonOptions: {
@@ -13,9 +14,8 @@ var cityMarkersCluster = L.markerClusterGroup({
 var adminCityClusterGroup = L.markerClusterGroup({
     maxClusterRadius: 25
 });
-var placeMarker = null; // Marker to indicate selected places
 
-// Tile layers
+// Set up the map with default tile layers
 var streets = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 19,
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -30,6 +30,7 @@ var baseMaps = {
     "Satellite": satellite,
 };
 
+// Add markers for overlays
 var overlayMaps = {
     "Administrative Cities": adminCityClusterGroup,
     "Cities": cityMarkersCluster,
@@ -38,68 +39,23 @@ var overlayMaps = {
 var countryBorderLayerRef = { specificCountry: null };
 var activeCoordinates = { lat: null, lon: null };
 
-// ---------------------------------------------------------
-// BUTTONS
-// ---------------------------------------------------------
-
-// Location Button
-var locationBtn = L.easyButton('<img src="Images/cities.png" width="20" height="20">', function(btn, map) {
-    map.locate({ setView: false });
-});
-
-// Country Info Button
-var infoBtn = L.easyButton('<img src="Images/Wiki.png" width="20" height="20">', function() {
-    const countryModal = new bootstrap.Modal($('#countryModal')[0]);
-    countryModal.show();
-});
-
-// Currency Button
-var currencyBtn = L.easyButton('<img src="Images/currency.png" width="20" height="20">', function() {
-    const currencyCode = $('#curenCurrencyCodeConverter').text();
-    if (!currencyCode) {
-        showAlert('Currency data is not available. Please try again later.', 'warning');
-        return;
-    }
-    getCurrencyData(currencyCode);
-    const currencyModal = new bootstrap.Modal($('#currencyModal')[0]);
-    currencyModal.show();
-});
-
-// Weather Button
-var weatherModalBtn = L.easyButton('<img src="Images/weather.png" width="20" height="20">', function() {
-    if (activeCoordinates.lat && activeCoordinates.lon) {
-        getWeatherData(activeCoordinates.lat, activeCoordinates.lon, '');
-    } else {
-        showAlert('Sorry, the location is not defined.', 'danger');
-    }
-    const weatherModal = new bootstrap.Modal($('#weatherModal')[0]);
-    weatherModal.show();
-});
-
-// ---------------------------------------------------------
-// EVENT HANDLERS
-// ---------------------------------------------------------
-
-// Initialize map after the DOM is ready
+// Initialize the map
 $(document).ready(function () {
     $('#preloader').show();
 
-    // Initialize the map
+    // Initialize the map with Leaflet
     map = L.map("map", {
-        layers: [streets], // Default view with streets
+        layers: [streets],  // Default view with streets
         maxZoom: 18,
     }).fitWorld();
 
-    // Add layer control section
+    // Add layer control to the map
     layerControl = L.control.layers(baseMaps, overlayMaps).addTo(map);
 
-    // Add buttons to the map
-    locationBtn.addTo(map);
-    infoBtn.addTo(map);
-    currencyBtn.addTo(map);
-    weatherModalBtn.addTo(map);
+    // Add map buttons
+    addMapButtons();
 
-    // Use geolocation to detect user location
+    // Use geolocation to detect user's location and center the map
     map.locate({
         setView: true,
         maxZoom: 6,
@@ -114,7 +70,7 @@ $(document).ready(function () {
         });
     });
 
-    // When location is found
+    // When location is found, handle user location and load borders
     map.on('locationfound', function (e) {
         handleUserLocation(e.latlng.lat, e.latlng.lng);
         activeCoordinates.lat = e.latlng.lat;
@@ -124,7 +80,7 @@ $(document).ready(function () {
         });
     });
 
-    // Handle location errors
+    // Handle location error
     map.on('locationerror', function (e) {
         showAlert(e.message, 'warning');
         $('#preloader').fadeOut('slow', function() {
@@ -132,8 +88,8 @@ $(document).ready(function () {
         });
     });
 
-    // Change event for country dropdown
-    $('#countrySelect').on('change', function() {
+    // When country is selected from the dropdown
+    $('#countrySelect').on('change', function () {
         const isoCode = $(this).val();
         getCountrySpecificBorders(isoCode)
             .then(() => {
@@ -147,40 +103,76 @@ $(document).ready(function () {
 });
 
 // ---------------------------------------------------------
-// FUNCTIONS
+// Function Definitions
 // ---------------------------------------------------------
 
-// Handle user location
+// Add map buttons
+function addMapButtons() {
+    // Location Button
+    L.easyButton('<img src="Images/cities.png" width="20" height="20">', function(btn, map) {
+        map.locate({ setView: false });
+    }).addTo(map);
+
+    // Country Info Button
+    L.easyButton('<img src="Images/Wiki.png" width="20" height="20">', function () {
+        const countryModal = new bootstrap.Modal($('#countryModal')[0]);
+        countryModal.show();
+    }).addTo(map);
+
+    // Currency Button
+    L.easyButton('<img src="Images/currency.png" width="20" height="20">', function () {
+        const currencyCode = $('#curenCurrencyCodeConverter').text();
+        if (!currencyCode) {
+            showAlert('Currency data is not available. Please try again later.', 'warning');
+            return;
+        }
+        getCurrencyData(currencyCode);
+        const currencyModal = new bootstrap.Modal($('#currencyModal')[0]);
+        currencyModal.show();
+    }).addTo(map);
+
+    // Weather Button
+    L.easyButton('<img src="Images/weather.png" width="20" height="20">', function () {
+        if (activeCoordinates.lat && activeCoordinates.lon) {
+            getWeatherData(activeCoordinates.lat, activeCoordinates.lon, '');
+        } else {
+            showAlert('Sorry, the location is not defined.', 'danger');
+        }
+        const weatherModal = new bootstrap.Modal($('#weatherModal')[0]);
+        weatherModal.show();
+    }).addTo(map);
+}
+
+// Handle user location after detection
 function handleUserLocation(lat, lon) {
     $.ajax({
-        url: 'Php/getWeather.php', // Fetch weather for current location
+        url: 'Php/getWeather.php',  // Fetch weather for current location
         method: 'GET',
         data: { lat: lat, lon: lon },
         dataType: 'json',
-        success: function(data) {
-            const isoCode = data.countryISO;
+        success: function (data) {
+            const isoCode = data.countryISO;  // Assuming weather API returns countryISO
             $('#countrySelect').val(isoCode).change();
             $('#preloader').fadeOut('slow');
         },
-        error: function() {
+        error: function () {
             showAlert('Error fetching location', 'danger');
             $('#preloader').fadeOut('slow');
         }
     });
 }
 
-// Load country borders
+// Load borders for selected country
 function getCountrySpecificBorders(isoCode) {
     return new Promise((resolve, reject) => {
         $.ajax({
-            url: 'Data/countryBorders.geo.json',  // Path to the GeoJSON file
+            url: 'Data/countryBorders.geo.json',
             method: 'GET',
             dataType: 'json',
             success: function (data) {
-                // Filter the GeoJSON to find the matching country based on iso_a2
                 const specificCountryLayer = L.geoJSON(data, {
                     filter: function (feature) {
-                        return feature.properties.iso_a2 === isoCode;
+                        return feature.properties.iso_a2 === isoCode;  // Filter by ISO code
                     },
                     style: {
                         color: '#0000FF',
@@ -189,37 +181,30 @@ function getCountrySpecificBorders(isoCode) {
                     }
                 });
 
-                // Check if valid bounds exist before calling fitBounds
-                const bounds = specificCountryLayer.getBounds();
-                if (bounds.isValid()) {
-                    map.fitBounds(bounds);  // Only fit bounds if valid
-                } else {
-                    console.error("Invalid bounds for the selected country.");
+                if (countryBorderLayerRef.specificCountry) {
+                    map.removeLayer(countryBorderLayerRef.specificCountry);
+                    countryBorderLayerRef.specificCountry = null;
                 }
 
-                // Clear previous borders and add new layer
-                if (bordersLayerGroup) {
-                    bordersLayerGroup.clearLayers();
-                }
-                bordersLayerGroup.addLayer(specificCountryLayer);
-                resolve();  // Resolve the promise once the country layer is added
+                countryBorderLayerRef.specificCountry = specificCountryLayer.addTo(map);
+                map.fitBounds(specificCountryLayer.getBounds());
+                resolve();
             },
             error: function (error) {
-                console.error("Error fetching GeoJSON data: ", error);
-                reject(error);  // Reject the promise in case of an error
+                reject(error);
             }
         });
     });
 }
 
-// Set country information
+// Set country information in modal
 function setCountryInform(isoCode) {
     $.ajax({
         url: 'Php/countryName.php',
         method: 'GET',
         data: { isoCode: isoCode },
         dataType: 'json',
-        success: function(data) {
+        success: function (data) {
             $('#countryName').text(data.name);
             $('#capital').text(data.capital);
             $('#population').text(data.population);
@@ -232,25 +217,25 @@ function setCountryInform(isoCode) {
     });
 }
 
-// Fetch weather data
+// Fetch weather data for a given location
 function getWeatherData(lat, lon, locationName) {
     $.ajax({
         url: 'Php/getWeather.php',
         method: 'GET',
         data: { lat: lat, lon: lon },
         dataType: 'json',
-        success: function(data) {
+        success: function (data) {
             $('#weather-point-name').text(locationName || data.name);
             $('#weather-description').text(data.weatherDescription);
             $('#weather-temp').text(data.temp + ' °C');
         },
-        error: function() {
+        error: function () {
             showAlert('Error fetching weather data.', 'danger');
         }
     });
 }
 
-// Helper function to show alerts
+// Display alert message
 function showAlert(message, alertType = 'success') {
     const $alertPlaceholder = $('#alertPlaceholder');
     const $alertHtml = $(`<div class="alert alert-${alertType}">${message}</div>`);

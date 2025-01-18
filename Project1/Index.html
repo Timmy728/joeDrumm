@@ -1,27 +1,25 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Gazetteer</title>
 
-  <!-- Leaflet CSS (Removed integrity) -->
+  <!-- Leaflet CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 
+  <!-- Leaflet EasyButton Plugin -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet-easybutton/2.5.0/easy-button.css" />
+  
+  <!-- Leaflet MarkerCluster Plugin -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.1/MarkerCluster.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.1/MarkerCluster.Default.css" />
+  
   <!-- Bootstrap CSS -->
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 
   <!-- Custom CSS -->
   <link rel="stylesheet" href="Css/style.css">
-
-  <!-- Leaflet Marker Cluster CSS -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.0/dist/leaflet.markercluster.css" />
-  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.0/dist/leaflet.markercluster.default.css" />
-
-  <!-- Leaflet EasyButton CSS -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet-easybutton/2.5.1/easy-button.css" />
-
 </head>
 
 <body>
@@ -57,7 +55,6 @@
         <div class="modal-body">
           <table class="table table-striped">
             <tbody>
-              <!-- Dynamically populated -->
               <tr>
                 <td>Country Name</td>
                 <td id="countryName"></td>
@@ -114,10 +111,9 @@
   <!-- JS Files -->
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="https://unpkg.com/leaflet.markercluster@1.5.0/dist/leaflet.markercluster.js"></script> <!-- Marker Cluster -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-easybutton/2.5.1/easy-button.js"></script> <!-- EasyButton -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-easybutton/2.5.0/easy-button.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.1/leaflet.markercluster.js"></script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
   <script src="Js/script.js"></script>
 </body>
-
 </html>

@@ -1,131 +1,143 @@
 <!DOCTYPE html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Country Gazetteer</title>
 
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Gazetteer</title>
-
-  <!-- Leaflet CSS -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-
-  <!-- Leaflet EasyButton Plugin -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet-easybutton/2.5.0/easy-button.css" />
-  
-  <!-- Leaflet MarkerCluster Plugin -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.1/MarkerCluster.css" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.1/MarkerCluster.Default.css" />
-  
-  <!-- Bootstrap CSS -->
-  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-
-  <!-- Custom CSS -->
-  <link rel="stylesheet" href="Css/style.css">
-</head>
-
-<body>
-  <!-- Preloader -->
-  <div id="preloader" class="d-flex justify-content-center align-items-center">
-    <div class="spinner-border text-primary" role="status">
-      <span class="sr-only">Loading...</span>
+    <!-- Import Bootstrap CSS via @import in style.css (or directly here) -->
+    <link rel="stylesheet" href="css/style.css" />
+    <style>
+      @import url('https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css');
+    </style>
+  </head>
+  <body>
+    <!-- Loader -->
+    <div id="preloader">
+      <div class="spinner-border" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
     </div>
-  </div>
 
-  <!-- Country Selector -->
-  <div id="selectContainer" class="p-3">
-    <select id="countrySelect" class="form-select shadow-sm">
-      <!-- Populated dynamically via PHP -->
-      <?php include 'Php/countryName.php'; ?>
-    </select>
-  </div>
-
-  <!-- Map Container -->
-  <div id="map" style="height: 500px; width: 100%;"></div>
-
-  <!-- Alert Placeholder -->
-  <div id="alertPlaceholder" class="position-fixed top-50 start-50 translate-middle"></div>
-
-  <!-- Country Info Modal -->
-  <div class="modal fade" id="countryModal" tabindex="-1" aria-labelledby="countryModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+    <!-- Weather Modal -->
+    <div class="modal" id="weatherModal">
       <div class="modal-content">
-        <div class="modal-header bg-info">
-          <h5 class="modal-title text-uppercase" id="countryModalLabel">Country Information</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <div class="modal-header">
+          <h4>Country Weather: <span id="weatherCountry"></span></h4>
+          <button class="close" onclick="closeModal('weatherModal')">&times;</button>
         </div>
         <div class="modal-body">
-          <table class="table table-striped">
+          <div id="pre-load"></div>
+          <p id="conditionsToday"></p>
+          <p id="tempToday"></p>
+          <div id="forecast-container"></div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn" onclick="closeModal('weatherModal')">Close</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Wikipedia Modal -->
+    <div class="modal" id="wikiModal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 id="wikiModalLabel">Wiki Information For: <span id="wiki-title"></span></h4>
+          <button class="close" onclick="closeModal('wikiModal')">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="wikiImg" id="wiki-img"></div>
+          <div class="wikiInfo" id="wiki-info"></div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn" onclick="closeModal('wikiModal')">Close</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Currency Modal -->
+    <div class="modal" id="currencyModal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 id="currencyModalLabel">Currency Information <span id="CurrencyCountryName"></span></h4>
+          <button class="close" onclick="closeModal('currencyModal')">&times;</button>
+        </div>
+        <div class="modal-body">
+          <table class="table">
             <tbody>
               <tr>
-                <td>Country Name</td>
-                <td id="countryName"></td>
+                <td>Name:</td>
+                <td id="txtCurrencyName"></td>
               </tr>
               <tr>
-                <td>Capital</td>
-                <td id="capital"></td>
+                <td>Code:</td>
+                <td id="txtCurrencyCode"></td>
               </tr>
               <tr>
-                <td>Population</td>
-                <td id="population"></td>
+                <td>Symbol:</td>
+                <td id="txtCurrencySymbol"></td>
               </tr>
               <tr>
-                <td>Currency</td>
-                <td id="currency"></td>
-              </tr>
-              <tr>
-                <td>Timezone</td>
-                <td id="timezone"></td>
+                <td>Exchange Rate:</td>
+                <td id="txtCurrencyRate"></td>
               </tr>
             </tbody>
           </table>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Close</button>
+          <button class="btn" onclick="closeModal('currencyModal')">Close</button>
         </div>
       </div>
     </div>
-  </div>
 
-  <!-- Weather Modal -->
-  <div class="modal fade" id="weatherModal" tabindex="-1" aria-labelledby="weatherModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
+    <!-- Country Information Modal -->
+    <div class="modal" id="countryModal">
       <div class="modal-content">
-        <div class="modal-header bg-success">
-          <h5 class="modal-title" id="weatherModalLabel">Weather Information</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <div class="modal-header">
+          <h4 id="countryModalLabel">Country Information For <span id="countryNames"></span></h4>
+          <button class="close" onclick="closeModal('countryModal')">&times;</button>
         </div>
         <div class="modal-body">
-          <p id="weather-point-name"></p>
-          <p id="weather-description"></p>
-          <p id="weather-temp"></p>
-          <p>Humidity: <span id="humidity"></span>%</p>
-          <p>Wind Speed: <span id="wind-speed"></span> m/s</p>
-          <p>Pressure: <span id="pressure"></span> hPa</p>
+          <table class="table">
+            <tr>
+              <td>ISO 2:</td>
+              <td id="iso2"></td>
+            </tr>
+            <tr>
+              <td>ISO 3:</td>
+              <td id="iso3"></td>
+            </tr>
+            <tr>
+              <td>Population:</td>
+              <td id="population"></td>
+            </tr>
+            <tr>
+              <td>Currency:</td>
+              <td id="currencyName"></td>
+            </tr>
+            <tr>
+              <td>Currency Symbol:</td>
+              <td id="currencySymbol"></td>
+            </tr>
+            <tr>
+              <td>Timezone:</td>
+              <td id="timezone"></td>
+            </tr>
+          </table>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Close</button>
+          <button class="btn" onclick="closeModal('countryModal')">Close</button>
         </div>
       </div>
     </div>
-  </div>
 
-  <!-- JS Files -->
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-  
-  <!-- Leaflet JS -->
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- Dropdown and Map -->
+    <form>
+      <select name="sel-country" id="selCountry" class="form-select"></select>
+    </form>
+    <div id="map"></div>
 
-  <!-- Leaflet EasyButton Plugin -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-easybutton/2.5.0/easy-button.js"></script>
-  
-  <!-- Leaflet MarkerCluster Plugin -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.1/leaflet.markercluster.js"></script>
-  
-  <!-- Bootstrap JS -->
-  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-
-  <!-- Custom Script -->
-  <script src="Js/script.js"></script>
-</body>
-
+    <!-- Link to your custom JavaScript file -->
+    <script src="js/script.js"></script>
+  </body>
 </html>

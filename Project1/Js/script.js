@@ -45,50 +45,6 @@ var overlayMaps = {
 var countryBorderLayerRef = { specificCountry: null}; 
 var activeCoordinates = { lat: null, lon: null };
 
-// buttons
-
-// user location
-var locationBtn = L.easyButton('<img src="images/home.png" width="20" height="20">', function(btn, map) {
-    map.locate({setView: false}); // find the location and do not move the map to it
-});
-
-// info modal  
-var infoBtn = L.easyButton('<img src="images/cities.png" width="20" height="20">', function() {
-    const countryModal = new bootstrap.Modal($('#countryModal')[0]);
-    countryModal.show();
-});
-
-// currency modal
-var currencyBtn = L.easyButton('<img src="images/currency.png" width="20" height="20">', function() {
-    const currencyCode = $('#curenCurrencyCodeConverter').text();  
-    if (!currencyCode) {
-        showAlert('Currency data is not available. Please try again later.', 'warning');
-        return;
-    }
-    getCurrencyData(currencyCode);        
-
-    const currencyModal = new bootstrap.Modal($('#currencyModal')[0]);
-    currencyModal.show();
-});
-
-// weather modal
-var weatherModalBtn = L.easyButton('<img src="images/weather.png" width="20" height="20">', function() {
-    // We update the modal window with weather based on the active coordinates
-    if (activeCoordinates.lat && activeCoordinates.lon) {
-        getWeatherData(activeCoordinates.lat, activeCoordinates.lon, '');
-    } else {
-        showAlert('Sorry, the location is not defined.', 'danger');
-    }
-
-    const weatherModal = new bootstrap.Modal($('#weatherModal')[0]);
-    weatherModal.show();
-});
-
-// wiki modal
-var wikiBtn = L.easyButton('<img src="images/wiki.png" width="20" height="20">', function() {
-    showWikiModal();
-});
-
 // icons
 var capitalIcon = L.ExtraMarkers.icon({
     icon: 'fa-star',
@@ -131,13 +87,6 @@ $(document).ready(function () {
 
     // Add layer control section
     layerControl = L.control.layers(baseMaps, overlayMaps).addTo(map);
-
-    // Add buttons to the map
-    locationBtn.addTo(map);
-    infoBtn.addTo(map);
-    currencyBtn.addTo(map);
-    weatherModalBtn.addTo(map);
-    wikiBtn.addTo(map);    
     
     map.locate({
         setView: true,

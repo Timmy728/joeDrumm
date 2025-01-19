@@ -158,6 +158,108 @@ const displayCurrency = (iso2) => {
   });
 };
 
+// Fetch and display exchange rate
+const displayExchangeRate = (iso2) => {
+  $.ajax({
+    url: "php/LatestExchangeRate.php",
+    method: "GET",
+    data: { iso2 },
+    dataType: "json",
+    success: function (data) {
+      $("#txtCurrencyRate").text(data.rate);
+    },
+    error: function (error) {
+      console.error("Error fetching exchange rate:", error);
+    },
+  });
+};
+
+// Fetch and display timezone
+const displayTimezone = (iso2) => {
+  $.ajax({
+    url: "php/Timezone.php",
+    method: "GET",
+    data: { iso2 },
+    dataType: "json",
+    success: function (data) {
+      $("#timezone").text(data.timezone);
+    },
+    error: function (error) {
+      console.error("Error fetching timezone:", error);
+    },
+  });
+};
+
+// Fetch and display capital city
+const displayCapitalCity = (iso2) => {
+  $.ajax({
+    url: "php/capitalCities.php",
+    method: "GET",
+    data: { iso2 },
+    dataType: "json",
+    success: function (data) {
+      $("#capitalCity").text(data.capital);
+    },
+    error: function (error) {
+      console.error("Error fetching capital city:", error);
+    },
+  });
+};
+
+// Fetch and display weather forecast
+const displayWeatherForecast = (lat, lon) => {
+  $.ajax({
+    url: "php/getWeatherForecast.php",
+    method: "GET",
+    data: { lat, lon },
+    dataType: "json",
+    success: function (data) {
+      $("#forecast-container").html(data.forecast);
+    },
+    error: function (error) {
+      console.error("Error fetching weather forecast:", error);
+    },
+  });
+};
+
+// Fetch and display earthquake data
+const displayEarthquakes = (iso2) => {
+  $.ajax({
+    url: "php/earthQuakes.php",
+    method: "GET",
+    data: { iso2 },
+    dataType: "json",
+    success: function (data) {
+      let earthquakeInfo = "";
+      data.earthquakes.forEach((earthquake) => {
+        earthquakeInfo += `<p>Magnitude: ${earthquake.magnitude} - Location: ${earthquake.location}</p>`;
+      });
+      $("#earthquakeInfo").html(earthquakeInfo);
+    },
+    error: function (error) {
+      console.error("Error fetching earthquake data:", error);
+    },
+  });
+};
+
+// Fetch and display Wikipedia data
+const displayWikipediaInfo = (query) => {
+  $.ajax({
+    url: "php/wikipediaSearch.php",
+    method: "GET",
+    data: { query },
+    dataType: "json",
+    success: function (data) {
+      $("#wiki-title").text(data.title);
+      $("#wiki-info").html(data.extract);
+      $("#wiki-img").html(`<img src="${data.thumbnail}" alt="Wiki Image">`);
+    },
+    error: function (error) {
+      console.error("Error fetching Wikipedia data:", error);
+    },
+  });
+};
+
 // Handle country selection
 $("#selCountry").on("change", function () {
   selectedCountryISO2 = $(this).val();
@@ -166,6 +268,10 @@ $("#selCountry").on("change", function () {
   displayCountryInfo(selectedCountryISO2);
   displayPopulation(selectedCountryISO2);
   displayCurrency(selectedCountryISO2);
+  displayExchangeRate(selectedCountryISO2);
+  displayTimezone(selectedCountryISO2);
+  displayCapitalCity(selectedCountryISO2);
+  displayWeatherForecast(selectedCountryISO2);
 
   // Optionally fetch weather based on the country's center lat/lon
   const country = countryBordersData.features.find(
@@ -175,6 +281,12 @@ $("#selCountry").on("change", function () {
     const [lon, lat] = country.properties.center;
     displayWeather(lat, lon);
   }
+
+  // Fetch earthquakes data
+  displayEarthquakes(selectedCountryISO2);
+
+  // Fetch Wikipedia data
+  displayWikipediaInfo(selectedCountryISO2);
 });
 
 // Geolocation: Center map on user's current location

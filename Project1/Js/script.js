@@ -1,9 +1,4 @@
 // script.js
-
-// ---------------------------------------------------------
-// GLOBAL DECLARATIONS
-// ---------------------------------------------------------
-
 var map, layerControl;
 var bordersLayerGroup = L.layerGroup();
 var cityMarkersCluster = L.markerClusterGroup({

@@ -19,6 +19,31 @@
       </div>
     </div>
 
+    <!-- Country Information -->
+    <div class="container">
+      <h1>Country Information</h1>
+      <form>
+        <label for="selCountry">Select Country:</label>
+        <select name="sel-country" id="selCountry" class="form-select" aria-label="Select Country"></select>
+      </form>
+
+      <!-- Country Information -->
+      <div id="countryInfo">
+        <p><strong>Country:</strong> <span id="countryNames"></span></p>
+        <p><strong>ISO2 Code:</strong> <span id="iso2"></span></p>
+        <p><strong>ISO3 Code:</strong> <span id="iso3"></span></p>
+        <p><strong>Population:</strong> <span id="population"></span></p>
+        <p><strong>Capital City:</strong> <span id="capitalCity"></span></p>
+        <p><strong>Timezone:</strong> <span id="timezone"></span></p>
+        <p><strong>Currency:</strong> <span id="currencyName"></span> (<span id="currencySymbol"></span>)</p>
+        <p><strong>Currency Code:</strong> <span id="txtCurrencyCode"></span></p>
+        <p><strong>Exchange Rate:</strong> <span id="txtCurrencyRate"></span></p>
+      </div>
+    </div>
+
+    <!-- Map -->
+    <div id="map" style="height: 500px;"></div>
+
     <!-- Weather Modal -->
     <div class="modal" id="weatherModal">
       <div class="modal-content">
@@ -27,13 +52,28 @@
           <button class="close" onclick="closeModal('weatherModal')">&times;</button>
         </div>
         <div class="modal-body">
-          <div id="pre-load"></div>
           <p id="conditionsToday"></p>
           <p id="tempToday"></p>
-          <div id="forecast-container"></div>
+          <div id="weatherImg"></div>
         </div>
         <div class="modal-footer">
           <button class="btn" onclick="closeModal('weatherModal')">Close</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Earthquake Modal -->
+    <div class="modal" id="earthquakeModal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4>Earthquakes Information</h4>
+          <button class="close" onclick="closeModal('earthquakeModal')">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div id="earthquakeInfo"></div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn" onclick="closeModal('earthquakeModal')">Close</button>
         </div>
       </div>
     </div>
@@ -42,7 +82,7 @@
     <div class="modal" id="wikiModal">
       <div class="modal-content">
         <div class="modal-header">
-          <h4 id="wikiModalLabel">Wiki Information For: <span id="wiki-title"></span></h4>
+          <h4 id="wikiModalLabel">Wikipedia Information For: <span id="wiki-title"></span></h4>
           <button class="close" onclick="closeModal('wikiModal')">&times;</button>
         </div>
         <div class="modal-body">
@@ -55,89 +95,7 @@
       </div>
     </div>
 
-    <!-- Currency Modal -->
-    <div class="modal" id="currencyModal">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h4 id="currencyModalLabel">Currency Information <span id="CurrencyCountryName"></span></h4>
-          <button class="close" onclick="closeModal('currencyModal')">&times;</button>
-        </div>
-        <div class="modal-body">
-          <table class="table">
-            <tbody>
-              <tr>
-                <td>Name:</td>
-                <td id="txtCurrencyName"></td>
-              </tr>
-              <tr>
-                <td>Code:</td>
-                <td id="txtCurrencyCode"></td>
-              </tr>
-              <tr>
-                <td>Symbol:</td>
-                <td id="txtCurrencySymbol"></td>
-              </tr>
-              <tr>
-                <td>Exchange Rate:</td>
-                <td id="txtCurrencyRate"></td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-        <div class="modal-footer">
-          <button class="btn" onclick="closeModal('currencyModal')">Close</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Country Information Modal -->
-    <div class="modal" id="countryModal">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h4 id="countryModalLabel">Country Information For <span id="countryNames"></span></h4>
-          <button class="close" onclick="closeModal('countryModal')">&times;</button>
-        </div>
-        <div class="modal-body">
-          <table class="table">
-            <tr>
-              <td>ISO 2:</td>
-              <td id="iso2"></td>
-            </tr>
-            <tr>
-              <td>ISO 3:</td>
-              <td id="iso3"></td>
-            </tr>
-            <tr>
-              <td>Population:</td>
-              <td id="population"></td>
-            </tr>
-            <tr>
-              <td>Currency:</td>
-              <td id="currencyName"></td>
-            </tr>
-            <tr>
-              <td>Currency Symbol:</td>
-              <td id="currencySymbol"></td>
-            </tr>
-            <tr>
-              <td>Timezone:</td>
-              <td id="timezone"></td>
-            </tr>
-          </table>
-        </div>
-        <div class="modal-footer">
-          <button class="btn" onclick="closeModal('countryModal')">Close</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Dropdown and Map -->
-    <form>
-      <select name="sel-country" id="selCountry" class="form-select"></select>
-    </form>
-    <div id="map"></div>
-
-    <!-- Link to your custom JavaScript file -->
+    <!-- Scripts -->
     <script src="js/script.js"></script>
   </body>
 </html>

@@ -45,28 +45,6 @@ var overlayMaps = {
 var countryBorderLayerRef = { specificCountry: null}; 
 var activeCoordinates = { lat: null, lon: null };
 
-// icons
-var capitalIcon = L.ExtraMarkers.icon({
-    icon: 'fa-star',
-    markerColor: 'red',
-    shape: 'circle',
-    prefix: 'fa'
-});
-
-var adminCityIcon = L.ExtraMarkers.icon({
-    icon: 'fa-city',
-    markerColor: 'blue',
-    shape: 'circle',
-    prefix: 'fa'
-});
-
-var simpleCityIcon = L.ExtraMarkers.icon({
-    icon: 'fa-building',
-    markerColor: 'green',
-    shape: 'circle',
-    prefix: 'fa'
-});
-
 // ---------------------------------------------------------
 // EVENT HANDLERS
 // ---------------------------------------------------------

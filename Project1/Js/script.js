@@ -1,315 +1,208 @@
-// script.js
-var map, layerControl;
-var bordersLayerGroup = L.layerGroup();
-var cityMarkersCluster = L.markerClusterGroup({
-    maxClusterRadius: 50,
-    polygonOptions: {
-        fillColor: "#FF0000",
-        color: "#000",
+let map;
+let bordersLayer;
+let weatherMarkerGroup;
+let selectedCountryISO2;
+let countryBordersData;
+
+// Tile layers
+const streets = L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+  attribution:
+    '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+});
+
+const satellite = L.tileLayer(
+  "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+  {
+    attribution:
+      "Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community",
+  }
+);
+
+const basemaps = {
+  Streets: streets,
+  Satellite: satellite,
+};
+
+// Initialize map
+map = L.map("map", {
+  layers: [streets],
+  maxZoom: 18,
+}).fitWorld();
+
+// Initialize marker groups
+weatherMarkerGroup = L.markerClusterGroup();
+
+// Load country borders from geoJSON
+fetch("Data/countryBorders.geo.json")
+  .then((response) => response.json())
+  .then((data) => {
+    countryBordersData = data;
+  })
+  .catch((error) => console.error("Error loading country borders:", error));
+
+// Populate country dropdown
+const populateCountryDropdown = () => {
+  $.ajax({
+    url: "php/countryName.php",
+    method: "GET",
+    dataType: "json",
+    success: function (response) {
+      response.forEach((country) => {
+        $("#selCountry").append(
+          $("<option>", {
+            value: country.iso2,
+            text: country.name,
+          })
+        );
+      });
+      $("#selCountry").prop("selectedIndex", 0);
+    },
+    error: function (error) {
+      console.error("Error fetching country names:", error);
+    },
+  });
+};
+
+// Update map with country borders
+const updateCountryBorders = (iso2) => {
+  if (bordersLayer) {
+    map.removeLayer(bordersLayer);
+  }
+
+  const country = countryBordersData.features.find(
+    (feature) => feature.properties.iso_a2 === iso2
+  );
+
+  if (country) {
+    bordersLayer = L.geoJSON(country, {
+      style: {
+        color: "blue",
         weight: 2,
-        opacity: 1,
-        fillOpacity: 0.5
-    }
-});
-var adminCityClusterGroup = L.markerClusterGroup({
-    maxClusterRadius: 25
-}); 
-var placeMarker = null; // marker to indicate the places we were looking for
-
-// tile layers
-
-var streets = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 19,
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-}); 
-
-var satellite = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", {
-    attribution: "Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community"
-});
-
-var baseMaps = {
-    "Streets": streets,
-    "Satellite": satellite,
+        fillColor: "orange",
+        fillOpacity: 0.2,
+      },
+    }).addTo(map);
+    map.fitBounds(bordersLayer.getBounds());
+  }
 };
 
-var overlayMaps = {
-    "Administrative Cities": adminCityClusterGroup,
-    "Cities": cityMarkersCluster,
+// Fetch and display country information
+const displayCountryInfo = (iso2) => {
+  $.ajax({
+    url: "php/countryName.php",
+    method: "GET",
+    data: { iso2 },
+    dataType: "json",
+    success: function (data) {
+      $("#countryNames").text(data.name);
+      $("#iso2").text(data.iso2);
+      $("#iso3").text(data.iso3);
+    },
+    error: function (error) {
+      console.error("Error fetching country info:", error);
+    },
+  });
 };
 
-var countryBorderLayerRef = { specificCountry: null}; 
-var activeCoordinates = { lat: null, lon: null };
+// Fetch and display population
+const displayPopulation = (iso2) => {
+  $.ajax({
+    url: "php/Population.php",
+    method: "GET",
+    data: { iso2 },
+    dataType: "json",
+    success: function (data) {
+      $("#population").text(data.population);
+    },
+    error: function (error) {
+      console.error("Error fetching population:", error);
+    },
+  });
+};
 
-// ---------------------------------------------------------
-// EVENT HANDLERS
-// ---------------------------------------------------------
+// Fetch and display weather
+const displayWeather = (lat, lon) => {
+  $.ajax({
+    url: "php/getWeather.php",
+    method: "GET",
+    data: { lat, lon },
+    dataType: "json",
+    success: function (data) {
+      $("#tempToday").text(`${data.temp} °C`);
+      $("#conditionsToday").text(data.description);
+      $("#weatherImg").html(
+        `<img src="https://openweathermap.org/img/wn/${data.icon}.png" alt="Weather Icon">`
+      );
+    },
+    error: function (error) {
+      console.error("Error fetching weather:", error);
+    },
+  });
+};
 
-// initialise and add controls once DOM is ready
+// Fetch and display currency
+const displayCurrency = (iso2) => {
+  $.ajax({
+    url: "php/Currency.php",
+    method: "GET",
+    data: { iso2 },
+    dataType: "json",
+    success: function (data) {
+      $("#currencyName").text(data.name);
+      $("#currencySymbol").text(data.symbol);
+      $("#txtCurrencyCode").text(data.code);
+    },
+    error: function (error) {
+      console.error("Error fetching currency:", error);
+    },
+  });
+};
 
-$(document).ready(function () {
-    $('#preloader').show();
+// Handle country selection
+$("#selCountry").on("change", function () {
+  selectedCountryISO2 = $(this).val();
 
-    // download the list of countries
-    loadCountryList();
+  updateCountryBorders(selectedCountryISO2);
+  displayCountryInfo(selectedCountryISO2);
+  displayPopulation(selectedCountryISO2);
+  displayCurrency(selectedCountryISO2);
 
-    // Initialize the map
-    map = L.map("map", {
-        layers: [streets],  // default view with streets
-        maxZoom: 18,
-    }).fitWorld();
-
-    // Add layer control section
-    layerControl = L.control.layers(baseMaps, overlayMaps).addTo(map);
-    
-    map.locate({
-        setView: true,
-        maxZoom: 6,
-        watch: false, // avoid constantly updating the coordinates
-        enableHighAccuracy: true
-    });
-
-    $(window).on('load', function() {
-        // Hide preloader once the page is fully loaded
-        $('#preloader').fadeOut('slow', function() {
-            $(this).remove(); // remove preloader from DOM
-        });
-    });
-
-    // Load country borders on location found
-    map.on('locationfound', function (e) {
-        handleUserLocation(e.latlng.lat, e.latlng.lng);
-        activeCoordinates.lat = e.latlng.lat;
-        activeCoordinates.lon = e.latlng.lng;
-        $('#preloader').fadeOut('slow', function() {
-            $(this).remove(); // remove preloader from DOM
-        });
-    });
-
-    map.on('locationerror', function (e) {
-        showAlert(e.message, 'warning');
-        $('#preloader').fadeOut('slow', function() {
-            $(this).remove(); // remove preloader from DOM
-        });
-    });
-
-    $('#countrySelect').on('change', function() {
-        const isoCode = $(this).val();
-        getCountrySpecificBorders(isoCode)
-            .then(() => {
-                loadCitiesForCountry(isoCode);
-            })
-            .catch((error) => {
-                showAlert('Error after fetching borders:', 'danger');
-            });
-        setCountryInform(isoCode);
-    });
-
+  // Optionally fetch weather based on the country's center lat/lon
+  const country = countryBordersData.features.find(
+    (feature) => feature.properties.iso_a2 === selectedCountryISO2
+  );
+  if (country) {
+    const [lon, lat] = country.properties.center;
+    displayWeather(lat, lon);
+  }
 });
 
-// ---------------------------------------------------------
-// Functions
-// ---------------------------------------------------------
+// Geolocation: Center map on user's current location
+if (navigator.geolocation) {
+  navigator.geolocation.getCurrentPosition(
+    (position) => {
+      const { latitude, longitude } = position.coords;
+      map.setView([latitude, longitude], 10);
 
-// after finding the user, set all the necessary information by coordinates
-function handleUserLocation(lat, lon) {
-    $.ajax({
-        url: 'php/countryName.php', // Using your PHP file for country name lookup
-        method: 'GET',
-        data: { lat: lat, lon: lon },
-        dataType: 'json',
-        success: function(data) {
-            const isoCode = data.countryISO;
-            $('#countrySelect').val(isoCode).change();
-            $('#preloader').fadeOut('slow');
+      // Reverse geocode to find country
+      $.ajax({
+        url: "php/countryName.php",
+        method: "GET",
+        data: { lat: latitude, lon: longitude },
+        dataType: "json",
+        success: function (data) {
+          $("#selCountry").val(data.iso2).change();
         },
-        error: function() {
-            showAlert('Error fetching location', 'danger');
-            $('#preloader').fadeOut('slow');
-        }
-    });
-}
-
-// function to download the list of countries
-function loadCountryList() {
-    $.ajax({
-        url: 'php/countryName.php', // Call your PHP file for the country list
-        method: 'GET',
-        dataType: 'json',
-        success: function(countries) {
-            const $countrySelect = $('#countrySelect');
-            $countrySelect.empty();
-            countries.forEach(country => {
-                const option = $('<option></option>')
-                    .val(country.iso)
-                    .text(country.name);
-                $countrySelect.append(option);
-            });
+        error: function (error) {
+          console.error("Error fetching country from geolocation:", error);
         },
-        error: function(xhr, status, error) {
-            showAlert(
-                'Sorry for the inconvenience, something went wrong with the server. Failed to load country list.',
-                'warning'
-            );
-        }
-    });
-}
-
-// add the borders of the selected country to the map
-function getCountrySpecificBorders(isoCode) {
-    return new Promise((resolve, reject) => {
-        $.ajax({
-                url: 'php/earthquakes.php', // Replace with your PHP file that gets country borders
-                method: 'GET',
-                data: { isoCode: isoCode },
-                dataType: 'json',
-                success: function(data) {
-                    const specificCountryLayer = L.geoJSON(data, {
-                        style: function () {
-                            return {
-                                color: '#0000FF',
-                                weight: 3,
-                                dashArray: '5, 5',
-                                fillOpacity: 0
-                            };
-                        }
-                    });
-    
-                    if (countryBorderLayerRef.specificCountry) {
-                        map.removeLayer(countryBorderLayerRef.specificCountry);
-                        countryBorderLayerRef.specificCountry = null;
-                    }
-    
-                    countryBorderLayerRef.specificCountry = specificCountryLayer.addTo(map);
-                    map.fitBounds(specificCountryLayer.getBounds());
-    
-                    resolve();
-                },
-                error: function(error) {
-                    reject(error);
-                }
-            });
-    });
-}
-
-// Set information for country (ISO code, name, currency, etc.)
-function setCountryInform(isoCode) {
-    $.ajax({
-        url: 'php/countryName.php', // Fetch country details from your PHP file
-        method: 'GET',
-        data: { isoCode: isoCode },
-        dataType: 'json',
-        success: function(data) {
-            $('#countryName').text(data.name);
-            $('#capital').text(data.capital);
-            $('#population').text(numeral(data.population).format('0.0a'));
-            $('#currency').text(`${data.currency.name} (${data.currency.symbol})`);
-            $('#flag').html(`<img src="${data.flag}" width="100" alt="${data.flagAlt}">`);
-            $('#region').text(data.region);
-            $('#languages').text(data.languages);
-            $('#timezones').text(data.timezones);
-        },
-        error: function(error) {
-            showAlert('Error fetching country information', 'danger');
-        }
-    });
-}
-
-// Get weather information from PHP
-function getWeatherData(lat, lon, locationName) {
-    $.ajax({
-        url: 'php/getWeather.php',
-        method: 'GET',
-        data: { lat: lat, lon: lon },
-        dataType: 'json',
-        success: function(data) {
-            updateWeatherModal(data, locationName);
-            getWeatherForecast(lat, lon);
-        },
-        error: function() {
-            showAlert('Sorry, something went wrong with the weather service.', 'danger');
-        }
-    });
-}
-
-// Get weather forecast data from PHP
-function getWeatherForecast(lat, lon) {
-    $.ajax({
-        url: 'php/getWeatherForecast.php',
-        method: 'GET',
-        data: { lat: lat, lon: lon },
-        dataType: 'json',
-        success: function(data) {
-            updateWeatherForecast(data);
-        },
-        error: function() {
-            showAlert('Sorry, something went wrong with the forecast service.', 'danger');
-        }
-    });
-}
-
-// Function for displaying weather data in modal
-function updateWeatherModal(weatherData, locationName) {
-    $('#weather-point-name').text(locationName.toUpperCase() || weatherData.name.toUpperCase());
-    $('#current-date-time').text(moment().format('ddd Do'));
-    $('#weather-icon').attr('src', `http://openweathermap.org/img/wn/${weatherData.icon}@2x.png`);
-    $('#weather-description').text(weatherData.weatherDescription);
-    $('#weather-temp').text(numeral(weatherData.temp).format('0') + ' °C');
-    $('#humidity').text(numeral(weatherData.humidity).format('0') + ' %');
-    $('#wind-speed').text(numeral(weatherData.windSpeed).format('0.0') + ' m/s');
-    $('#pressure').text(numeral(weatherData.pressure).format('0') + ' hPa');
-    $('#visibility').text(numeral(weatherData.visibility / 1000).format('0.0') + ' km');
-}
-
-// Function for receiving weather forecast data
-function updateWeatherForecast(data) {
-    // Forecast processing goes here
-}
-
-// Function to display Wikipedia info
-function showWikiModal() {
-    let countryName = $('#countrySelect option:selected').text().replace(/\s+/g, '_');
-    
-    $.ajax({
-        url: 'php/wikipediaSearch.php',
-        method: 'GET',
-        data: { countryName: countryName },
-        dataType: 'json',
-        success: function(data) {
-            $('#wiki-country-name').text(data.title);
-            $('#wiki-intro').text(data.extract);
-            $('#wiki-link').attr('href', data.content_urls);
-            if (data.originalimage) {
-                $('#wiki-image').attr('src', data.originalimage);
-            } else {
-                $('#wiki-image').hide();
-            }
-            const newsModal = new bootstrap.Modal($('#wikiModal')[0]);
-            newsModal.show();
-        },
-        error: function(error) {
-            showAlert('Error fetching Wikipedia data. Sorry for the inconvenience, data is available for this country.', 'danger');
-        }
-    });
-}
-
-// Function to notify the user
-function showAlert(message, alertType = 'success', autoClose = true, closeDelay = 5000) {
-    const $alertPlaceholder = $('#alertPlaceholder');
-    const $alertHtml = $(`
-        <div class="alert alert-${alertType} alert-dismissible fade show text-center" role="alert" style="z-index: 2000;">
-            ${message}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    `);
-    $alertPlaceholder.html($alertHtml);
-    
-    if (autoClose) {
-        setTimeout(() => {
-            const $alertNode = $alertPlaceholder.find('.alert');
-            if ($alertNode.length) {
-                $alertNode.removeClass('show'); // hide messages
-                $alertNode.on('transitionend', () => $alertNode.remove());
-            }
-        }, closeDelay);
+      });
+    },
+    (error) => {
+      console.error("Geolocation error:", error);
     }
+  );
 }
+
+// Populate dropdown on page load
+populateCountryDropdown();

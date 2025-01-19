@@ -30,8 +30,7 @@ var streets = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', 
 
 var satellite = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", {
     attribution: "Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community"
-    }
-);
+});
 
 var baseMaps = {
     "Streets": streets,
@@ -332,11 +331,11 @@ function updateWeatherModal(weatherData, locationName) {
     $('#current-date-time').text(moment().format('ddd Do'));
     $('#weather-icon').attr('src', `http://openweathermap.org/img/wn/${weatherData.icon}@2x.png`);
     $('#weather-description').text(weatherData.weatherDescription);
-    $('#weather-temp').text(numeral(weatherData.temp).format('0')} °C);
-    $('#humidity').text(numeral(weatherData.humidity).format('0')} %);
-    $('#wind-speed').text(numeral(weatherData.windSpeed).format('0.0')} m/s);
-    $('#pressure').text(numeral(weatherData.pressure).format('0')} hPa);
-    $('#visibility').text(numeral(weatherData.visibility / 1000).format('0.0')} km);
+    $('#weather-temp').text(numeral(weatherData.temp).format('0') + ' °C');
+    $('#humidity').text(numeral(weatherData.humidity).format('0') + ' %');
+    $('#wind-speed').text(numeral(weatherData.windSpeed).format('0.0') + ' m/s');
+    $('#pressure').text(numeral(weatherData.pressure).format('0') + ' hPa');
+    $('#visibility').text(numeral(weatherData.visibility / 1000).format('0.0') + ' km');
 }
 
 // Function for receiving weather forecast data

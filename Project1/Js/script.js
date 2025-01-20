@@ -301,7 +301,7 @@ $("#selCountry").on("change", function () {
   );
   if (country) {
     const [lon, lat] = country.properties.center;
-    displayWeather(lat, lon); // Add weather marker to the map
+    displayWeather(lat, lon); // Add weather marker to the cluster
     displayWeatherForecast(lat, lon); // Add weather forecast
   }
 

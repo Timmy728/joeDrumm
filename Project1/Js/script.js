@@ -36,7 +36,7 @@ L.control.layers(basemaps).addTo(map);
 L.marker([51.505, -0.09]).addTo(map).bindPopup("Test Marker").openPopup();
 
 // **Initialize Marker Groups**
-weatherMarkerGroup = L.markerClusterGroup();
+weatherMarkerGroup = L.markerClusterGroup(); // Initialize MarkerCluster for weather markers
 map.addLayer(weatherMarkerGroup);
 
 // **Load Country Borders from GeoJSON**
@@ -251,6 +251,34 @@ const displayWikipediaInfo = (query) => {
   });
 };
 
+// **Fetch and Display Weather Forecast (16-day)**
+const displayWeatherForecast = (lat, lon) => {
+  $.ajax({
+    url: "php/getWeatherForecast.php", // Endpoint for 16-day forecast
+    method: "GET",
+    data: { lat, lon },
+    dataType: "json",
+    success: function (data) {
+      let forecastHtml = "<h4>16-Day Weather Forecast</h4>";
+      data.forecast.forEach((forecast) => {
+        forecastHtml += `
+          <p>${forecast.date}: ${forecast.temp} °C, ${forecast.description}</p>
+        `;
+      });
+
+      // Optionally, create a marker for each forecasted location
+      const forecastMarker = L.marker([lat, lon]).bindPopup(forecastHtml);
+      weatherMarkerGroup.addLayer(forecastMarker); // Add to cluster group
+
+      // Optionally, update the DOM or display the forecast data in a different section
+      $("#forecastInfo").html(forecastHtml);
+    },
+    error: function (error) {
+      console.error("Error fetching weather forecast:", error);
+    },
+  });
+};
+
 // **Handle Country Selection**
 $("#selCountry").on("change", function () {
   selectedCountryISO2 = $(this).val();
@@ -268,7 +296,8 @@ $("#selCountry").on("change", function () {
   );
   if (country) {
     const [lon, lat] = country.properties.center;
-    displayWeather(lat, lon);
+    displayWeather(lat, lon); // Add weather marker to the cluster
+    displayWeatherForecast(lat, lon); // Add weather forecast
   }
 
   displayEarthquakes(selectedCountryISO2);
@@ -300,4 +329,3 @@ if (navigator.geolocation) {
     }
   );
 }
-//

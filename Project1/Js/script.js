@@ -329,7 +329,7 @@ if (navigator.geolocation) {
           $("#selCountry").val(data.iso2).change();
         },
         error: function (error) {
-          console.error("Error fetching country from geolocation:", error);
+          console.error("Geolocation error:", error);
         },
       });
     },

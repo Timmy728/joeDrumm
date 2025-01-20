@@ -1,6 +1,5 @@
 let map;
 let bordersLayer;
-let weatherMarkerGroup;
 let selectedCountryISO2;
 let countryBordersData;
 
@@ -34,10 +33,6 @@ L.control.layers(basemaps).addTo(map);
 
 // **Add Test Marker for Icon Verification**
 L.marker([51.505, -0.09]).addTo(map).bindPopup("Test Marker").openPopup();
-
-// **Initialize Marker Groups**
-weatherMarkerGroup = L.markerClusterGroup(); // Initialize MarkerCluster for weather markers
-map.addLayer(weatherMarkerGroup);
 
 // **Load Country Borders from GeoJSON**
 fetch("Data/countryBorders.geo.json")
@@ -278,7 +273,7 @@ const displayWeatherForecast = (lat, lon) => {
 
       // Optionally, create a marker for each forecasted location
       const forecastMarker = L.marker([lat, lon]).bindPopup(forecastHtml);
-      weatherMarkerGroup.addLayer(forecastMarker); // Add to cluster group
+      map.addLayer(forecastMarker); // Add to the map
 
       // Optionally, update the DOM or display the forecast data in a different section
       $("#forecastInfo").html(forecastHtml);
@@ -306,7 +301,7 @@ $("#selCountry").on("change", function () {
   );
   if (country) {
     const [lon, lat] = country.properties.center;
-    displayWeather(lat, lon); // Add weather marker to the cluster
+    displayWeather(lat, lon); // Add weather marker to the map
     displayWeatherForecast(lat, lon); // Add weather forecast
   }
 

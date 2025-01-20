@@ -314,7 +314,6 @@ $("#selCountry").on("change", function () {
   displayWikipediaInfo(selectedCountryISO2);
 });
 
-// **Geolocation**
 if (navigator.geolocation) {
   navigator.geolocation.getCurrentPosition(
     (position) => {

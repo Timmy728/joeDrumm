@@ -47,6 +47,16 @@ fetch("Data/countryBorders.geo.json")
   })
   .catch((error) => console.error("Error loading country borders:", error));
 
+// **Marker Icon Configuration**
+const markerIcon = L.icon({
+  iconUrl: 'Images/marker-icon.png',  // Local marker icon
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowUrl: 'Images/marker-shadow.png',  // Local shadow image
+  shadowSize: [41, 41],
+});
+
 // **Populate Country Dropdown**
 const populateCountryDropdown = () => {
   $.ajax({
@@ -146,16 +156,6 @@ const displayWeather = (lat, lon) => {
     },
   });
 };
-
-// **Marker Icon Configuration**
-const markerIcon = L.icon({
-  iconUrl: 'images/marker-icon.png',  // Local marker icon
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
-  shadowUrl: 'images/marker-shadow.png',  // Local shadow image
-  shadowSize: [41, 41],
-});
 
 // **Fetch and Display Currency**
 const displayCurrency = (iso2) => {
@@ -314,6 +314,7 @@ $("#selCountry").on("change", function () {
   displayWikipediaInfo(selectedCountryISO2);
 });
 
+// **Geolocation**
 if (navigator.geolocation) {
   navigator.geolocation.getCurrentPosition(
     (position) => {
@@ -329,7 +330,7 @@ if (navigator.geolocation) {
           $("#selCountry").val(data.iso2).change();
         },
         error: function (error) {
-          console.error("Geolocation error:", error);
+          console.error("Error fetching country from geolocation:", error);
         },
       });
     },

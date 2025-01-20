@@ -279,4 +279,52 @@ const displayWeatherForecast = (lat, lon) => {
   });
 };
 
-$("#sel
+// **Handle Country Selection**
+$("#selCountry").on("change", function () {
+  selectedCountryISO2 = $(this).val();
+
+  updateCountryBorders(selectedCountryISO2);
+  displayCountryInfo(selectedCountryISO2);
+  displayPopulation(selectedCountryISO2);
+  displayCurrency(selectedCountryISO2);
+  displayExchangeRate(selectedCountryISO2);
+  displayTimezone(selectedCountryISO2);
+  displayCapitalCity(selectedCountryISO2);
+
+  const country = countryBordersData.features.find(
+    (feature) => feature.properties.iso_a2 === selectedCountryISO2
+  );
+  if (country) {
+    const [lon, lat] = country.properties.center;
+    displayWeather(lat, lon); // Add weather marker to the cluster
+    displayWeatherForecast(lat, lon); // Add weather forecast
+  }
+
+  displayEarthquakes(selectedCountryISO2);
+  displayWikipediaInfo(selectedCountryISO2);
+});
+
+if (navigator.geolocation) {
+  navigator.geolocation.getCurrentPosition(
+    (position) => {
+      const { latitude, longitude } = position.coords;
+      map.setView([latitude, longitude], 10);
+
+      $.ajax({
+        url: "php/countryName.php",
+        method: "GET",
+        data: { lat: latitude, lon: longitude },
+        dataType: "json",
+        success: function (data) {
+          $("#selCountry").val(data.iso2).change();
+        },
+        error: function (error) {
+          console.error("Error fetching country from geolocation:", error);
+        },
+      });
+    },
+    (error) => {
+      console.error("Geolocation error:", error);
+    }
+  );
+}

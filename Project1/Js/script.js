@@ -147,6 +147,16 @@ const displayWeather = (lat, lon) => {
   });
 };
 
+// **Marker Icon Configuration**
+const markerIcon = L.icon({
+  iconUrl: 'images/marker-icon.png',  // Local marker icon
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowUrl: 'images/marker-shadow.png',  // Local shadow image
+  shadowSize: [41, 41],
+});
+
 // **Fetch and Display Currency**
 const displayCurrency = (iso2) => {
   $.ajax({

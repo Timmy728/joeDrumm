@@ -1,5 +1,3 @@
-/* required styles */
-
 .leaflet-pane,
 .leaflet-tile,
 .leaflet-marker-icon,
@@ -126,9 +124,6 @@
 	position: absolute;
 	}
 
-
-/* control positioning */
-
 .leaflet-control {
 	position: relative;
 	z-index: 800;
@@ -173,9 +168,6 @@
 	margin-right: 10px;
 	}
 
-
-/* zoom and fade animations */
-
 .leaflet-fade-anim .leaflet-popup {
 	opacity: 0;
 	-webkit-transition: opacity 0.2s linear;
@@ -210,9 +202,6 @@ svg.leaflet-zoom-animated {
 	visibility: hidden;
 	}
 
-
-/* cursors */
-
 .leaflet-interactive {
 	cursor: pointer;
 	}
@@ -238,7 +227,6 @@ svg.leaflet-zoom-animated {
 	cursor:         grabbing;
 	}
 
-/* marker & overlays interactivity */
 .leaflet-marker-icon,
 .leaflet-marker-shadow,
 .leaflet-image-layer,
@@ -255,8 +243,6 @@ svg.leaflet-image-layer.leaflet-interactive path {
 	pointer-events: auto;
 	}
 
-/* visual tweaks */
-
 .leaflet-container {
 	background: #ddd;
 	outline-offset: 1px;
@@ -269,17 +255,12 @@ svg.leaflet-image-layer.leaflet-interactive path {
 	background: rgba(255,255,255,0.5);
 	}
 
-
-/* general typography */
 .leaflet-container {
 	font-family: "Helvetica Neue", Arial, Helvetica, sans-serif;
 	font-size: 12px;
 	font-size: 0.75rem;
 	line-height: 1.5;
 	}
-
-
-/* general toolbar styles */
 
 .leaflet-bar {
 	box-shadow: 0 1px 5px rgba(0,0,0,0.65);
@@ -335,8 +316,6 @@ svg.leaflet-image-layer.leaflet-interactive path {
 	border-bottom-right-radius: 2px;
 	}
 
-/* zoom control */
-
 .leaflet-control-zoom-in,
 .leaflet-control-zoom-out {
 	font: bold 18px 'Lucida Console', Monaco, monospace;
@@ -346,9 +325,6 @@ svg.leaflet-image-layer.leaflet-interactive path {
 .leaflet-touch .leaflet-control-zoom-in, .leaflet-touch .leaflet-control-zoom-out  {
 	font-size: 22px;
 	}
-
-
-/* layers control */
 
 .leaflet-control-layers {
 	box-shadow: 0 1px 5px rgba(0,0,0,0.4);
@@ -402,13 +378,9 @@ svg.leaflet-image-layer.leaflet-interactive path {
 	margin: 5px -10px 5px -6px;
 	}
 
-/* Default icon URLs */
 .leaflet-default-icon-path { /* used only in path-guessing heuristic, see L.Icon.Default */
 	background-image: url(images/marker-icon.png);
 	}
-
-
-/* attribution and scale controls */
 
 .leaflet-container .leaflet-control-attribution {
 	background: #fff;
@@ -470,9 +442,6 @@ svg.leaflet-image-layer.leaflet-interactive path {
 	border: 2px solid rgba(0,0,0,0.2);
 	background-clip: padding-box;
 	}
-
-
-/* popup */
 
 .leaflet-popup {
 	position: absolute;
@@ -563,17 +532,11 @@ svg.leaflet-image-layer.leaflet-interactive path {
 	border: 1px solid #999;
 	}
 
-
-/* div icon */
-
 .leaflet-div-icon {
 	background: #fff;
 	border: 1px solid #666;
 	}
 
-
-/* Tooltip */
-/* Base styles for the element that has a tooltip */
 .leaflet-tooltip {
 	position: absolute;
 	padding: 6px;
@@ -603,8 +566,6 @@ svg.leaflet-image-layer.leaflet-interactive path {
 	background: transparent;
 	content: "";
 	}
-
-/* Directions */
 
 .leaflet-tooltip-bottom {
 	margin-top: 6px;
@@ -649,8 +610,6 @@ svg.leaflet-image-layer.leaflet-interactive path {
 	margin-left: -12px;
 	border-right-color: #fff;
 	}
-
-/* Printing */
 
 @media print {
 	/* Prevent printers from removing background-images of controls. */

@@ -4,7 +4,7 @@ let weatherMarkerGroup;
 let selectedCountryISO2;
 let countryBordersData;
 
-// Tile layers
+// **Tile Layers**
 const streets = L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
   attribution:
     '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
@@ -23,16 +23,23 @@ const basemaps = {
   Satellite: satellite,
 };
 
-// Initialize map
+// **Initialize Map**
 map = L.map("map", {
-  layers: [streets],
+  layers: [streets], // Default layer
   maxZoom: 18,
 }).fitWorld();
 
-// Initialize marker groups
-weatherMarkerGroup = L.markerClusterGroup();
+// Add Layer Control
+L.control.layers(basemaps).addTo(map);
 
-// Load country borders from geoJSON
+// **Add Test Marker for Icon Verification**
+L.marker([51.505, -0.09]).addTo(map).bindPopup("Test Marker").openPopup();
+
+// **Initialize Marker Groups**
+weatherMarkerGroup = L.markerClusterGroup();
+map.addLayer(weatherMarkerGroup);
+
+// **Load Country Borders from GeoJSON**
 fetch("Data/countryBorders.geo.json")
   .then((response) => response.json())
   .then((data) => {
@@ -40,7 +47,7 @@ fetch("Data/countryBorders.geo.json")
   })
   .catch((error) => console.error("Error loading country borders:", error));
 
-// Populate country dropdown
+// **Populate Country Dropdown**
 const populateCountryDropdown = () => {
   $.ajax({
     url: "php/countryName.php",
@@ -63,7 +70,7 @@ const populateCountryDropdown = () => {
   });
 };
 
-// Update map with country borders
+// **Update Country Borders**
 const updateCountryBorders = (iso2) => {
   if (bordersLayer) {
     map.removeLayer(bordersLayer);
@@ -86,7 +93,7 @@ const updateCountryBorders = (iso2) => {
   }
 };
 
-// Fetch and display country information
+// **Fetch and Display Country Information**
 const displayCountryInfo = (iso2) => {
   $.ajax({
     url: "php/countryName.php",
@@ -104,7 +111,7 @@ const displayCountryInfo = (iso2) => {
   });
 };
 
-// Fetch and display population
+// **Fetch and Display Population**
 const displayPopulation = (iso2) => {
   $.ajax({
     url: "php/Population.php",
@@ -120,7 +127,7 @@ const displayPopulation = (iso2) => {
   });
 };
 
-// Fetch and display weather
+// **Fetch and Display Weather**
 const displayWeather = (lat, lon) => {
   $.ajax({
     url: "php/getWeather.php",
@@ -140,7 +147,7 @@ const displayWeather = (lat, lon) => {
   });
 };
 
-// Fetch and display currency
+// **Fetch and Display Currency**
 const displayCurrency = (iso2) => {
   $.ajax({
     url: "php/Currency.php",
@@ -158,7 +165,7 @@ const displayCurrency = (iso2) => {
   });
 };
 
-// Fetch and display exchange rate
+// **Fetch and Display Exchange Rate**
 const displayExchangeRate = (iso2) => {
   $.ajax({
     url: "php/LatestExchangeRate.php",
@@ -174,7 +181,7 @@ const displayExchangeRate = (iso2) => {
   });
 };
 
-// Fetch and display timezone
+// **Fetch and Display Timezone**
 const displayTimezone = (iso2) => {
   $.ajax({
     url: "php/Timezone.php",
@@ -190,7 +197,7 @@ const displayTimezone = (iso2) => {
   });
 };
 
-// Fetch and display capital city
+// **Fetch and Display Capital City**
 const displayCapitalCity = (iso2) => {
   $.ajax({
     url: "php/capitalCities.php",
@@ -206,23 +213,7 @@ const displayCapitalCity = (iso2) => {
   });
 };
 
-// Fetch and display weather forecast
-const displayWeatherForecast = (lat, lon) => {
-  $.ajax({
-    url: "php/getWeatherForecast.php",
-    method: "GET",
-    data: { lat, lon },
-    dataType: "json",
-    success: function (data) {
-      $("#forecast-container").html(data.forecast);
-    },
-    error: function (error) {
-      console.error("Error fetching weather forecast:", error);
-    },
-  });
-};
-
-// Fetch and display earthquake data
+// **Fetch and Display Earthquakes**
 const displayEarthquakes = (iso2) => {
   $.ajax({
     url: "php/earthQuakes.php",
@@ -242,7 +233,7 @@ const displayEarthquakes = (iso2) => {
   });
 };
 
-// Fetch and display Wikipedia data
+// **Fetch and Display Wikipedia Information**
 const displayWikipediaInfo = (query) => {
   $.ajax({
     url: "php/wikipediaSearch.php",
@@ -260,7 +251,7 @@ const displayWikipediaInfo = (query) => {
   });
 };
 
-// Handle country selection
+// **Handle Country Selection**
 $("#selCountry").on("change", function () {
   selectedCountryISO2 = $(this).val();
 
@@ -271,9 +262,7 @@ $("#selCountry").on("change", function () {
   displayExchangeRate(selectedCountryISO2);
   displayTimezone(selectedCountryISO2);
   displayCapitalCity(selectedCountryISO2);
-  displayWeatherForecast(selectedCountryISO2);
 
-  // Optionally fetch weather based on the country's center lat/lon
   const country = countryBordersData.features.find(
     (feature) => feature.properties.iso_a2 === selectedCountryISO2
   );
@@ -282,21 +271,17 @@ $("#selCountry").on("change", function () {
     displayWeather(lat, lon);
   }
 
-  // Fetch earthquakes data
   displayEarthquakes(selectedCountryISO2);
-
-  // Fetch Wikipedia data
   displayWikipediaInfo(selectedCountryISO2);
 });
 
-// Geolocation: Center map on user's current location
+// **Geolocation**
 if (navigator.geolocation) {
   navigator.geolocation.getCurrentPosition(
     (position) => {
       const { latitude, longitude } = position.coords;
       map.setView([latitude, longitude], 10);
 
-      // Reverse geocode to find country
       $.ajax({
         url: "php/countryName.php",
         method: "GET",
@@ -315,6 +300,4 @@ if (navigator.geolocation) {
     }
   );
 }
-
-// Populate dropdown on page load
-populateCountryDropdown();
+//

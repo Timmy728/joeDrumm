@@ -2,6 +2,7 @@ let map;
 let bordersLayer;
 let selectedCountryISO2;
 let countryBordersData;
+let markerClusterGroup = L.markerClusterGroup(); // Initialize MarkerClusterGroup
 
 // **Tile Layers**
 const streets = L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
@@ -31,8 +32,11 @@ map = L.map("map", {
 // Add Layer Control
 L.control.layers(basemaps).addTo(map);
 
+// Add the MarkerCluster group to the map
+map.addLayer(markerClusterGroup);
+
 // **Add Test Marker for Icon Verification**
-L.marker([51.505, -0.09]).addTo(map).bindPopup("Test Marker").openPopup();
+L.marker([51.505, -0.09]).addTo(markerClusterGroup).bindPopup("Test Marker").openPopup();
 
 // **Load Country Borders from GeoJSON**
 fetch("Data/countryBorders.geo.json")
@@ -145,6 +149,12 @@ const displayWeather = (lat, lon) => {
       $("#weatherImg").html(
         `<img src="https://openweathermap.org/img/wn/${data.icon}.png" alt="Weather Icon">`
       );
+
+      // Add the weather marker to the MarkerCluster group
+      const weatherMarker = L.marker([lat, lon], { icon: markerIcon }).bindPopup(
+        `<h4>Weather Info</h4><p>${data.temp} °C - ${data.description}</p>`
+      );
+      markerClusterGroup.addLayer(weatherMarker); // Add weather marker to the cluster group
     },
     error: function (error) {
       console.error("Error fetching weather:", error);
@@ -273,7 +283,7 @@ const displayWeatherForecast = (lat, lon) => {
 
       // Optionally, create a marker for each forecasted location
       const forecastMarker = L.marker([lat, lon]).bindPopup(forecastHtml);
-      map.addLayer(forecastMarker); // Add to the map
+      markerClusterGroup.addLayer(forecastMarker); // Add to the marker cluster
 
       // Optionally, update the DOM or display the forecast data in a different section
       $("#forecastInfo").html(forecastHtml);

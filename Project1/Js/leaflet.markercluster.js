@@ -1,6 +1,10 @@
 L.MarkerCluster = L.Marker.extend({
 	options: L.Icon.prototype.options,
 
+	L.markerClusterGroup = function (options) {
+    return new L.MarkerClusterGroup(options);
+     };
+
 	initialize: function (group, zoom, a, b) {
 		L.Marker.prototype.initialize.call(
 			this,

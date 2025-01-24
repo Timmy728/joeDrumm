@@ -2,30 +2,40 @@ let map;
 let bordersLayer;
 let selectedCountryISO2;
 let countryBordersData;
-let markerClusterGroup = L.markerClusterGroup(); // Initialize MarkerClusterGroup
 
-// **Tile Layers**
-const streets = L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
-  attribution:
-    '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-});
+// Check if MarkerCluster is loaded before initializing
+let markerClusterGroup;
 
-const satellite = L.tileLayer(
-  "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-  {
-    attribution:
-      "Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community",
-  }
-);
-
-const basemaps = {
-  Streets: streets,
-  Satellite: satellite,
-};
-
-// **Initialize Map when DOM is fully loaded**
 document.addEventListener("DOMContentLoaded", function () {
-  // Initialize the map only after DOM and libraries have loaded
+  // Ensure MarkerCluster is available
+  if (typeof L.markerClusterGroup !== "function") {
+    console.error("MarkerCluster is not loaded correctly. Check your library paths.");
+    return;
+  }
+
+  // Initialize MarkerClusterGroup
+  markerClusterGroup = L.markerClusterGroup();
+
+  // **Tile Layers**
+  const streets = L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    attribution:
+      '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+  });
+
+  const satellite = L.tileLayer(
+    "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+    {
+      attribution:
+        "Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community",
+    }
+  );
+
+  const basemaps = {
+    Streets: streets,
+    Satellite: satellite,
+  };
+
+  // **Initialize Map**
   map = L.map("map", {
     layers: [streets], // Default layer
     maxZoom: 18,
@@ -155,14 +165,52 @@ document.addEventListener("DOMContentLoaded", function () {
           `<img src="https://openweathermap.org/img/wn/${data.icon}.png" alt="Weather Icon">`
         );
 
-        // Add the weather marker to the MarkerCluster group
         const weatherMarker = L.marker([lat, lon], { icon: markerIcon }).bindPopup(
           `<h4>Weather Info</h4><p>${data.temp} °C - ${data.description}</p>`
         );
-        markerClusterGroup.addLayer(weatherMarker); // Add weather marker to the cluster group
+        markerClusterGroup.addLayer(weatherMarker);
       },
       error: function (error) {
         console.error("Error fetching weather:", error);
+      },
+    });
+  };
+
+  // **Fetch and Display Timezone**
+  const displayTimezone = (iso2) => {
+    $.ajax({
+      url: "php/Timezone.php",
+      method: "GET",
+      data: { iso2 },
+      dataType: "json",
+      success: function (data) {
+        $("#timezone").text(data.timezone);
+      },
+      error: function (error) {
+        console.error("Error fetching timezone:", error);
+      },
+    });
+  };
+
+  // **Fetch and Display Weather Forecast**
+  const displayWeatherForecast = (lat, lon) => {
+    $.ajax({
+      url: "php/getWeatherForecast.php",
+      method: "GET",
+      data: { lat, lon },
+      dataType: "json",
+      success: function (data) {
+        let forecastHtml = "<h4>16-Day Weather Forecast</h4>";
+        data.forecast.forEach((forecast) => {
+          forecastHtml += `<p>${forecast.date}: ${forecast.temp} °C, ${forecast.description}</p>`;
+        });
+
+        const forecastMarker = L.marker([lat, lon]).bindPopup(forecastHtml);
+        markerClusterGroup.addLayer(forecastMarker);
+        $("#forecastInfo").html(forecastHtml);
+      },
+      error: function (error) {
+        console.error("Error fetching weather forecast:", error);
       },
     });
   };
@@ -201,22 +249,6 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   };
 
-  // **Fetch and Display Timezone**
-  const displayTimezone = (iso2) => {
-    $.ajax({
-      url: "php/Timezone.php",
-      method: "GET",
-      data: { iso2 },
-      dataType: "json",
-      success: function (data) {
-        $("#timezone").text(data.timezone);
-      },
-      error: function (error) {
-        console.error("Error fetching timezone:", error);
-      },
-    });
-  };
-
   // **Fetch and Display Capital City**
   const displayCapitalCity = (iso2) => {
     $.ajax({
@@ -229,26 +261,6 @@ document.addEventListener("DOMContentLoaded", function () {
       },
       error: function (error) {
         console.error("Error fetching capital city:", error);
-      },
-    });
-  };
-
-  // **Fetch and Display Earthquakes**
-  const displayEarthquakes = (iso2) => {
-    $.ajax({
-      url: "php/earthQuakes.php",
-      method: "GET",
-      data: { iso2 },
-      dataType: "json",
-      success: function (data) {
-        let earthquakeInfo = "";
-        data.earthquakes.forEach((earthquake) => {
-          earthquakeInfo += `<p>Magnitude: ${earthquake.magnitude} - Location: ${earthquake.location}</p>`;
-        });
-        $("#earthquakeInfo").html(earthquakeInfo);
-      },
-      error: function (error) {
-        console.error("Error fetching earthquake data:", error);
       },
     });
   };
@@ -271,81 +283,29 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   };
 
-  // **Fetch and Display Weather Forecast (16-day)**
-  const displayWeatherForecast = (lat, lon) => {
-    $.ajax({
-      url: "php/getWeatherForecast.php", // Endpoint for 16-day forecast
-      method: "GET",
-      data: { lat, lon },
-      dataType: "json",
-      success: function (data) {
-        let forecastHtml = "<h4>16-Day Weather Forecast</h4>";
-        data.forecast.forEach((forecast) => {
-          forecastHtml += `
-            <p>${forecast.date}: ${forecast.temp} °C, ${forecast.description}</p>
-          `;
-        });
-
-        // Optionally, create a marker for each forecasted location
-        const forecastMarker = L.marker([lat, lon]).bindPopup(forecastHtml);
-        markerClusterGroup.addLayer(forecastMarker); // Add to the marker cluster
-
-        // Optionally, update the DOM or display the forecast data in a different section
-        $("#forecastInfo").html(forecastHtml);
-      },
-      error: function (error) {
-        console.error("Error fetching weather forecast:", error);
-      },
-    });
-  };
-
   // **Handle Country Selection**
   $("#selCountry").on("change", function () {
     selectedCountryISO2 = $(this).val();
-
     updateCountryBorders(selectedCountryISO2);
     displayCountryInfo(selectedCountryISO2);
     displayPopulation(selectedCountryISO2);
-    displayCurrency(selectedCountryISO2);
-    displayExchangeRate(selectedCountryISO2);
     displayTimezone(selectedCountryISO2);
-    displayCapitalCity(selectedCountryISO2);
 
     const country = countryBordersData.features.find(
       (feature) => feature.properties.iso_a2 === selectedCountryISO2
     );
+
     if (country) {
       const [lon, lat] = country.properties.center;
-      displayWeather(lat, lon); // Add weather marker to the cluster
-      displayWeatherForecast(lat, lon); // Add weather forecast
+      displayWeather(lat, lon);
+      displayWeatherForecast(lat, lon);
     }
 
-    displayEarthquakes(selectedCountryISO2);
+    displayCurrency(selectedCountryISO2);
+    displayExchangeRate(selectedCountryISO2);
+    displayCapitalCity(selectedCountryISO2);
     displayWikipediaInfo(selectedCountryISO2);
   });
 
-  if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const { latitude, longitude } = position.coords;
-        map.setView([latitude, longitude], 10);
-
-        $.ajax({
-          url: "php/countryName.php",
-          method: "GET",
-          data: { lat: latitude, lon: longitude },
-          dataType: "json",
-          success: function (data) {
-            $("#selCountry").val(data.iso2).change();
-          },
-          error: function (error) {
-            console.error("Error fetching country from geolocation:", error);
-          },
-        });
-      },
-      (error) => {
-        console.error("Geolocation error:", error);
-      }
-    );
-  }
+  populateCountryDropdown();
 });

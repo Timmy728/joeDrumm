@@ -16,7 +16,6 @@ document.addEventListener("DOMContentLoaded", function () {
   // Initialize MarkerClusterGroup
   markerClusterGroup = L.markerClusterGroup();
 
-  // **Tile Layers**
   const streets = L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
     attribution:
       '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
@@ -35,13 +34,11 @@ document.addEventListener("DOMContentLoaded", function () {
     Satellite: satellite,
   };
 
-  // **Initialize Map**
   map = L.map("map", {
     layers: [streets], // Default layer
     maxZoom: 18,
   }).fitWorld();
 
-  // Add Layer Control
   L.control.layers(basemaps).addTo(map);
 
   // Add the MarkerCluster group to the map
@@ -53,7 +50,6 @@ document.addEventListener("DOMContentLoaded", function () {
     .bindPopup("Test Marker")
     .openPopup();
 
-  // **Load Country Borders from GeoJSON**
   fetch("Data/countryBorders.geo.json")
     .then((response) => response.json())
     .then((data) => {
@@ -61,7 +57,7 @@ document.addEventListener("DOMContentLoaded", function () {
     })
     .catch((error) => console.error("Error loading country borders:", error));
 
-  // **Marker Icon Configuration**
+ 
   const markerIcon = L.icon({
     iconUrl: "Images/marker-icon.png", // Local marker icon
     iconSize: [25, 41],
@@ -71,7 +67,6 @@ document.addEventListener("DOMContentLoaded", function () {
     shadowSize: [41, 41],
   });
 
-  // **Populate Country Dropdown**
   const populateCountryDropdown = () => {
     $.ajax({
       url: "php/countryName.php",
@@ -94,7 +89,6 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   };
 
-  // **Update Country Borders**
   const updateCountryBorders = (iso2) => {
     if (bordersLayer) {
       map.removeLayer(bordersLayer);
@@ -117,7 +111,6 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   };
 
-  // **Fetch and Display Country Information**
   const displayCountryInfo = (iso2) => {
     $.ajax({
       url: "php/countryName.php",
@@ -135,7 +128,6 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   };
 
-  // **Fetch and Display Population**
   const displayPopulation = (iso2) => {
     $.ajax({
       url: "php/Population.php",
@@ -151,7 +143,6 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   };
 
-  // **Fetch and Display Weather**
   const displayWeather = (lat, lon) => {
     $.ajax({
       url: "php/getWeather.php",
@@ -176,7 +167,6 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   };
 
-  // **Fetch and Display Timezone**
   const displayTimezone = (iso2) => {
     $.ajax({
       url: "php/Timezone.php",
@@ -191,8 +181,7 @@ document.addEventListener("DOMContentLoaded", function () {
       },
     });
   };
-
-  // **Fetch and Display Weather Forecast**
+  
   const displayWeatherForecast = (lat, lon) => {
     $.ajax({
       url: "php/getWeatherForecast.php",
@@ -215,7 +204,6 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   };
 
-  // **Fetch and Display Currency**
   const displayCurrency = (iso2) => {
     $.ajax({
       url: "php/Currency.php",
@@ -233,7 +221,6 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   };
 
-  // **Fetch and Display Exchange Rate**
   const displayExchangeRate = (iso2) => {
     $.ajax({
       url: "php/LatestExchangeRate.php",
@@ -249,7 +236,6 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   };
 
-  // **Fetch and Display Capital City**
   const displayCapitalCity = (iso2) => {
     $.ajax({
       url: "php/capitalCities.php",
@@ -265,7 +251,6 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   };
 
-  // **Fetch and Display Wikipedia Information**
   const displayWikipediaInfo = (query) => {
     $.ajax({
       url: "php/wikipediaSearch.php",
@@ -283,7 +268,6 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   };
 
-  // **Handle Country Selection**
   $("#selCountry").on("change", function () {
     selectedCountryISO2 = $(this).val();
     updateCountryBorders(selectedCountryISO2);

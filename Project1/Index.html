@@ -12,14 +12,14 @@
     <link rel="stylesheet" href="css/leaflet.css" />
 
     <!-- MarkerCluster CSS -->
-    <link rel="stylesheet" href="css/leaflet.MarkerCluster.css" />
-    <link rel="stylesheet" href="css/MarkerCluster.Default.css" />
+    <link rel="stylesheet" href="MarkerCluster.css" />
+    <link rel="stylesheet" href="MarkerCluster.Default.css" />
 
     <!-- Custom CSS -->
     <link rel="stylesheet" href="css/style.css" />
   </head>
   <body>
-    <!-- Loader -->
+    
     <div id="preloader">
       <div class="spinner-border" role="status">
         <span class="visually-hidden">Loading...</span>
@@ -69,39 +69,6 @@
       </div>
     </div>
 
-    <!-- Earthquake Modal -->
-    <div class="modal" id="earthquakeModal">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h4>Earthquakes Information</h4>
-          <button class="close" onclick="closeModal('earthquakeModal')">&times;</button>
-        </div>
-        <div class="modal-body">
-          <div id="earthquakeInfo"></div>
-        </div>
-        <div class="modal-footer">
-          <button class="btn" onclick="closeModal('earthquakeModal')">Close</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Wikipedia Modal -->
-    <div class="modal" id="wikiModal">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h4 id="wikiModalLabel">Wikipedia Information For: <span id="wiki-title"></span></h4>
-          <button class="close" onclick="closeModal('wikiModal')">&times;</button>
-        </div>
-        <div class="modal-body">
-          <div class="wikiImg" id="wiki-img"></div>
-          <div class="wikiInfo" id="wiki-info"></div>
-        </div>
-        <div class="modal-footer">
-          <button class="btn" onclick="closeModal('wikiModal')">Close</button>
-        </div>
-      </div>
-    </div>
-
     <!-- Bootstrap JS -->
     <script src="Js/bootstrap.bundle.min.js"></script>
 
@@ -112,7 +79,7 @@
     <script src="Js/leaflet.js"></script>
 
     <!-- MarkerCluster JS -->
-    <script src="Js/leaflet.MarkerCluster.js"></script>
+    <script src="leaflet.markercluster.js"></script>
 
     <!-- Custom Script -->
     <script src="Js/script.js"></script>

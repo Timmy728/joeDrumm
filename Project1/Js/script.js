@@ -72,8 +72,8 @@ document.addEventListener("DOMContentLoaded", function () {
       method: "GET",
       dataType: "json",
       success: function (response) {
+        // Ensure the response is an array before using forEach
         if (Array.isArray(response)) {
-          // Ensure response is an array before using forEach
           response.forEach((country) => {
             $("#selCountry").append(
               $("<option>", {
@@ -306,6 +306,6 @@ document.addEventListener("DOMContentLoaded", function () {
     displayWikipediaInfo(selectedCountryISO2);
   });
 
-  populateCountryDropdown();
-  displayEarthquakes();
+  populateCountryDropdown(); // Initialize the dropdown
+  displayEarthquakes(); // Load earthquake data
 });

@@ -293,25 +293,13 @@ document.addEventListener("DOMContentLoaded", function () {
     displayCountryInfo(selectedCountryISO2);
     displayPopulation(selectedCountryISO2);
     displayTimezone(selectedCountryISO2);
-
-    const country = countryBordersData.features.find(
-      (feature) => feature.properties.iso_a2 === selectedCountryISO2
-    );
-
-    if (country) {
-      const [lon, lat] = country.properties.center;
-      displayWeather(lat, lon);
-      displayWeatherForecast(lat, lon);
-    }
-
+    displayWeather(selectedCountryISO2);
+    displayWeatherForecast(selectedCountryISO2);
     displayCurrency(selectedCountryISO2);
     displayExchangeRate(selectedCountryISO2);
     displayCapitalCity(selectedCountryISO2);
     displayWikipediaInfo(selectedCountryISO2);
   });
-
-  // Call the earthquake display function when the page is ready
-  displayEarthquakes();
 
   populateCountryDropdown();
 });

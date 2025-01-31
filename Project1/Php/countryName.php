@@ -1,17 +1,13 @@
 <?php
-
 // My API Key
 $apiKey = "405e0adb0071520e14c73f914452342b";
 
-// Function to get country details by name
 function getCountryByName($countryName, $apiKey) {
     // API URL with query parameters
     $url = "https://api.countrylayer.com/v2/name/" . urlencode($countryName) . "?access_key=" . $apiKey . "&fullText=true";
 
-    // Initialize cURL
     $curl = curl_init();
 
-    // Set cURL options
     curl_setopt_array($curl, [
         CURLOPT_URL => $url,
         CURLOPT_RETURNTRANSFER => true,
@@ -36,15 +32,21 @@ function getCountryByName($countryName, $apiKey) {
     return $data;
 }
 
+// If the 'countryName' is passed as a GET parameter
+if (isset($_GET['countryName'])) {
+    $countryName = $_GET['countryName'];  // Get country name from request
+    $result = getCountryByName($countryName, $apiKey);
 
-$countryName = "United Kingdom";
-$result = getCountryByName($countryName, $apiKey);
-
-// Check and display the result
-if ($result && !isset($result['error'])) {
-    echo "Country Details:\n";
-    print_r($result);
+    // Return the result as a JSON response
+    if ($result && !isset($result['error'])) {
+        // Output the country data as JSON
+        echo json_encode($result);
+    } else {
+        // Return an error if the data couldn't be fetched
+        echo json_encode(['error' => 'Error fetching country data.']);
+    }
 } else {
-    echo "Error fetching country data.\n";
+    // Return an error if no country name is provided
+    echo json_encode(['error' => 'No country name provided.']);
 }
 ?>

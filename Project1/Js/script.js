@@ -57,7 +57,6 @@ document.addEventListener("DOMContentLoaded", function () {
     })
     .catch((error) => console.error("Error loading country borders:", error));
 
- 
   const markerIcon = L.icon({
     iconUrl: "Images/marker-icon.png", // Local marker icon
     iconSize: [25, 41],
@@ -181,7 +180,7 @@ document.addEventListener("DOMContentLoaded", function () {
       },
     });
   };
-  
+
   const displayWeatherForecast = (lat, lon) => {
     $.ajax({
       url: "php/getWeatherForecast.php",
@@ -268,6 +267,26 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   };
 
+  // Earthquake data integration
+  const displayEarthquakes = () => {
+    $.ajax({
+      url: "php/earthQuakes.php",  // Add your PHP endpoint here
+      method: "GET",
+      dataType: "json",
+      success: function (data) {
+        data.forEach((quake) => {
+          const quakeMarker = L.marker([quake.lat, quake.lon]).bindPopup(
+            `<h4>Earthquake Info</h4><p>Magnitude: ${quake.magnitude} - ${quake.location}</p>`
+          );
+          markerClusterGroup.addLayer(quakeMarker);
+        });
+      },
+      error: function (error) {
+        console.error("Error fetching earthquake data:", error);
+      },
+    });
+  };
+
   $("#selCountry").on("change", function () {
     selectedCountryISO2 = $(this).val();
     updateCountryBorders(selectedCountryISO2);
@@ -290,6 +309,9 @@ document.addEventListener("DOMContentLoaded", function () {
     displayCapitalCity(selectedCountryISO2);
     displayWikipediaInfo(selectedCountryISO2);
   });
+
+  // Call the earthquake display function when the page is ready
+  displayEarthquakes();
 
   populateCountryDropdown();
 });

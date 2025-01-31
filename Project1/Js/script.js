@@ -72,15 +72,20 @@ document.addEventListener("DOMContentLoaded", function () {
       method: "GET",
       dataType: "json",
       success: function (response) {
-        response.forEach((country) => {
-          $("#selCountry").append(
-            $("<option>", {
-              value: country.iso2,
-              text: country.name,
-            })
-          );
-        });
-        $("#selCountry").prop("selectedIndex", 0);
+        if (Array.isArray(response)) {
+          // Ensure response is an array before using forEach
+          response.forEach((country) => {
+            $("#selCountry").append(
+              $("<option>", {
+                value: country.iso2,
+                text: country.name,
+              })
+            );
+          });
+          $("#selCountry").prop("selectedIndex", 0);
+        } else {
+          console.error("Expected an array but got:", response);
+        }
       },
       error: function (error) {
         console.error("Error fetching country names:", error);
@@ -302,4 +307,5 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   populateCountryDropdown();
+  displayEarthquakes();
 });

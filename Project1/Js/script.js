@@ -72,6 +72,9 @@ document.addEventListener("DOMContentLoaded", function () {
       method: "GET",
       dataType: "json",
       success: function (response) {
+        // Log the response to check its structure
+        console.log("Response from countryName.php:", response);
+
         // Ensure the response is an array before using forEach
         if (Array.isArray(response)) {
           response.forEach((country) => {
@@ -281,7 +284,7 @@ document.addEventListener("DOMContentLoaded", function () {
       success: function (data) {
         data.forEach((quake) => {
           const quakeMarker = L.marker([quake.lat, quake.lon]).bindPopup(
-            `<h4>Earthquake Info</h4><p>Magnitude: ${quake.magnitude} - ${quake.location}</p>`
+            `<h4>Earthquake Info</h4><p>Magnitude: ${quake.magnitude} | Date: ${quake.date}</p>`
           );
           markerClusterGroup.addLayer(quakeMarker);
         });
@@ -292,20 +295,25 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   };
 
-  $("#selCountry").on("change", function () {
-    selectedCountryISO2 = $(this).val();
-    updateCountryBorders(selectedCountryISO2);
-    displayCountryInfo(selectedCountryISO2);
-    displayPopulation(selectedCountryISO2);
-    displayTimezone(selectedCountryISO2);
-    displayWeather(selectedCountryISO2);
-    displayWeatherForecast(selectedCountryISO2);
-    displayCurrency(selectedCountryISO2);
-    displayExchangeRate(selectedCountryISO2);
-    displayCapitalCity(selectedCountryISO2);
-    displayWikipediaInfo(selectedCountryISO2);
-  });
+  // Call to populate the dropdown
+  populateCountryDropdown();
 
-  populateCountryDropdown(); // Initialize the dropdown
-  displayEarthquakes(); // Load earthquake data
+  // Event listener for dropdown change
+  $("#selCountry").change(function () {
+    selectedCountryISO2 = $(this).val();
+
+    if (selectedCountryISO2) {
+      updateCountryBorders(selectedCountryISO2);
+      displayCountryInfo(selectedCountryISO2);
+      displayPopulation(selectedCountryISO2);
+      displayWeather(lat, lon); // Add correct lat/lon
+      displayTimezone(selectedCountryISO2);
+      displayWeatherForecast(lat, lon); // Add correct lat/lon
+      displayCurrency(selectedCountryISO2);
+      displayExchangeRate(selectedCountryISO2);
+      displayCapitalCity(selectedCountryISO2);
+      displayWikipediaInfo(selectedCountryISO2);
+      displayEarthquakes();
+    }
+  });
 });

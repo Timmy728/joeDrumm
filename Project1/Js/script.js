@@ -67,34 +67,40 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   const populateCountryDropdown = () => {
-    $.ajax({
-      url: "php/countryName.php",
-      method: "GET",
-      dataType: "json",
-      success: function (response) {
-        // Log the response to check its structure
-        console.log("Response from countryName.php:", response);
+  $.ajax({
+    url: "php/countryName.php",
+    method: "GET",
+    dataType: "json",
+    success: function (response) {
+      // Log the response to check its structure
+      console.log("Response from countryName.php:", response);
 
-        // Ensure the response is an array before using forEach
-        if (Array.isArray(response)) {
-          response.forEach((country) => {
-            $("#selCountry").append(
-              $("<option>", {
-                value: country.iso2,
-                text: country.name,
-              })
-            );
-          });
-          $("#selCountry").prop("selectedIndex", 0);
-        } else {
-          console.error("Expected an array but got:", response);
-        }
-      },
-      error: function (error) {
-        console.error("Error fetching country names:", error);
-      },
-    });
-  };
+      // Check for error in the response
+      if (response.error) {
+        console.error("Error in response:", response.error);
+        return;
+      }
+
+      // Check if the response is an array (as expected for country list)
+      if (Array.isArray(response)) {
+        response.forEach((country) => {
+          $("#selCountry").append(
+            $("<option>", {
+              value: country.iso2,
+              text: country.name,
+            })
+          );
+        });
+        $("#selCountry").prop("selectedIndex", 0);
+      } else {
+        console.error("Expected an array but got:", response);
+      }
+    },
+    error: function (error) {
+      console.error("Error fetching country names:", error);
+    },
+  });
+};
 
   const updateCountryBorders = (iso2) => {
     if (bordersLayer) {

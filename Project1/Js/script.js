@@ -70,7 +70,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   const populateCountryDropdown = () => {
     $.ajax({
-      url: "php/countryName.php",
+      url: "php/countryName.php", // Ensure the path to PHP file is correct
       method: "GET",
       dataType: "json",
       success: function (response) {
@@ -127,7 +127,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   const displayCountryInfo = (iso2) => {
     $.ajax({
-      url: "php/countryName.php",
+      url: "php/countryName.php", // Ensure the path to PHP file is correct
       method: "GET",
       data: { iso2: iso2 }, // Ensure iso2 is passed properly
       dataType: "json",
@@ -306,22 +306,23 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   };
 
-  // Call the populate function on page load
+  // Call the populate function once the DOM is loaded
   populateCountryDropdown();
 
-  // When a country is selected from dropdown
-  $("#selCountry").on("change", function () {
-    const selectedCountry = $("#selCountry").val();
-    selectedCountryISO2 = selectedCountry;
-
-    updateCountryBorders(selectedCountryISO2);
-    displayCountryInfo(selectedCountryISO2);
-    displayPopulation(selectedCountryISO2);
-    displayWeather(selectedCountryISO2);
-    displayTimezone(selectedCountryISO2);
-    displayCurrency(selectedCountryISO2);
-    displayExchangeRate(selectedCountryISO2);
-    displayCapitalCity(selectedCountryISO2);
-    displayWikipediaInfo(selectedCountryISO2);
+  // Event listener for country selection
+  $("#selCountry").change(function () {
+    const iso2 = $(this).val();
+    selectedCountryISO2 = iso2;
+    updateCountryBorders(iso2);
+    displayCountryInfo(iso2);
+    displayPopulation(iso2);
+    displayWeather(iso2);
+    displayTimezone(iso2);
+    displayCurrency(iso2);
+    displayExchangeRate(iso2);
+    displayCapitalCity(iso2);
+    displayWikipediaInfo(iso2);
+    displayWeatherForecast(iso2);
+    displayEarthquakes();
   });
 });

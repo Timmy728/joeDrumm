@@ -1,4 +1,6 @@
 <?php
+header('Content-Type: application/json'); // Ensure JSON response
+
 // My API Key
 $apiKey = "405e0adb0071520e14c73f914452342b";
 
@@ -14,39 +16,38 @@ function getCountryByName($countryName, $apiKey) {
         CURLOPT_SSL_VERIFYPEER => false,
     ]);
 
-    // Execute the API request
     $response = curl_exec($curl);
+    $httpCode = curl_getinfo($curl, CURLINFO_HTTP_CODE); // Get HTTP status code
 
-    // Handle errors
+    // Handle cURL errors
     if (curl_errno($curl)) {
-        echo "cURL Error: " . curl_error($curl);
-        return null;
+        curl_close($curl);
+        echo json_encode(["error" => "cURL Error: " . curl_error($curl)]);
+        exit;
     }
 
-    // Close cURL session
     curl_close($curl);
 
-    // Decode the JSON response
+    // Decode JSON response
     $data = json_decode($response, true);
+
+    // Handle API errors (e.g., invalid country name, API limits, etc.)
+    if ($httpCode !== 200 || isset($data['error'])) {
+        return ["error" => "Invalid country name or API error."];
+    }
 
     return $data;
 }
 
-// If the 'countryName' is passed as a GET parameter
-if (isset($_GET['countryName'])) {
-    $countryName = $_GET['countryName'];  // Get country name from request
-    $result = getCountryByName($countryName, $apiKey);
-
-    // Return the result as a JSON response
-    if ($result && !isset($result['error'])) {
-        // Output the country data as JSON
-        echo json_encode($result);
-    } else {
-        // Return an error if the data couldn't be fetched
-        echo json_encode(['error' => 'Error fetching country data.']);
-    }
-} else {
-    // Return an error if no country name is provided
-    echo json_encode(['error' => 'No country name provided.']);
+// Check if 'countryName' is provided in the GET request
+if (!isset($_GET['countryName']) || empty(trim($_GET['countryName']))) {
+    echo json_encode(["error" => "No country name provided."]);
+    exit;
 }
+
+$countryName = trim($_GET['countryName']); // Sanitize input
+$result = getCountryByName($countryName, $apiKey);
+
+// Return the result as JSON
+echo json_encode($result);
 ?>

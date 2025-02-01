@@ -57,6 +57,12 @@ if (!isset($_GET['iso2']) || empty(trim($_GET['iso2']))) {
 
 $iso2 = trim($_GET['iso2']); // Sanitize input
 
+// Ensure the iso2 code is a valid 2-letter country code (basic validation)
+if (strlen($iso2) !== 2 || !ctype_alpha($iso2)) {
+    echo json_encode(["error" => "Invalid ISO2 country code. It should be 2 alphabetic characters."]);
+    exit;
+}
+
 // Call the function and get the result
 $result = getCountryByISO2($iso2, $apiKey);
 

@@ -1,16 +1,14 @@
-
 <?php
 header('Content-Type: application/json'); // Ensure JSON response
 
 // Your API Key
 $apiKey = "405e0adb0071520e14c73f914452342b";
 
-function getCountryByISO2($iso2, $apiKey) {
-    // API URL with query parameters
-    $url = "https://api.countrylayer.com/v2/alpha/" . urlencode($iso2) . "?access_key=" . $apiKey;
+// Function to fetch all countries
+function getAllCountries($apiKey) {
+    $url = "https://api.countrylayer.com/v2/all?access_key=" . $apiKey;
 
     $curl = curl_init();
-
     curl_setopt_array($curl, [
         CURLOPT_URL => $url,
         CURLOPT_RETURNTRANSFER => true,
@@ -18,55 +16,50 @@ function getCountryByISO2($iso2, $apiKey) {
     ]);
 
     $response = curl_exec($curl);
-    $httpCode = curl_getinfo($curl, CURLINFO_HTTP_CODE); // Get HTTP status code
+    $httpCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
 
-    // Handle cURL errors
     if (curl_errno($curl)) {
         curl_close($curl);
-        echo json_encode(["error" => "cURL Error: " . curl_error($curl)]);
-        exit;
+        return ["error" => "cURL Error: " . curl_error($curl)];
     }
 
     curl_close($curl);
-
-    // Decode JSON response
     $data = json_decode($response, true);
 
-    // Check if the response is valid
     if (!$data) {
-        return ["error" => "Error decoding the API response."];
+        return ["error" => "Error decoding API response."];
     }
 
-    // Handle API errors (e.g., invalid country code, API limits, etc.)
-    if ($httpCode !== 200) {
+    if ($httpCode !== 200 || isset($data['error'])) {
         return ["error" => "API error. Status code: " . $httpCode];
     }
 
-    if (isset($data['error'])) {
-        return ["error" => "API Error: " . $data['error']['info']];
+    // Process API response to match expected format
+    $countries = [];
+    foreach ($data as $country) {
+        if (isset($country['alpha2Code']) && isset($country['name'])) {
+            $countries[] = [
+                "iso2" => $country['alpha2Code'],
+                "name" => $country['name']
+            ];
+        }
     }
 
-    return $data;
+    return $countries;
 }
 
-// Check if 'iso2' is provided in the GET request
-if (!isset($_GET['iso2']) || empty(trim($_GET['iso2']))) {
-    // Debugging output for empty iso2
-    echo json_encode(["error" => "No ISO2 country code provided. URL: " . $_SERVER['REQUEST_URI']]);
-    exit;
+// If 'iso2' is provided, fetch details for that specific country
+if (isset($_GET['iso2']) && !empty(trim($_GET['iso2']))) {
+    $iso2 = strtoupper(trim($_GET['iso2']));
+
+    if (strlen($iso2) !== 2 || !ctype_alpha($iso2)) {
+        echo json_encode(["error" => "Invalid ISO2 country code."]);
+        exit;
+    }
+
+    echo json_encode(getCountryByISO2($iso2, $apiKey));
+} else {
+    // No ISO2 provided, return all countries
+    echo json_encode(getAllCountries($apiKey));
 }
-
-$iso2 = trim($_GET['iso2']); // Sanitize input
-
-// Ensure the iso2 code is a valid 2-letter country code (basic validation)
-if (strlen($iso2) !== 2 || !ctype_alpha($iso2)) {
-    echo json_encode(["error" => "Invalid ISO2 country code. It should be 2 alphabetic characters."]);
-    exit;
-}
-
-// Call the function and get the result
-$result = getCountryByISO2($iso2, $apiKey);
-
-// Return the result as JSON
-echo json_encode($result);
 ?>

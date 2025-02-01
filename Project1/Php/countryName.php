@@ -1,7 +1,7 @@
 <?php
 header('Content-Type: application/json'); // Ensure JSON response
 
-// My API Key
+// Your API Key
 $apiKey = "405e0adb0071520e14c73f914452342b";
 
 function getCountryByISO2($iso2, $apiKey) {
@@ -31,9 +31,18 @@ function getCountryByISO2($iso2, $apiKey) {
     // Decode JSON response
     $data = json_decode($response, true);
 
-    // Handle API errors (e.g., invalid country name, API limits, etc.)
-    if ($httpCode !== 200 || isset($data['error'])) {
-        return ["error" => "Invalid country code or API error."];
+    // Check if the response is valid
+    if (!$data) {
+        return ["error" => "Error decoding the API response."];
+    }
+
+    // Handle API errors (e.g., invalid country code, API limits, etc.)
+    if ($httpCode !== 200) {
+        return ["error" => "API error. Status code: " . $httpCode];
+    }
+
+    if (isset($data['error'])) {
+        return ["error" => "API Error: " . $data['error']['info']];
     }
 
     return $data;
@@ -46,6 +55,8 @@ if (!isset($_GET['iso2']) || empty(trim($_GET['iso2']))) {
 }
 
 $iso2 = trim($_GET['iso2']); // Sanitize input
+
+// Call the function and get the result
 $result = getCountryByISO2($iso2, $apiKey);
 
 // Return the result as JSON

@@ -50,7 +50,8 @@ function getCountryByISO2($iso2, $apiKey) {
 
 // Check if 'iso2' is provided in the GET request
 if (!isset($_GET['iso2']) || empty(trim($_GET['iso2']))) {
-    echo json_encode(["error" => "No ISO2 country code provided."]);
+    // Debugging output for empty iso2
+    echo json_encode(["error" => "No ISO2 country code provided. URL: " . $_SERVER['REQUEST_URI']]);
     exit;
 }
 

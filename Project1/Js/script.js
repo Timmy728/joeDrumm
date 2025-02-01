@@ -50,6 +50,7 @@ document.addEventListener("DOMContentLoaded", function () {
     .bindPopup("Test Marker")
     .openPopup();
 
+  // Fetch country borders
   fetch("Data/countryBorders.geo.json")
     .then((response) => response.json())
     .then((data) => {
@@ -57,6 +58,7 @@ document.addEventListener("DOMContentLoaded", function () {
     })
     .catch((error) => console.error("Error loading country borders:", error));
 
+  // Marker icon setup
   const markerIcon = L.icon({
     iconUrl: "Images/marker-icon.png", // Local marker icon
     iconSize: [25, 41],
@@ -118,6 +120,8 @@ document.addEventListener("DOMContentLoaded", function () {
         },
       }).addTo(map);
       map.fitBounds(bordersLayer.getBounds());
+    } else {
+      console.error(`Country borders for ${iso2} not found.`);
     }
   };
 
@@ -310,7 +314,6 @@ document.addEventListener("DOMContentLoaded", function () {
     const selectedCountry = $("#selCountry").val();
     selectedCountryISO2 = selectedCountry;
 
-    // Update country data
     updateCountryBorders(selectedCountryISO2);
     displayCountryInfo(selectedCountryISO2);
     displayPopulation(selectedCountryISO2);

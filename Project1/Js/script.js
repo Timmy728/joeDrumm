@@ -67,40 +67,37 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   const populateCountryDropdown = () => {
-  $.ajax({
-    url: "php/countryName.php",
-    method: "GET",
-    dataType: "json",
-    success: function (response) {
-      // Log the response to check its structure
-      console.log("Response from countryName.php:", response);
+    $.ajax({
+      url: "php/countryName.php",
+      method: "GET",
+      dataType: "json",
+      success: function (response) {
+        console.log("Response from countryName.php:", response);
 
-      // Check for error in the response
-      if (response.error) {
-        console.error("Error in response:", response.error);
-        return;
-      }
+        if (response.error) {
+          console.error("Error in response:", response.error);
+          return;
+        }
 
-      // Check if the response is an array (as expected for country list)
-      if (Array.isArray(response)) {
-        response.forEach((country) => {
-          $("#selCountry").append(
-            $("<option>", {
-              value: country.iso2,
-              text: country.name,
-            })
-          );
-        });
-        $("#selCountry").prop("selectedIndex", 0);
-      } else {
-        console.error("Expected an array but got:", response);
-      }
-    },
-    error: function (error) {
-      console.error("Error fetching country names:", error);
-    },
-  });
-};
+        if (Array.isArray(response)) {
+          response.forEach((country) => {
+            $("#selCountry").append(
+              $("<option>", {
+                value: country.iso2,
+                text: country.name,
+              })
+            );
+          });
+          $("#selCountry").prop("selectedIndex", 0);
+        } else {
+          console.error("Expected an array but got:", response);
+        }
+      },
+      error: function (error) {
+        console.error("Error fetching country names:", error);
+      },
+    });
+  };
 
   const updateCountryBorders = (iso2) => {
     if (bordersLayer) {
@@ -284,7 +281,7 @@ document.addEventListener("DOMContentLoaded", function () {
   // Earthquake data integration
   const displayEarthquakes = () => {
     $.ajax({
-      url: "php/earthQuakes.php",  // Add your PHP endpoint here
+      url: "php/earthQuakes.php", // Add your PHP endpoint here
       method: "GET",
       dataType: "json",
       success: function (data) {
@@ -312,11 +309,13 @@ document.addEventListener("DOMContentLoaded", function () {
       updateCountryBorders(selectedCountryISO2);
       displayCountryInfo(selectedCountryISO2);
       displayPopulation(selectedCountryISO2);
+
+      // Get actual lat/lon for the selected country
+      const countryLatLon = getLatLonByIso2(selectedCountryISO2); // Placeholder function, replace with actual logic
       
-      // Set your coordinates here for accurate weather display
-      displayWeather(0, 0); // Replace with the actual lat/lon
+      displayWeather(countryLatLon.lat, countryLatLon.lon);
       displayTimezone(selectedCountryISO2);
-      displayWeatherForecast(0, 0); // Replace with the actual lat/lon
+      displayWeatherForecast(countryLatLon.lat, countryLatLon.lon);
       displayCurrency(selectedCountryISO2);
       displayExchangeRate(selectedCountryISO2);
       displayCapitalCity(selectedCountryISO2);

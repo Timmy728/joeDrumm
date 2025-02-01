@@ -125,9 +125,13 @@ document.addEventListener("DOMContentLoaded", function () {
     $.ajax({
       url: "php/countryName.php",
       method: "GET",
-      data: { iso2 },
+      data: { iso2: iso2 }, // Ensure iso2 is passed properly
       dataType: "json",
       success: function (data) {
+        if (data.error) {
+          console.error("Error fetching country info:", data.error);
+          return;
+        }
         $("#countryNames").text(data.name);
         $("#iso2").text(data.iso2);
         $("#iso3").text(data.iso3);
@@ -142,7 +146,7 @@ document.addEventListener("DOMContentLoaded", function () {
     $.ajax({
       url: "php/Population.php",
       method: "GET",
-      data: { iso2 },
+      data: { iso2: iso2 }, // Ensure iso2 is passed properly
       dataType: "json",
       success: function (data) {
         $("#population").text(data.population);
@@ -157,7 +161,7 @@ document.addEventListener("DOMContentLoaded", function () {
     $.ajax({
       url: "php/getWeather.php",
       method: "GET",
-      data: { lat, lon },
+      data: { lat: lat, lon: lon }, // Send lat and lon for weather
       dataType: "json",
       success: function (data) {
         $("#tempToday").text(`${data.temp} °C`);
@@ -181,7 +185,7 @@ document.addEventListener("DOMContentLoaded", function () {
     $.ajax({
       url: "php/Timezone.php",
       method: "GET",
-      data: { iso2 },
+      data: { iso2: iso2 },
       dataType: "json",
       success: function (data) {
         $("#timezone").text(data.timezone);
@@ -196,7 +200,7 @@ document.addEventListener("DOMContentLoaded", function () {
     $.ajax({
       url: "php/getWeatherForecast.php",
       method: "GET",
-      data: { lat, lon },
+      data: { lat: lat, lon: lon },
       dataType: "json",
       success: function (data) {
         let forecastHtml = "<h4>16-Day Weather Forecast</h4>";
@@ -218,7 +222,7 @@ document.addEventListener("DOMContentLoaded", function () {
     $.ajax({
       url: "php/Currency.php",
       method: "GET",
-      data: { iso2 },
+      data: { iso2: iso2 },
       dataType: "json",
       success: function (data) {
         $("#currencyName").text(data.name);
@@ -235,7 +239,7 @@ document.addEventListener("DOMContentLoaded", function () {
     $.ajax({
       url: "php/LatestExchangeRate.php",
       method: "GET",
-      data: { iso2 },
+      data: { iso2: iso2 },
       dataType: "json",
       success: function (data) {
         $("#txtCurrencyRate").text(data.rate);
@@ -250,7 +254,7 @@ document.addEventListener("DOMContentLoaded", function () {
     $.ajax({
       url: "php/capitalCities.php",
       method: "GET",
-      data: { iso2 },
+      data: { iso2: iso2 },
       dataType: "json",
       success: function (data) {
         $("#capitalCity").text(data.capital);
@@ -265,7 +269,7 @@ document.addEventListener("DOMContentLoaded", function () {
     $.ajax({
       url: "php/wikipediaSearch.php",
       method: "GET",
-      data: { query },
+      data: { query: query },
       dataType: "json",
       success: function (data) {
         $("#wiki-title").text(data.title);
@@ -281,16 +285,16 @@ document.addEventListener("DOMContentLoaded", function () {
   // Earthquake data integration
   const displayEarthquakes = () => {
     $.ajax({
-      url: "php/earthQuakes.php", // Add your PHP endpoint here
+      url: "php/getEarthquakes.php",
       method: "GET",
       dataType: "json",
       success: function (data) {
-        data.forEach((quake) => {
-          const quakeMarker = L.marker([quake.lat, quake.lon]).bindPopup(
-            `<h4>Earthquake Info</h4><p>Magnitude: ${quake.magnitude} | Date: ${quake.date}</p>`
-          );
-          markerClusterGroup.addLayer(quakeMarker);
+        let earthquakeHtml = "<h4>Recent Earthquakes</h4>";
+        data.earthquakes.forEach((quake) => {
+          earthquakeHtml += `<p>${quake.time}: ${quake.magnitude} - ${quake.location}</p>`;
         });
+
+        $("#earthquakeInfo").html(earthquakeHtml);
       },
       error: function (error) {
         console.error("Error fetching earthquake data:", error);
@@ -298,29 +302,23 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   };
 
-  // Call to populate the dropdown
+  // Call the populate function on page load
   populateCountryDropdown();
 
-  // Event listener for dropdown change
-  $("#selCountry").change(function () {
-    selectedCountryISO2 = $(this).val();
+  // When a country is selected from dropdown
+  $("#selCountry").on("change", function () {
+    const selectedCountry = $("#selCountry").val();
+    selectedCountryISO2 = selectedCountry;
 
-    if (selectedCountryISO2) {
-      updateCountryBorders(selectedCountryISO2);
-      displayCountryInfo(selectedCountryISO2);
-      displayPopulation(selectedCountryISO2);
-
-      // Get actual lat/lon for the selected country
-      const countryLatLon = getLatLonByIso2(selectedCountryISO2); // Placeholder function, replace with actual logic
-      
-      displayWeather(countryLatLon.lat, countryLatLon.lon);
-      displayTimezone(selectedCountryISO2);
-      displayWeatherForecast(countryLatLon.lat, countryLatLon.lon);
-      displayCurrency(selectedCountryISO2);
-      displayExchangeRate(selectedCountryISO2);
-      displayCapitalCity(selectedCountryISO2);
-      displayWikipediaInfo(selectedCountryISO2);
-      displayEarthquakes();
-    }
+    // Update country data
+    updateCountryBorders(selectedCountryISO2);
+    displayCountryInfo(selectedCountryISO2);
+    displayPopulation(selectedCountryISO2);
+    displayWeather(selectedCountryISO2);
+    displayTimezone(selectedCountryISO2);
+    displayCurrency(selectedCountryISO2);
+    displayExchangeRate(selectedCountryISO2);
+    displayCapitalCity(selectedCountryISO2);
+    displayWikipediaInfo(selectedCountryISO2);
   });
 });

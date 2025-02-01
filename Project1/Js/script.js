@@ -306,9 +306,11 @@ document.addEventListener("DOMContentLoaded", function () {
       updateCountryBorders(selectedCountryISO2);
       displayCountryInfo(selectedCountryISO2);
       displayPopulation(selectedCountryISO2);
-      displayWeather(lat, lon); // Add correct lat/lon
+      
+      // Set your coordinates here for accurate weather display
+      displayWeather(0, 0); // Replace with the actual lat/lon
       displayTimezone(selectedCountryISO2);
-      displayWeatherForecast(lat, lon); // Add correct lat/lon
+      displayWeatherForecast(0, 0); // Replace with the actual lat/lon
       displayCurrency(selectedCountryISO2);
       displayExchangeRate(selectedCountryISO2);
       displayCapitalCity(selectedCountryISO2);

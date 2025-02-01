@@ -4,9 +4,9 @@ header('Content-Type: application/json'); // Ensure JSON response
 // My API Key
 $apiKey = "405e0adb0071520e14c73f914452342b";
 
-function getCountryByName($countryName, $apiKey) {
+function getCountryByISO2($iso2, $apiKey) {
     // API URL with query parameters
-    $url = "https://api.countrylayer.com/v2/name/" . urlencode($countryName) . "?access_key=" . $apiKey . "&fullText=true";
+    $url = "https://api.countrylayer.com/v2/alpha/" . urlencode($iso2) . "?access_key=" . $apiKey;
 
     $curl = curl_init();
 
@@ -33,20 +33,20 @@ function getCountryByName($countryName, $apiKey) {
 
     // Handle API errors (e.g., invalid country name, API limits, etc.)
     if ($httpCode !== 200 || isset($data['error'])) {
-        return ["error" => "Invalid country name or API error."];
+        return ["error" => "Invalid country code or API error."];
     }
 
     return $data;
 }
 
-// Check if 'countryName' is provided in the GET request
-if (!isset($_GET['countryName']) || empty(trim($_GET['countryName']))) {
-    echo json_encode(["error" => "No country name provided."]);
+// Check if 'iso2' is provided in the GET request
+if (!isset($_GET['iso2']) || empty(trim($_GET['iso2']))) {
+    echo json_encode(["error" => "No ISO2 country code provided."]);
     exit;
 }
 
-$countryName = trim($_GET['countryName']); // Sanitize input
-$result = getCountryByName($countryName, $apiKey);
+$iso2 = trim($_GET['iso2']); // Sanitize input
+$result = getCountryByISO2($iso2, $apiKey);
 
 // Return the result as JSON
 echo json_encode($result);

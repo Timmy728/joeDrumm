@@ -48,6 +48,46 @@ function getAllCountries($apiKey) {
     return $countries;
 }
 
+// Fetch details for a specific country by ISO2 code
+function getCountryByISO2($iso2, $apiKey) {
+    $url = "https://api.countrylayer.com/v2/alpha/{$iso2}?access_key=" . $apiKey;
+
+    $curl = curl_init();
+    curl_setopt_array($curl, [
+        CURLOPT_URL => $url,
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_SSL_VERIFYPEER => false,
+    ]);
+
+    $response = curl_exec($curl);
+    $httpCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+
+    if (curl_errno($curl)) {
+        curl_close($curl);
+        return ["error" => "cURL Error: " . curl_error($curl)];
+    }
+
+    curl_close($curl);
+    $data = json_decode($response, true);
+
+    if (!$data) {
+        return ["error" => "Error decoding API response."];
+    }
+
+    if ($httpCode !== 200 || isset($data['error'])) {
+        return ["error" => "API error. Status code: " . $httpCode];
+    }
+
+    return [
+        "name" => $data['name'],
+        "iso2" => $data['alpha2Code'],
+        "iso3" => $data['alpha3Code'],
+        "capital" => $data['capital'],
+        "population" => $data['population'],
+        "timezone" => $data['timezones'][0], // Assuming single timezone
+    ];
+}
+
 // If 'iso2' is provided, fetch details for that specific country
 if (isset($_GET['iso2']) && !empty(trim($_GET['iso2']))) {
     $iso2 = strtoupper(trim($_GET['iso2']));

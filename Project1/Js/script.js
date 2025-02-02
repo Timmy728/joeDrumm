@@ -1,4 +1,4 @@
-let map; 
+let map;
 let bordersLayer;
 let selectedCountryISO2;
 let countryBordersData;
@@ -6,7 +6,44 @@ let countryBordersData;
 // Check if MarkerCluster is loaded before initializing
 let markerClusterGroup;
 
-document.addEventListener("DOMContentLoaded", function () {
+$(document).ready(function () {
+  // Fetch country data when the page loads
+  $.ajax({
+    url: "php/countryName.php", // Ensure this URL matches the path to your PHP file
+    type: "GET",
+    dataType: "json",
+    success: function (data) {
+      console.log("Response from countryName.php:", data); // Log raw response
+
+      // Check if data is valid and is an array
+      if (Array.isArray(data) && data.length > 0) {
+        populateCountryDropdown(data); // Populate the dropdown
+      } else {
+        console.error("No valid country data found.");
+      }
+    },
+    error: function (xhr, status, error) {
+      console.error("Error fetching country data:", error);
+    },
+  });
+
+  // Function to populate the country dropdown
+  function populateCountryDropdown(countries) {
+    const dropdown = $("#selCountry");
+    dropdown.empty(); // Clear any existing options
+
+    // Add a default 'Select Country' option
+    dropdown.append(new Option("Select Country", ""));
+
+    // Loop through the array of countries and add options to the dropdown
+    countries.forEach(function (country) {
+      // Make sure the country has the expected properties (name and iso2)
+      if (country.name && country.iso2) {
+        dropdown.append(new Option(country.name, country.iso2)); // Display country name, store iso2 code
+      }
+    });
+  }
+
   // Ensure MarkerCluster is available
   if (typeof L.markerClusterGroup !== "function") {
     console.error("MarkerCluster is not loaded correctly. Check your library paths.");
@@ -67,41 +104,6 @@ document.addEventListener("DOMContentLoaded", function () {
     shadowUrl: "Images/marker-shadow.png", // Local shadow image
     shadowSize: [41, 41],
   });
-
-  const populateCountryDropdown = () => {
-    $.ajax({
-      url: "php/countryName.php", // Ensure the path to PHP file is correct
-      method: "GET",
-      dataType: "json",
-      success: function (response) {
-        console.log("Response from countryName.php:", response);
-
-        // Handle errors in response (from PHP)
-        if (response.error) {
-          console.error("Error in response:", response.error);
-          return;
-        }
-
-        // Process the response if it contains an array of countries
-        if (Array.isArray(response)) {
-          response.forEach((country) => {
-            $("#selCountry").append(
-              $("<option>", {
-                value: country.iso2,
-                text: country.name,
-              })
-            );
-          });
-          $("#selCountry").prop("selectedIndex", 0);
-        } else {
-          console.error("Expected an array but got:", response);
-        }
-      },
-      error: function (error) {
-        console.error("Error fetching country names:", error);
-      },
-    });
-  };
 
   const updateCountryBorders = (iso2) => {
     if (bordersLayer) {
@@ -295,12 +297,16 @@ document.addEventListener("DOMContentLoaded", function () {
       method: "GET",
       dataType: "json",
       success: function (data) {
-        let earthquakeHtml = "<h4>Recent Earthquakes</h4>";
-        data.earthquakes.forEach((quake) => {
-          earthquakeHtml += `<p>${quake.time}: ${quake.magnitude} - ${quake.location}</p>`;
-        });
+        data.features.forEach((earthquake) => {
+          const coords = earthquake.geometry.coordinates;
+          const magnitude = earthquake.properties.mag;
+          const place = earthquake.properties.place;
 
-        $("#earthquakeInfo").html(earthquakeHtml);
+          const earthquakeMarker = L.marker([coords[1], coords[0]]).bindPopup(
+            `<strong>Magnitude:</strong> ${magnitude}<br><strong>Location:</strong> ${place}`
+          );
+          markerClusterGroup.addLayer(earthquakeMarker);
+        });
       },
       error: function (error) {
         console.error("Error fetching earthquake data:", error);
@@ -308,22 +314,22 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   };
 
-  // Call the populate function once the DOM is loaded
-  populateCountryDropdown();
-
-  // Event listeners
+  // Event listener for country selection
   $("#selCountry").change(function () {
-    selectedCountryISO2 = $(this).val();
-    updateCountryBorders(selectedCountryISO2);
-    displayCountryInfo(selectedCountryISO2);
-    displayPopulation(selectedCountryISO2);
-    displayWeather(51.5074, -0.1278); // Example: London lat, lon
-    displayTimezone(selectedCountryISO2);
-    displayWeatherForecast(51.5074, -0.1278); // Example: London lat, lon
-    displayCurrency(selectedCountryISO2);
-    displayExchangeRate(selectedCountryISO2);
-    displayCapitalCity(selectedCountryISO2);
-    displayWikipediaInfo("Earthquakes");
-    displayEarthquakes(); // New earthquakes data call
+    const iso2 = $(this).val();
+    if (iso2) {
+      selectedCountryISO2 = iso2;
+      updateCountryBorders(iso2);
+      displayCountryInfo(iso2);
+      displayPopulation(iso2);
+      displayTimezone(iso2);
+      displayCurrency(iso2);
+      displayExchangeRate(iso2);
+      displayCapitalCity(iso2);
+      displayWikipediaInfo(iso2);
+      displayWeatherForecast(iso2);
+      displayWeather(iso2);
+      displayEarthquakes();
+    }
   });
 });

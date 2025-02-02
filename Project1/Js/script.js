@@ -1,4 +1,4 @@
-let map;
+let map; 
 let bordersLayer;
 let selectedCountryISO2;
 let countryBordersData;
@@ -69,39 +69,39 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   const populateCountryDropdown = () => {
-  $.ajax({
-    url: "php/countryName.php", // Ensure the path to PHP file is correct
-    method: "GET",
-    dataType: "json",
-    success: function (response) {
-      console.log("Response from countryName.php:", response);
+    $.ajax({
+      url: "php/countryName.php", // Ensure the path to PHP file is correct
+      method: "GET",
+      dataType: "json",
+      success: function (response) {
+        console.log("Response from countryName.php:", response);
 
-      // Handle errors in response (from PHP)
-      if (response.error) {
-        console.error("Error in response:", response.error);
-        return;
-      }
+        // Handle errors in response (from PHP)
+        if (response.error) {
+          console.error("Error in response:", response.error);
+          return;
+        }
 
-      // Process the response if it contains an array of countries
-      if (Array.isArray(response)) {
-        response.forEach((country) => {
-          $("#selCountry").append(
-            $("<option>", {
-              value: country.iso2,
-              text: country.name,
-            })
-          );
-        });
-        $("#selCountry").prop("selectedIndex", 0);
-      } else {
-        console.error("Expected an array but got:", response);
-      }
-    },
-    error: function (error) {
-      console.error("Error fetching country names:", error);
-    },
-  });
-};
+        // Process the response if it contains an array of countries
+        if (Array.isArray(response)) {
+          response.forEach((country) => {
+            $("#selCountry").append(
+              $("<option>", {
+                value: country.iso2,
+                text: country.name,
+              })
+            );
+          });
+          $("#selCountry").prop("selectedIndex", 0);
+        } else {
+          console.error("Expected an array but got:", response);
+        }
+      },
+      error: function (error) {
+        console.error("Error fetching country names:", error);
+      },
+    });
+  };
 
   const updateCountryBorders = (iso2) => {
     if (bordersLayer) {
@@ -291,7 +291,7 @@ document.addEventListener("DOMContentLoaded", function () {
   // Earthquake data integration
   const displayEarthquakes = () => {
     $.ajax({
-      url: "php/getEarthquakes.php",
+      url: "php/earthQuakes.php", // Corrected the PHP file name
       method: "GET",
       dataType: "json",
       success: function (data) {
@@ -311,20 +311,19 @@ document.addEventListener("DOMContentLoaded", function () {
   // Call the populate function once the DOM is loaded
   populateCountryDropdown();
 
-  // Event listener for country selection
+  // Event listeners
   $("#selCountry").change(function () {
-    const iso2 = $(this).val();
-    selectedCountryISO2 = iso2;
-    updateCountryBorders(iso2);
-    displayCountryInfo(iso2);
-    displayPopulation(iso2);
-    displayWeather(iso2);
-    displayTimezone(iso2);
-    displayCurrency(iso2);
-    displayExchangeRate(iso2);
-    displayCapitalCity(iso2);
-    displayWikipediaInfo(iso2);
-    displayWeatherForecast(iso2);
-    displayEarthquakes();
+    selectedCountryISO2 = $(this).val();
+    updateCountryBorders(selectedCountryISO2);
+    displayCountryInfo(selectedCountryISO2);
+    displayPopulation(selectedCountryISO2);
+    displayWeather(51.5074, -0.1278); // Example: London lat, lon
+    displayTimezone(selectedCountryISO2);
+    displayWeatherForecast(51.5074, -0.1278); // Example: London lat, lon
+    displayCurrency(selectedCountryISO2);
+    displayExchangeRate(selectedCountryISO2);
+    displayCapitalCity(selectedCountryISO2);
+    displayWikipediaInfo("Earthquakes");
+    displayEarthquakes(); // New earthquakes data call
   });
 });

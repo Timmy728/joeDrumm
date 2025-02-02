@@ -76,20 +76,21 @@ document.addEventListener("DOMContentLoaded", function () {
     success: function (response) {
       console.log("Response from countryName.php:", response);
 
-      // Check if the response is an array and contains country objects
+      // Handle errors in response (from PHP)
+      if (response.error) {
+        console.error("Error in response:", response.error);
+        return;
+      }
+
+      // Process the response if it contains an array of countries
       if (Array.isArray(response)) {
         response.forEach((country) => {
-          // Ensure that each country has the expected properties (iso2 and name)
-          if (country.iso2 && country.name) {
-            $("#selCountry").append(
-              $("<option>", {
-                value: country.iso2,
-                text: country.name,
-              })
-            );
-          } else {
-            console.warn("Invalid country data found:", country);
-          }
+          $("#selCountry").append(
+            $("<option>", {
+              value: country.iso2,
+              text: country.name,
+            })
+          );
         });
         $("#selCountry").prop("selectedIndex", 0);
       } else {

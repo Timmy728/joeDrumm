@@ -69,37 +69,38 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   const populateCountryDropdown = () => {
-    $.ajax({
-      url: "php/countryName.php", // Ensure the path to PHP file is correct
-      method: "GET",
-      dataType: "json",
-      success: function (response) {
-        console.log("Response from countryName.php:", response);
+  $.ajax({
+    url: "php/countryName.php", // Ensure the path to PHP file is correct
+    method: "GET",
+    dataType: "json",
+    success: function (response) {
+      console.log("Response from countryName.php:", response);
 
-        if (response.error) {
-          console.error("Error in response:", response.error);
-          return;
-        }
-
-        if (Array.isArray(response)) {
-          response.forEach((country) => {
+      // Check if the response is an array and contains country objects
+      if (Array.isArray(response)) {
+        response.forEach((country) => {
+          // Ensure that each country has the expected properties (iso2 and name)
+          if (country.iso2 && country.name) {
             $("#selCountry").append(
               $("<option>", {
                 value: country.iso2,
                 text: country.name,
               })
             );
-          });
-          $("#selCountry").prop("selectedIndex", 0);
-        } else {
-          console.error("Expected an array but got:", response);
-        }
-      },
-      error: function (error) {
-        console.error("Error fetching country names:", error);
-      },
-    });
-  };
+          } else {
+            console.warn("Invalid country data found:", country);
+          }
+        });
+        $("#selCountry").prop("selectedIndex", 0);
+      } else {
+        console.error("Expected an array but got:", response);
+      }
+    },
+    error: function (error) {
+      console.error("Error fetching country names:", error);
+    },
+  });
+};
 
   const updateCountryBorders = (iso2) => {
     if (bordersLayer) {

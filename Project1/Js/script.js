@@ -6,6 +6,8 @@ let countryBordersData;
 // Check if MarkerCluster is loaded before initializing
 let markerClusterGroup;
 
+(JQuery):$(window).on('load', function () {if ($('#preloader').length) {$('#preloader').delay(1000).fadeOut('slow', function () {$(this).remove();});}});
+
 $(document).ready(function () {
   // Fetch country data when the page loads
   $.ajax({

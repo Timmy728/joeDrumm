@@ -1,3 +1,11 @@
+$(window).on('load', function () {
+    if ($('#preloader').length) {
+        $('#preloader').delay(1000).fadeOut('slow', function () {
+            $(this).remove();
+        });
+    }
+});
+
 let map;
 let bordersLayer;
 let selectedCountryISO2;
@@ -5,8 +13,6 @@ let countryBordersData;
 
 // Check if MarkerCluster is loaded before initializing
 let markerClusterGroup;
-
-(JQuery):$(window).on('load', function () {if ($('#preloader').length) {$('#preloader').delay(1000).fadeOut('slow', function () {$(this).remove();});}});
 
 $(document).ready(function () {
   // Fetch country data when the page loads
@@ -17,7 +23,6 @@ $(document).ready(function () {
     success: function (data) {
       console.log("Response from countryName.php:", data); // Log raw response
 
-      // Check if data is valid and is an array
       if (Array.isArray(data) && data.length > 0) {
         populateCountryDropdown(data); // Populate the dropdown
       } else {
@@ -29,12 +34,10 @@ $(document).ready(function () {
     },
   });
 
-  // Function to populate the country dropdown
   function populateCountryDropdown(countries) {
     const dropdown = $("#selCountry");
     dropdown.empty(); // Clear any existing options
 
-    // Add a default 'Select Country' option
     dropdown.append(new Option("Select Country", ""));
 
     // Loop through the array of countries and add options to the dropdown
@@ -46,7 +49,6 @@ $(document).ready(function () {
     });
   }
 
-  // Ensure MarkerCluster is available
   if (typeof L.markerClusterGroup !== "function") {
     console.error("MarkerCluster is not loaded correctly. Check your library paths.");
     return;
@@ -83,13 +85,11 @@ $(document).ready(function () {
   // Add the MarkerCluster group to the map
   map.addLayer(markerClusterGroup);
 
-  // **Add Test Marker for Icon Verification**
   L.marker([51.505, -0.09])
     .addTo(markerClusterGroup)
     .bindPopup("Test Marker")
     .openPopup();
 
-  // Fetch country borders
   fetch("Data/countryBorders.geo.json")
     .then((response) => response.json())
     .then((data) => {
@@ -99,11 +99,11 @@ $(document).ready(function () {
 
   // Marker icon setup
   const markerIcon = L.icon({
-    iconUrl: "Images/marker-icon.png", // Local marker icon
+    iconUrl: "images/marker-icon.png",
     iconSize: [25, 41],
     iconAnchor: [12, 41],
     popupAnchor: [1, -34],
-    shadowUrl: "Images/marker-shadow.png", // Local shadow image
+    shadowUrl: "images/marker-shadow.png", 
     shadowSize: [41, 41],
   });
 
@@ -316,7 +316,6 @@ $(document).ready(function () {
     });
   };
 
-  // Event listener for country selection
   $("#selCountry").change(function () {
     const iso2 = $(this).val();
     if (iso2) {

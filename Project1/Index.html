@@ -1,87 +1,75 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gazetteer</title>
-
+  
     <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="css/bootstrap.min.css" />
-
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    
     <!-- Leaflet CSS -->
-    <link rel="stylesheet" href="css/leaflet.css" />
+    <link rel="stylesheet" href="css/leaflet.css">
 
     <!-- MarkerCluster CSS -->
-    <link rel="stylesheet" href="css/MarkerCluster.css" />
-    <link rel="stylesheet" href="css/MarkerCluster.Default.css" />
-
-    <!-- Custom CSS -->
-    <link rel="stylesheet" href="css/style.css" />
-  </head>
-  <body>
+    <link rel="stylesheet" href="css/MarkerCluster.css">
+    <link rel="stylesheet" href="css/MarkerCluster.Default.css">
     
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
     <div id="preloader">
-      <div class="spinner-border" role="status">
-        <span class="visually-hidden">Loading...</span>
-      </div>
+        <div class="spinner-border" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
     </div>
 
-    <!-- Country Information -->
     <div class="container">
-      <h1>Country Information</h1>
-      <form>
-        <label for="selCountry">Select Country:</label>
-        <select name="sel-country" id="selCountry" class="form-select" aria-label="Select Country"></select>
-      </form>
+        <h1>Country Information</h1>
+        <form>
+            <label for="selCountry">Select Country:</label>
+            <select name="sel-country" id="selCountry" class="form-select"></select>
+        </form>
 
-      <!-- Country Information -->
-      <div id="countryInfo">
-        <p><strong>Country:</strong> <span id="countryNames"></span></p>
-        <p><strong>ISO2 Code:</strong> <span id="iso2"></span></p>
-        <p><strong>ISO3 Code:</strong> <span id="iso3"></span></p>
-        <p><strong>Population:</strong> <span id="population"></span></p>
-        <p><strong>Capital City:</strong> <span id="capitalCity"></span></p>
-        <p><strong>Timezone:</strong> <span id="timezone"></span></p>
-        <p><strong>Currency:</strong> <span id="currencyName"></span> (<span id="currencySymbol"></span>)</p>
-        <p><strong>Currency Code:</strong> <span id="txtCurrencyCode"></span></p>
-        <p><strong>Exchange Rate:</strong> <span id="txtCurrencyRate"></span></p>
-      </div>
+        <div id="countryInfo">
+            <p><strong>Country:</strong> <span id="countryNames"></span></p>
+            <p><strong>Capital City:</strong> <span id="capitalCity"></span></p>
+            <p><strong>Population:</strong> <span id="population"></span></p>
+            <p><strong>Currency:</strong> <span id="currencyName"></span> (<span id="currencySymbol"></span>)</p>
+            <p><strong>Exchange Rate:</strong> <span id="exchangeRate"></span></p>
+            <p><strong>Current Weather:</strong> <span id="weather"></span></p>
+            <p><strong>Weather Forecast:</strong> <span id="weatherForecast"></span></p>
+            <p><strong>Wikipedia Search:</strong> <a id="wikiLink" href="#" target="_blank">View on Wikipedia</a></p>
+            <p><strong>Timezone:</strong> <span id="timezone"></span></p>
+            <p><strong>Recent Earthquakes:</strong> <span id="earthquakes"></span></p>
+        </div>
     </div>
 
-    <!-- Map -->
     <div id="map" style="height: 500px;"></div>
 
     <!-- Weather Modal -->
     <div class="modal" id="weatherModal">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h4>Country Weather: <span id="weatherCountry"></span></h4>
-          <button class="close" onclick="closeModal('weatherModal')">&times;</button>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4>Country Weather: <span id="weatherCountry"></span></h4>
+                <button class="close" onclick="closeModal('weatherModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p id="conditionsToday"></p>
+                <p id="tempToday"></p>
+                <div id="weatherImg"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn" onclick="closeModal('weatherModal')">Close</button>
+            </div>
         </div>
-        <div class="modal-body">
-          <p id="conditionsToday"></p>
-          <p id="tempToday"></p>
-          <div id="weatherImg"></div>
-        </div>
-        <div class="modal-footer">
-          <button class="btn" onclick="closeModal('weatherModal')">Close</button>
-        </div>
-      </div>
     </div>
 
-    <!-- Bootstrap JS -->
     <script src="Js/bootstrap.bundle.min.js"></script>
-
-    <!-- jQuery -->
     <script src="Js/jquery-3.7.1.min.js"></script>
-
-    <!-- Leaflet JS -->
     <script src="Js/leaflet.js"></script>
-
-    <!-- MarkerCluster JS -->
     <script src="Js/leaflet.markercluster.js"></script>
-
-    <!-- Custom Script -->
     <script src="Js/script.js"></script>
-  </body>
+</body>
 </html>

@@ -14,25 +14,25 @@ let countryBordersData;
 // Check if MarkerCluster is loaded before initializing
 let markerClusterGroup;
 
-$(document).ready(function () {
-  // Fetch country data when the page loads
-  $.ajax({
-    url: "php/countryName.php", // Ensure this URL matches the path to your PHP file
-    type: "GET",
-    dataType: "json",
-    success: function (data) {
-      console.log("Response from countryName.php:", data); // Log raw response
+ // $(document).ready(function () {
+ // Fetch country data when the page loads
+ //  $.ajax({
+ //    url: "php/countryName.php", // Ensure this URL matches the path to your PHP file
+ //    type: "GET",
+ //    dataType: "json",
+  //   success: function (data) {
+   //    console.log("Response from countryName.php:", data); // Log raw response
 
-      if (Array.isArray(data) && data.length > 0) {
-        populateCountryDropdown(data); // Populate the dropdown
-      } else {
-        console.error("No valid country data found.");
-      }
-    },
-    error: function (xhr, status, error) {
-      console.error("Error fetching country data:", error);
-    },
-  });
+    //   if (Array.isArray(data) && data.length > 0) {
+   //      populateCountryDropdown(data); // Populate the dropdown
+  //     } else {
+  //       console.error("No valid country data found.");
+ //      }
+ //    },
+ //    error: function (xhr, status, error) {
+  //     console.error("Error fetching country data:", error);
+ //    },
+ //  });
 
   function populateCountryDropdown(countries) {
     const dropdown = $("#selCountry");
@@ -131,190 +131,190 @@ $(document).ready(function () {
     }
   };
 
-  const displayCountryInfo = (iso2) => {
-    $.ajax({
-      url: "php/countryName.php", // Ensure the path to PHP file is correct
-      method: "GET",
-      data: { iso2: iso2 }, // Ensure iso2 is passed properly
-      dataType: "json",
-      success: function (data) {
-        if (data.error) {
-          console.error("Error fetching country info:", data.error);
-          return;
-        }
-        $("#countryNames").text(data.name);
-        $("#iso2").text(data.iso2);
-        $("#iso3").text(data.iso3);
-      },
-      error: function (error) {
-        console.error("Error fetching country info:", error);
-      },
-    });
-  };
+ //  const displayCountryInfo = (iso2) => {
+  //   $.ajax({
+   //    url: "php/countryName.php", // Ensure the path to PHP file is correct
+    //   method: "GET",
+     //  data: { iso2: iso2 }, // Ensure iso2 is passed properly
+     //  dataType: "json",
+     //  success: function (data) {
+     //    if (data.error) {
+     //      console.error("Error fetching country info:", data.error);
+    //       return;
+    //     }
+   //      $("#countryNames").text(data.name);
+   //      $("#iso2").text(data.iso2);
+   //      $("#iso3").text(data.iso3);
+   //    },
+  //     error: function (error) {
+  //       console.error("Error fetching country info:", error);
+  //     },
+ //    });
+ //  };
 
-  const displayPopulation = (iso2) => {
-    $.ajax({
-      url: "php/Population.php",
-      method: "GET",
-      data: { iso2: iso2 }, // Ensure iso2 is passed properly
-      dataType: "json",
-      success: function (data) {
-        $("#population").text(data.population);
-      },
-      error: function (error) {
-        console.error("Error fetching population:", error);
-      },
-    });
-  };
+ //  const displayPopulation = (iso2) => {
+   //  $.ajax({
+     //  url: "php/Population.php",
+     //  method: "GET",
+     //  data: { iso2: iso2 }, // Ensure iso2 is passed properly
+     //  dataType: "json",
+     //  success: function (data) {
+     //    $("#population").text(data.population);
+   //    },
+     //  error: function (error) {
+    //     console.error("Error fetching population:", error);
+   //    },
+   //  });
+   // };
 
-  const displayWeather = (lat, lon) => {
-    $.ajax({
-      url: "php/getWeather.php",
-      method: "GET",
-      data: { lat: lat, lon: lon }, // Send lat and lon for weather
-      dataType: "json",
-      success: function (data) {
-        $("#tempToday").text(`${data.temp} °C`);
-        $("#conditionsToday").text(data.description);
-        $("#weatherImg").html(
-          `<img src="https://openweathermap.org/img/wn/${data.icon}.png" alt="Weather Icon">`
-        );
+  // const displayWeather = (lat, lon) => {
+     // $.ajax({
+     //  url: "php/getWeather.php",
+     //  method: "GET",
+     //  data: { lat: lat, lon: lon }, // Send lat and lon for weather
+     //  dataType: "json",
+      // success: function (data) {
+       //  $("#tempToday").text(`${data.temp} °C`);
+       //  $("#conditionsToday").text(data.description);
+       //  $("#weatherImg").html(
+         //  `<img src="https://openweathermap.org/img/wn/${data.icon}.png" alt="Weather Icon">`
+        // );
 
-        const weatherMarker = L.marker([lat, lon], { icon: markerIcon }).bindPopup(
-          `<h4>Weather Info</h4><p>${data.temp} °C - ${data.description}</p>`
-        );
-        markerClusterGroup.addLayer(weatherMarker);
-      },
-      error: function (error) {
-        console.error("Error fetching weather:", error);
-      },
-    });
-  };
+        // const weatherMarker = L.marker([lat, lon], { icon: markerIcon }).bindPopup(
+       //    `<h4>Weather Info</h4><p>${data.temp} °C - ${data.description}</p>`
+      //   );
+      //   markerClusterGroup.addLayer(weatherMarker);
+     //  },
+     //  error: function (error) {
+     //    console.error("Error fetching weather:", error);
+    //   },
+   //  });
+  // };
 
-  const displayTimezone = (iso2) => {
-    $.ajax({
-      url: "php/Timezone.php",
-      method: "GET",
-      data: { iso2: iso2 },
-      dataType: "json",
-      success: function (data) {
-        $("#timezone").text(data.timezone);
-      },
-      error: function (error) {
-        console.error("Error fetching timezone:", error);
-      },
-    });
-  };
+  // const displayTimezone = (iso2) => {
+   //  $.ajax({
+    //   url: "php/Timezone.php",
+    //   method: "GET",
+    //   data: { iso2: iso2 },
+     //  dataType: "json",
+     //  success: function (data) {
+    //     $("#timezone").text(data.timezone);
+    //   },
+    //   error: function (error) {
+    //     console.error("Error fetching timezone:", error);
+    //   },
+    // });
+  // };
 
-  const displayWeatherForecast = (lat, lon) => {
-    $.ajax({
-      url: "php/getWeatherForecast.php",
-      method: "GET",
-      data: { lat: lat, lon: lon },
-      dataType: "json",
-      success: function (data) {
-        let forecastHtml = "<h4>16-Day Weather Forecast</h4>";
-        data.forecast.forEach((forecast) => {
-          forecastHtml += `<p>${forecast.date}: ${forecast.temp} °C, ${forecast.description}</p>`;
-        });
+  // const displayWeatherForecast = (lat, lon) => {
+    // $.ajax({
+     //  url: "php/getWeatherForecast.php",
+     //  method: "GET",
+     //  data: { lat: lat, lon: lon },
+     //  dataType: "json",
+      // success: function (data) {
+        // let forecastHtml = "<h4>16-Day Weather Forecast</h4>";
+         //data.forecast.forEach((forecast) => {
+        //   forecastHtml += `<p>${forecast.date}: ${forecast.temp} °C, ${forecast.description}</p>`;
+        // });
 
-        const forecastMarker = L.marker([lat, lon]).bindPopup(forecastHtml);
-        markerClusterGroup.addLayer(forecastMarker);
-        $("#forecastInfo").html(forecastHtml);
-      },
-      error: function (error) {
-        console.error("Error fetching weather forecast:", error);
-      },
-    });
-  };
+      //   const forecastMarker = L.marker([lat, lon]).bindPopup(forecastHtml);
+     //    markerClusterGroup.addLayer(forecastMarker);
+     //    $("#forecastInfo").html(forecastHtml);
+     //  },
+     //  error: function (error) {
+       //  console.error("Error fetching weather forecast:", error);
+      // },
+   //  });
+  // };
 
   const displayCurrency = (iso2) => {
-    $.ajax({
-      url: "php/Currency.php",
-      method: "GET",
+     $.ajax({
+    url: "php/Currency.php",
+       method: "GET",
       data: { iso2: iso2 },
-      dataType: "json",
-      success: function (data) {
-        $("#currencyName").text(data.name);
-        $("#currencySymbol").text(data.symbol);
-        $("#txtCurrencyCode").text(data.code);
-      },
-      error: function (error) {
-        console.error("Error fetching currency:", error);
-      },
-    });
-  };
+       dataType: "json",
+       success: function (data) {
+         $("#currencyName").text(data.name);
+         $("#currencySymbol").text(data.symbol);
+         $("#txtCurrencyCode").text(data.code);
+       },
+       error: function (error) {
+         console.error("Error fetching currency:", error);
+       },
+     });
+   };
 
-  const displayExchangeRate = (iso2) => {
-    $.ajax({
-      url: "php/LatestExchangeRate.php",
-      method: "GET",
-      data: { iso2: iso2 },
-      dataType: "json",
-      success: function (data) {
-        $("#txtCurrencyRate").text(data.rate);
-      },
-      error: function (error) {
-        console.error("Error fetching exchange rate:", error);
-      },
-    });
-  };
+   //const displayExchangeRate = (iso2) => {
+     //$.ajax({
+      // url: "php/LatestExchangeRate.php",
+       //method: "GET",
+       //data: { iso2: iso2 },
+       //dataType: "json",
+      // success: function (data) {
+       //  $("#txtCurrencyRate").text(data.rate);
+       //},
+       //error: function (error) {
+        // console.error("Error fetching exchange rate:", error);
+      // },
+     //});
+  // };
 
-  const displayCapitalCity = (iso2) => {
-    $.ajax({
-      url: "php/capitalCities.php",
-      method: "GET",
-      data: { iso2: iso2 },
-      dataType: "json",
-      success: function (data) {
-        $("#capitalCity").text(data.capital);
-      },
-      error: function (error) {
-        console.error("Error fetching capital city:", error);
-      },
-    });
-  };
+   //const displayCapitalCity = (iso2) => {
+     //$.ajax({
+       //url: "php/capitalCities.php",
+       //method: "GET",
+       //data: { iso2: iso2 },
+       //dataType: "json",
+      // success: function (data) {
+         //$("#capitalCity").text(data.capital);
+       //},
+      // error: function (error) {
+         //console.error("Error fetching capital city:", error);
+     //  },
+    // });
+   //};
 
-  const displayWikipediaInfo = (query) => {
-    $.ajax({
-      url: "php/wikipediaSearch.php",
-      method: "GET",
-      data: { query: query },
-      dataType: "json",
-      success: function (data) {
-        $("#wiki-title").text(data.title);
-        $("#wiki-info").html(data.extract);
-        $("#wiki-img").html(`<img src="${data.thumbnail}" alt="Wiki Image">`);
-      },
-      error: function (error) {
-        console.error("Error fetching Wikipedia data:", error);
-      },
-    });
-  };
+   //const displayWikipediaInfo = (query) => {
+     //$.ajax({
+       //url: "php/wikipediaSearch.php",
+       //method: "GET",
+      // data: { query: query },
+      // dataType: "json",
+      // success: function (data) {
+      //   $("#wiki-title").text(data.title);
+        // $("#wiki-info").html(data.extract);
+        // $("#wiki-img").html(`<img src="${data.thumbnail}" alt="Wiki Image">`);
+      // },
+      // error: function (error) {
+         //console.error("Error fetching Wikipedia data:", error);
+      // },
+    // });
+   //};
 
   // Earthquake data integration
-  const displayEarthquakes = () => {
-    $.ajax({
-      url: "php/earthQuakes.php", // Corrected the PHP file name
-      method: "GET",
-      dataType: "json",
-      success: function (data) {
-        data.features.forEach((earthquake) => {
-          const coords = earthquake.geometry.coordinates;
-          const magnitude = earthquake.properties.mag;
-          const place = earthquake.properties.place;
+ // const displayEarthquakes = () => {
+   // $.ajax({
+     // url: "php/earthQuakes.php", // Corrected the PHP file name
+      //method: "GET",
+      //dataType: "json",
+      //success: function (data) {
+        //data.features.forEach((earthquake) => {
+          //const coords = earthquake.geometry.coordinates;
+          //const magnitude = earthquake.properties.mag;
+          //const place = earthquake.properties.place;
 
-          const earthquakeMarker = L.marker([coords[1], coords[0]]).bindPopup(
-            `<strong>Magnitude:</strong> ${magnitude}<br><strong>Location:</strong> ${place}`
-          );
-          markerClusterGroup.addLayer(earthquakeMarker);
-        });
-      },
-      error: function (error) {
-        console.error("Error fetching earthquake data:", error);
-      },
-    });
-  };
+          //const earthquakeMarker = L.marker([coords[1], coords[0]]).bindPopup(
+            //`<strong>Magnitude:</strong> ${magnitude}<br><strong>Location:</strong> ${place}`
+          //);
+          //markerClusterGroup.addLayer(earthquakeMarker);
+        //});
+      //},
+      //error: function (error) {
+        //console.error("Error fetching earthquake data:", error);
+      //},
+    //});
+  //};
 
   $("#selCountry").change(function () {
     const iso2 = $(this).val();

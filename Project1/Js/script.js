@@ -229,21 +229,24 @@ let markerClusterGroup;
   // };
 
   const displayCurrency = (iso2) => {
-     $.ajax({
-    url: "php/Currency.php",
-       method: "GET",
-      data: { iso2: iso2 },
-       dataType: "json",
-       success: function (data) {
-         $("#currencyName").text(data.name);
-         $("#currencySymbol").text(data.symbol);
-         $("#txtCurrencyCode").text(data.code);
-       },
-       error: function (error) {
-         console.error("Error fetching currency:", error);
-       },
-     });
-   };
+  $.ajax({
+    url: "php/currency.php",
+    method: "GET",
+    dataType: "json",
+    success: function (data) {
+      if (data.data && data.data[iso2]) {
+        $("#currencyName").text(data.data[iso2]); // Set currency name
+        $("#txtCurrencyCode").text(iso2); // Set currency code (ISO2)
+      } else {
+        console.error("Currency code not found:", iso2);
+      }
+    },
+    error: function (error) {
+      console.error("Error fetching currency data:", error);
+    },
+  });
+};
+
 
    //const displayExchangeRate = (iso2) => {
      //$.ajax({

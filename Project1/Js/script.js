@@ -228,21 +228,29 @@ let markerClusterGroup;
    //  });
   // };
 
-  const displayCurrency = (iso2) => {
+ const displayCurrency = (iso2) => {
+  console.log("Fetching currency for:", iso2);
+
   $.ajax({
     url: "php/currency.php",
     method: "GET",
     dataType: "json",
     success: function (data) {
-      if (data.data && data.data[iso2]) {
-        $("#currencyName").text(data.data[iso2]); // Set currency name
-        $("#txtCurrencyCode").text(iso2); // Set currency code (ISO2)
-      } else {
-        console.error("Currency code not found:", iso2);
-      }
+      console.log("API Response:", data);
+
+      // Get currency name
+      let currencyName = data.currencies[iso2] || "Not Available";
+      $("#currencyName").text(currencyName);
+      $("#txtCurrencyCode").text(iso2);
+
+      // Get exchange rate
+      let exchangeRate = data.exchangeRates[iso2] || "Unavailable";
+      $("#exchangeRate").text(`1 USD = ${exchangeRate} ${iso2}`);
     },
     error: function (error) {
       console.error("Error fetching currency data:", error);
+      $("#currencyName").text("Error Loading Currency");
+      $("#exchangeRate").text("Error Loading Exchange Rate");
     },
   });
 };

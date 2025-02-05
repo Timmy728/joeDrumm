@@ -15,7 +15,7 @@ let countryBordersData;
 let markerClusterGroup;
 
   $(document).ready(function () {
- Fetch country data when the page loads
+ //Fetch country data when the page loads
   $.ajax({
      url: "php/countryName.php", // Ensure this URL matches the path to your PHP file
      type: "GET",

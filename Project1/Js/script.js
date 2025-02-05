@@ -51,7 +51,6 @@ let markerClusterGroup;
 
   if (typeof L.markerClusterGroup !== "function") {
     console.error("MarkerCluster is not loaded correctly. Check your library paths.");
-    return;
   }
 
   // Initialize MarkerClusterGroup

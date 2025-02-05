@@ -228,30 +228,33 @@ let markerClusterGroup;
    //  });
   // };
 
- const displayCurrency = (iso2) => {
+const displayCurrency = (iso2) => {
   console.log("Fetching currency for:", iso2);
 
   $.ajax({
-    url: "php/currency.php",
+    url: "php/currency.php",  // Ensure the path to your PHP file is correct
     method: "GET",
+    data: { iso2: iso2 },      // Pass iso2 to the PHP script
     dataType: "json",
     success: function (data) {
       console.log("API Response:", data);
 
-      // Get currency name
-      let currencyName = data.currencies[iso2] || "Not Available";
-      $("#currencyName").text(currencyName);
-      $("#txtCurrencyCode").text(iso2);
-
-      // Get exchange rate
-      let exchangeRate = data.exchangeRates[iso2] || "Unavailable";
-      $("#exchangeRate").text(`1 USD = ${exchangeRate} ${iso2}`);
+      // Ensure the data structure contains currencies
+      if (data.currencies && data.currencies[iso2]) {
+        let currencyName = data.currencies[iso2];  // Get currency name
+        
+        // Display the currency name in the HTML element
+        $("#currencyName").text(currencyName || "Currency not found");
+      } else {
+        // Handle missing or incorrect data
+        console.error("Currency data not found.");
+        $("#currencyName").text("Currency not available");
+      }
     },
     error: function (error) {
       console.error("Error fetching currency data:", error);
-      $("#currencyName").text("Error Loading Currency");
-      $("#exchangeRate").text("Error Loading Exchange Rate");
-    },
+      $("#currencyName").text("Error loading currency");
+    }
   });
 };
 

@@ -305,7 +305,7 @@ const displayCurrency = (iso2) => {
      });
    };
 
-  Earthquake data integration
+  //Earthquake data integration
   const displayEarthquakes = () => {
     $.ajax({
       url: "php/earthQuakes.php", // Corrected the PHP file name

@@ -1,12 +1,9 @@
 <?php
 header('Content-Type: application/json'); // Ensure JSON response
 
-// Your API Key
-$apiKey = "405e0adb0071520e14c73f914452342b";
-
-// Function to fetch all countries
-function getAllCountries($apiKey) {
-    $url = "https://api.countrylayer.com/v2/all?access_key=" . $apiKey;
+// Function to fetch countries
+function getFilteredCountries() {
+    $url = "https://restcountries.com/v3.1/all";
 
     $curl = curl_init();
     curl_setopt_array($curl, [
@@ -17,47 +14,55 @@ function getAllCountries($apiKey) {
 
     $response = curl_exec($curl);
     $httpCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
-    
+
     if (curl_errno($curl)) {
-        $error = curl_error($curl);
         curl_close($curl);
-        return ["error" => "cURL Error: " . $error];
+        echo json_encode(["error" => "cURL Error: " . curl_error($curl)]);
+        exit;
     }
 
     curl_close($curl);
-    
-    // Debugging: Print raw response
-    if (!$response) {
-        return ["error" => "Empty response from API."];
-    }
-
     $data = json_decode($response, true);
-    
-    if (json_last_error() !== JSON_ERROR_NONE) {
-        return ["error" => "Error decoding API response: " . json_last_error_msg()];
+
+    if (!$data || $httpCode !== 200) {
+        echo json_encode(["error" => "API error. Status code: " . $httpCode]);
+        exit;
     }
 
-    if ($httpCode !== 200 || isset($data['error'])) {
-        return ["error" => "API error. Status code: " . $httpCode];
-    }
-
-    // Process API response to match expected format
     $countries = [];
+
     foreach ($data as $country) {
-        if (isset($country['alpha2Code']) && isset($country['name'])) {
+        if (isset($country['cca2'], $country['name']['common'])) {
+            $iso2 = $country['cca2'];
+            $name = $country['name']['common'];
+
+            // Exclude small territories and dependencies
+            if (!isset($country['independent']) || $country['independent'] !== true) {
+                continue; // Skip non-independent territories
+            }
+
             $countries[] = [
-                "iso2" => $country['alpha2Code'],
-                "name" => $country['name']
+                "iso2" => $iso2,
+                "name" => $name
             ];
         }
     }
 
-    return $countries;
+    // Sort countries alphabetically by name
+    usort($countries, function ($a, $b) {
+        return strcmp($a['name'], $b['name']);
+    });
+
+    // Limit to 150-220 countries (Adjust the number if needed)
+    $countries = array_slice($countries, 0, 200);
+
+    echo json_encode($countries);
+    exit;
 }
 
-// Fetch details for a specific country by ISO2 code
-function getCountryByISO2($iso2, $apiKey) {
-    $url = "https://api.countrylayer.com/v2/alpha/{$iso2}?access_key=" . $apiKey;
+// If 'iso2' is provided, fetch details for that specific country
+function getCountryByISO2($iso2) {
+    $url = "https://restcountries.com/v3.1/alpha/{$iso2}";
 
     $curl = curl_init();
     curl_setopt_array($curl, [
@@ -68,41 +73,34 @@ function getCountryByISO2($iso2, $apiKey) {
 
     $response = curl_exec($curl);
     $httpCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
-    
+
     if (curl_errno($curl)) {
-        $error = curl_error($curl);
         curl_close($curl);
-        return ["error" => "cURL Error: " . $error];
+        echo json_encode(["error" => "cURL Error: " . curl_error($curl)]);
+        exit;
     }
 
     curl_close($curl);
-    
-    // Debugging: Print raw response
-    if (!$response) {
-        return ["error" => "Empty response from API."];
-    }
-
     $data = json_decode($response, true);
-    
-    if (json_last_error() !== JSON_ERROR_NONE) {
-        return ["error" => "Error decoding API response: " . json_last_error_msg()];
+
+    if (!$data || $httpCode !== 200 || empty($data[0])) {
+        echo json_encode(["error" => "API error. Status code: " . $httpCode]);
+        exit;
     }
 
-    if ($httpCode !== 200 || isset($data['error'])) {
-        return ["error" => "API error. Status code: " . $httpCode];
-    }
-
-    return [
-        "name" => $data['name'],
-        "iso2" => $data['alpha2Code'],
-        "iso3" => $data['alpha3Code'],
-        "capital" => $data['capital'],
-        "population" => $data['population'],
-        "timezone" => $data['timezones'][0] ?? "N/A"
-    ];
+    $country = $data[0];
+    echo json_encode([
+        "name" => $country['name']['common'],
+        "iso2" => $country['cca2'],
+        "iso3" => $country['cca3'],
+        "capital" => $country['capital'][0] ?? "N/A",
+        "population" => $country['population'] ?? "N/A",
+        "timezone" => $country['timezones'][0] ?? "N/A",
+    ]);
+    exit;
 }
 
-// If 'iso2' is provided, fetch details for that specific country
+// Handle requests
 if (isset($_GET['iso2']) && !empty(trim($_GET['iso2']))) {
     $iso2 = strtoupper(trim($_GET['iso2']));
 
@@ -111,11 +109,8 @@ if (isset($_GET['iso2']) && !empty(trim($_GET['iso2']))) {
         exit;
     }
 
-    echo json_encode(getCountryByISO2($iso2, $apiKey));
-    exit;
+    getCountryByISO2($iso2);
 } else {
-    // No ISO2 provided, return all countries
-    echo json_encode(getAllCountries($apiKey));
-    exit;
+    getFilteredCountries();
 }
 ?>

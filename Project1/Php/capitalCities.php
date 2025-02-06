@@ -1,52 +1,51 @@
 <?php
 
-// My API Access key
-$apiKey = "405e0adb0071520e14c73f914452342b";
+ini_set('display_errors', 'On');
+error_reporting(E_ALL);
+$executionStartTime = microtime(true);
 
-// Function to fetch all capitals
-function getAllCapitals($apiKey) {
-    // API URL to fetch all countries
-    $url = "https://api.countrylayer.com/v2/all?access_key=" . $apiKey;
+// API URL to get capital cities
+$capitalsUrl = "https://restcountries.com/v3.1/all";
 
-    // Initialize cURL
-    $curl = curl_init();
+// Get the selected country ISO2 code from the query string
+$iso2 = strtoupper(trim($_GET['iso2'])); // e.g., 'US'
 
-    // Set cURL options
-    curl_setopt_array($curl, [
-        CURLOPT_URL => $url,
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_SSL_VERIFYPEER => false,
-    ]);
-
-    // Execute the API request
-    $response = curl_exec($curl);
-
-    // Handle errors
-    if (curl_errno($curl)) {
-        echo "cURL Error: " . curl_error($curl);
-        return null;
-    }
-
-    // Close cURL session
-    curl_close($curl);
-
-    // Decode the JSON response
-    $data = json_decode($response, true);
-
-    return $data;
+// Check if the country code is provided
+if (empty($iso2)) {
+    echo json_encode(["error" => "No country code provided."]);
+    exit;
 }
 
-$result = getAllCapitals($apiKey);
+// Fetch Country Information from the API
+$ch = curl_init();
+curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_URL, $capitalsUrl);
+$capitalsResult = curl_exec($ch);
+curl_close($ch);
 
-// Display all capitals
-if ($result && !isset($result['error'])) {
-    echo "List of Capitals:\n\n";
-    foreach ($result as $country) {
-        $capital = $country['capital'] ?? "N/A";
-        echo "$capital\n";
+// Check if API call was successful
+if (!$capitalsResult) {
+    echo json_encode(["error" => "Failed to fetch country data."]);
+    exit;
+}
+
+$capitalsData = json_decode($capitalsResult, true);
+
+// Find the capital city by country ISO2 code
+$capitalCity = null;
+
+foreach ($capitalsData as $country) {
+    if (isset($country['cca2']) && $country['cca2'] === $iso2) {
+        $capitalCity = isset($country['capital']) ? $country['capital'][0] : null;
+        break;
     }
+}
+
+// Return the result as JSON
+if ($capitalCity) {
+    echo json_encode(["capital" => $capitalCity]);
 } else {
-    echo "Error fetching capitals.\n";
+    echo json_encode(["error" => "Capital city not found for the provided country code."]);
 }
-
 ?>

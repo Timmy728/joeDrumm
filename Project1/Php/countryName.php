@@ -17,17 +17,24 @@ function getAllCountries($apiKey) {
 
     $response = curl_exec($curl);
     $httpCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
-
+    
     if (curl_errno($curl)) {
+        $error = curl_error($curl);
         curl_close($curl);
-        return ["error" => "cURL Error: " . curl_error($curl)];
+        return ["error" => "cURL Error: " . $error];
     }
 
     curl_close($curl);
-    $data = json_decode($response, true);
+    
+    // Debugging: Print raw response
+    if (!$response) {
+        return ["error" => "Empty response from API."];
+    }
 
-    if (!$data) {
-        return ["error" => "Error decoding API response."];
+    $data = json_decode($response, true);
+    
+    if (json_last_error() !== JSON_ERROR_NONE) {
+        return ["error" => "Error decoding API response: " . json_last_error_msg()];
     }
 
     if ($httpCode !== 200 || isset($data['error'])) {
@@ -61,17 +68,24 @@ function getCountryByISO2($iso2, $apiKey) {
 
     $response = curl_exec($curl);
     $httpCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
-
+    
     if (curl_errno($curl)) {
+        $error = curl_error($curl);
         curl_close($curl);
-        return ["error" => "cURL Error: " . curl_error($curl)];
+        return ["error" => "cURL Error: " . $error];
     }
 
     curl_close($curl);
-    $data = json_decode($response, true);
+    
+    // Debugging: Print raw response
+    if (!$response) {
+        return ["error" => "Empty response from API."];
+    }
 
-    if (!$data) {
-        return ["error" => "Error decoding API response."];
+    $data = json_decode($response, true);
+    
+    if (json_last_error() !== JSON_ERROR_NONE) {
+        return ["error" => "Error decoding API response: " . json_last_error_msg()];
     }
 
     if ($httpCode !== 200 || isset($data['error'])) {
@@ -84,7 +98,7 @@ function getCountryByISO2($iso2, $apiKey) {
         "iso3" => $data['alpha3Code'],
         "capital" => $data['capital'],
         "population" => $data['population'],
-        "timezone" => $data['timezones'][0], // Assuming single timezone
+        "timezone" => $data['timezones'][0] ?? "N/A"
     ];
 }
 
@@ -98,8 +112,10 @@ if (isset($_GET['iso2']) && !empty(trim($_GET['iso2']))) {
     }
 
     echo json_encode(getCountryByISO2($iso2, $apiKey));
+    exit;
 } else {
     // No ISO2 provided, return all countries
     echo json_encode(getAllCountries($apiKey));
+    exit;
 }
 ?>

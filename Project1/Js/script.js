@@ -329,21 +329,19 @@ const displayCurrency = (iso2) => {
     });
   };
 
-  $("#selCountry").change(function () {
-    const iso2 = $(this).val();
-    if (iso2) {
-      selectedCountryISO2 = iso2;
-      updateCountryBorders(iso2);
-      displayCountryInfo(iso2);
-      displayPopulation(iso2);
-      displayTimezone(iso2);
-      displayCurrency(iso2);
-      displayExchangeRate(iso2);
-      displayCapitalCity(iso2);
-      displayWikipediaInfo(iso2);
-      displayWeatherForecast(iso2);
-      displayWeather(iso2);
-      displayEarthquakes();
-    }
-  });
+  $("#selCountry").on("change", function () {
+        const iso2 = $(this).val();
+
+        if (iso2) {
+            selectedCountryISO2 = iso2;
+            updateCountryBorders(iso2);
+            displayCountryInfo(iso2);
+            displayPopulation(iso2);
+            displayWeather(iso2); // Include lat, lon from data if needed
+            displayTimezone(iso2);
+            displayWeatherForecast(iso2);
+            displayCurrency(iso2);
+            displayExchangeRate(iso2);
+        }
+    });
 });

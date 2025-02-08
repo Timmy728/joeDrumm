@@ -1,63 +1,61 @@
 <?php
 
-// My GeoNames API key
 $apiKey = "joedrumm12";
 
-// Function to fetch country info
-function getCountryList($apiKey) {
-    $url = "http://api.geonames.org/countryInfoJSON?username=" . $apiKey;
+// Function to get the timezone directly using a country's capital
+function getTimeZoneByCountry($countryCode, $apiKey) {
+    $url = "http://api.geonames.org/searchJSON?q=capital&country=$countryCode&featureCode=PPLC&maxRows=1&username=" . $apiKey;
 
-    // Initialize cURL
     $curl = curl_init();
-
     curl_setopt_array($curl, [
         CURLOPT_URL => $url,
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_SSL_VERIFYPEER => false,
     ]);
 
-    // Execute the API request
     $response = curl_exec($curl);
-
-    // Handle errors
-    if (curl_errno($curl)) {
-        echo "cURL Error: " . curl_error($curl);
-        return null;
-    }
-
-    // Close cURL session
     curl_close($curl);
 
-    // Decode the JSON response
     $data = json_decode($response, true);
 
-    return $data['geonames'] ?? null;
-}
+    if (isset($data['geonames'][0]['lat']) && isset($data['geonames'][0]['lng'])) {
+        $lat = $data['geonames'][0]['lat'];
+        $lng = $data['geonames'][0]['lng'];
 
-// Function to fetch time zone for given coordinates
-function getTimeZone($latitude, $longitude, $apiKey) {
-    $url = "http://api.geonames.org/timezoneJSON?lat=$latitude&lng=$longitude&username=" . $apiKey;
+        // Now fetch the timezone using the capital's coordinates
+        $timezoneUrl = "http://api.geonames.org/timezoneJSON?lat=$lat&lng=$lng&username=" . $apiKey;
 
-    // Initialize cURL
-    $curl = curl_init();
+        $curl = curl_init();
+        curl_setopt_array($curl, [
+            CURLOPT_URL => $timezoneUrl,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_SSL_VERIFYPEER => false,
+        ]);
 
-    curl_setopt_array($curl, [
-        CURLOPT_URL => $url,
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_SSL_VERIFYPEER => false,
-    ]);
+        $timezoneResponse = curl_exec($curl);
+        curl_close($curl);
 
-    // Execute the API request
-    $response = curl_exec($curl);
+        $timezoneData = json_decode($timezoneResponse, true);
 
-    if (curl_errno($curl)) {
-        echo "cURL Error: " . curl_error($curl);
-        return null;
+        return $timezoneData['timezoneId'] ?? null;
     }
 
-    curl_close($curl);
+    return null;
+}
 
-    // Decode the JSON response
-    $data = json_decode($res
+// Check if country code is provided
+if (isset($_GET['iso2'])) {
+    $countryCode = strtoupper($_GET['iso2']); // Convert to uppercase
 
+    // Get timezone directly
+    $timezone = getTimeZoneByCountry($countryCode, $apiKey);
+
+    if ($timezone) {
+        echo json_encode(["timezone" => $timezone]);
+    } else {
+        echo json_encode(["error" => "Timezone not found"]);
+    }
+} else {
+    echo json_encode(["error" => "No country code provided"]);
+}
 ?>

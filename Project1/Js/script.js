@@ -151,20 +151,26 @@ let markerClusterGroup;
      });
    };
 
-   const displayPopulation = (iso2) => {
-     $.ajax({
-       url: "php/Population.php",
-       method: "GET",
-       data: { iso2: iso2 }, // Ensure iso2 is passed properly
-       dataType: "json",
-       success: function (data) {
-         $("#population").text(data.population);
-       },
-      error: function (error) {
-     console.error("Error fetching population:", error);
-      },
-     });
-    };
+const displayPopulation = (iso2) => {
+  $.ajax({
+    url: "php/Population.php",
+    method: "GET",
+    data: { countryCode: iso2 }, // Pass the iso2 country code correctly
+    dataType: "json",
+    success: function (data) {
+      if (data && data.population) {
+        $("#population").text(`Population: ${data.population}`);
+      } else {
+        $("#population").text("No population data available.");
+      }
+    },
+    error: function (xhr, status, error) {
+      console.error("Error fetching population:", error);
+      $("#population").text("Failed to fetch population data.");
+    },
+  });
+};
+
 
    const displayWeather = (lat, lon) => {
       $.ajax({

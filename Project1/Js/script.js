@@ -305,29 +305,50 @@ const displayCurrency = (iso2) => {
      });
    };
 
-  //Earthquake data integration
-  const displayEarthquakes = () => {
-    $.ajax({
-      url: "php/earthQuakes.php", // Corrected the PHP file name
-      method: "GET",
-      dataType: "json",
-      success: function (data) {
+const displayEarthquakes = () => {
+  $.ajax({
+    url: "php/earthQuakes.php", // Make sure this path is correct
+    method: "GET",
+    dataType: "json",
+    success: function (data) {
+      // Log the entire response to understand its structure
+      console.log("Earthquake data:", data);
+      
+      // Check if the data has features and if it's an array
+      if (data && Array.isArray(data.features)) {
         data.features.forEach((earthquake) => {
           const coords = earthquake.geometry.coordinates;
           const magnitude = earthquake.properties.mag;
           const place = earthquake.properties.place;
 
-          const earthquakeMarker = L.marker([coords[1], coords[0]]).bindPopup(
-            `<strong>Magnitude:</strong> ${magnitude}<br><strong>Location:</strong> ${place}`
-          );
-          markerClusterGroup.addLayer(earthquakeMarker);
+          // Check if the coordinates are valid (should be an array with at least two values)
+          if (coords && coords.length >= 2) {
+            const earthquakeMarker = L.marker([coords[1], coords[0]])
+              .bindPopup(
+                `<strong>Magnitude:</strong> ${magnitude}<br><strong>Location:</strong> ${place}`
+              );
+            markerClusterGroup.addLayer(earthquakeMarker);
+          } else {
+            console.error("Invalid coordinates for earthquake:", earthquake);
+          }
         });
-      },
-      error: function (error) {
-        console.error("Error fetching earthquake data:", error);
-      },
-    });
-  };
+      } else {
+        console.error("Invalid data format or no features found in the response:", data);
+      }
+    },
+    error: function (xhr, status, error) {
+      // More detailed error handling
+      console.error("Error fetching earthquake data:");
+      console.error("Status: " + status);
+      console.error("Error: " + error);
+      console.error("Response Text: ", xhr.responseText);
+      
+      // Notify user of failure
+      alert("Sorry, there was an error fetching earthquake data. Please try again later.");
+    },
+  });
+};
+
 
   $("#selCountry").on("change", function () {
         const iso2 = $(this).val();

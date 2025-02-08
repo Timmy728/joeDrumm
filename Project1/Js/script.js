@@ -151,25 +151,40 @@ let markerClusterGroup;
      });
    };
 
-const displayPopulation = (iso2) => {
-  $.ajax({
-    url: "php/Population.php",
-    method: "GET",
-    data: { countryCode: iso2 }, // Pass the iso2 country code correctly
-    dataType: "json",
-    success: function (data) {
-      if (data && data.population) {
-        $("#population").text(`Population: ${data.population}`);
-      } else {
-        $("#population").text("No population data available.");
-      }
-    },
-    error: function (xhr, status, error) {
-      console.error("Error fetching population:", error);
-      $("#population").text("Failed to fetch population data.");
-    },
+   const displayPopulation = (iso2) => {
+    $.ajax({
+      url: "php/Population.php", // Ensure this is the correct path to your Population.php
+      method: "GET",
+      data: { countryCode: iso2 },  // Pass the correct country code (iso2)
+      dataType: "json",
+      success: function (data) {
+        // Log the data to check the response from the server
+        console.log(data);
+  
+        // Check if the population data is available and update the DOM
+        if (data && data.population) {
+          // Display only the population number, without the word "Population"
+          $("#population").text(data.population);
+        } else {
+          // If no population data is found, display a message
+          $("#population").text("Data not available.");
+        }
+      },
+      error: function (xhr, status, error) {
+        // Handle any AJAX errors
+        console.error("Error fetching population data:", error);
+        $("#population").text("Failed to fetch data.");
+      },
+    });
+  };
+  
+  // When the country is selected from the dropdown, call the displayPopulation function
+  $("#countrySelect").change(function () {
+    const selectedCountry = $(this).val(); // Get the country code (iso2) from the dropdown
+    if (selectedCountry) {
+      displayPopulation(selectedCountry);  // Call the function with the selected country code
+    }
   });
-};
 
 
    const displayWeather = (lat, lon) => {

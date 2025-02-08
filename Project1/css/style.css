@@ -139,6 +139,30 @@ h1 {
   height: 50px;
 }
 
+#earthquake-list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-around;
+  margin: 20px 0; /* Optional: Adjust margin for spacing */
+}
+
+.earthquake-entry {
+  width: 30%; /* Adjust this value as necessary for the horizontal layout */
+  margin: 15px; /* Spacing between earthquake entries */
+  padding: 15px;
+  background-color: #f8f8f8; /* Light background */
+  border: 1px solid #ddd; /* Light border */
+  border-radius: 5px; /* Rounded corners */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Soft shadow */
+  text-align: center;
+  font-family: Arial, sans-serif;
+}
+
+.earthquake-entry strong {
+  display: block;
+  margin: 5px 0;
+}
+
 #earthquakeInfo p {
   margin: 5px 0;
 }

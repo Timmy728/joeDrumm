@@ -23,8 +23,8 @@ function getCountryPopulations($apiKey) {
 
     // Handle errors
     if (curl_errno($curl)) {
-        echo "cURL Error: " . curl_error($curl);
-        return null;
+        echo json_encode(["error" => "cURL Error: " . curl_error($curl)]);
+        exit;
     }
 
     // Close cURL session
@@ -36,17 +36,30 @@ function getCountryPopulations($apiKey) {
     return $data['geonames'] ?? null;
 }
 
-$result = getCountryPopulations($apiKey);
+// Set the response header to JSON
+header('Content-Type: application/json');
 
-// Display population data
-if ($result) {
-    echo "List of Country Populations:\n\n";
-    foreach ($result as $country) {
-        $name = $country['countryName'] ?? "N/A";
-        $population = $country['population'] ?? "N/A";
-        echo "Country: $name, Population: $population\n";
+// Check if countryCode is provided in the request
+if (isset($_GET['countryCode'])) {
+    $countryCode = strtoupper($_GET['countryCode']); // Convert to uppercase
+
+    $result = getCountryPopulations($apiKey);
+
+    if ($result) {
+        foreach ($result as $country) {
+            if ($country['countryCode'] === $countryCode) {
+                // Return JSON response with population
+                echo json_encode(["population" => (int)$country['population']]);
+                exit;
+            }
+        }
+        // Return JSON response if country not found
+        echo json_encode(["error" => "Country not found."]);
+    } else {
+        echo json_encode(["error" => "Error fetching population data."]);
     }
 } else {
-    echo "Error fetching population data.\n";
+    echo json_encode(["error" => "No country code provided."]);
 }
+
 ?>

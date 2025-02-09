@@ -47,7 +47,6 @@ $countryCurrencies = [
     'RU' => 'RUB', // Russia uses RUB
     'IT' => 'EUR', // Italy uses EUR
     'MX' => 'MXN', // Mexico uses MXN
-    // Add more countries as needed...
     'AF' => 'AFN', // Afghanistan uses AFN
     'AL' => 'ALL', // Albania uses ALL
     'DZ' => 'DZD', // Algeria uses DZD

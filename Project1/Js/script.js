@@ -248,7 +248,8 @@ let markerClusterGroup;
      });
    };
 
-   const displayCurrency = (iso2) => {
+   
+const displayCurrency = (iso2) => {
     console.log("Fetching currency for:", iso2);
   
     $.ajax({
@@ -259,14 +260,17 @@ let markerClusterGroup;
       success: function (data) {
         console.log("API Response:", data);
   
-        // Check if currencyCode exists in the response
-        if (data.currencyCode) {
-          let currencyCode = data.currencyCode;  // Get currency code
-          
-          // Display the currency code in the HTML element
-          $("#currencyName").text(currencyCode || "Currency not available");
+        // Check if the response contains currency data
+        if (data && data.currencies && data.currencies.length > 0) {
+          let currency = data.currencies[0];  // Assuming the first currency in the array is the one to display
+          let currencyName = currency.name || "Currency name not available";
+          let currencyCode = currency.code || "Currency code not available";
+          let currencySymbol = currency.symbol || "Currency symbol not available";
+  
+          // Display the currency code and symbol in the HTML element
+          $("#currencyName").text(`${currencyName} (${currencyCode}) - ${currencySymbol}`);
         } else {
-          // Handle missing or incorrect data
+          // Handle missing currency data
           console.error("Currency data not found.");
           $("#currencyName").text("Currency not available");
         }

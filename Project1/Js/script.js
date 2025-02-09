@@ -248,35 +248,35 @@ let markerClusterGroup;
      });
    };
 
-const displayCurrency = (iso2) => {
-  console.log("Fetching currency for:", iso2);
-
-  $.ajax({
-    url: "php/currency.php",  // Ensure the path to your PHP file is correct
-    method: "GET",
-    data: { iso2: iso2 },      // Pass iso2 to the PHP script
-    dataType: "json",
-    success: function (data) {
-      console.log("API Response:", data);
-
-      // Ensure the data structure contains currencies
-      if (data.currencies && data.currencies[iso2]) {
-        let currencyName = data.currencies[iso2];  // Get currency name
-        
-        // Display the currency name in the HTML element
-        $("#currencyName").text(currencyName || "Currency not found");
-      } else {
-        // Handle missing or incorrect data
-        console.error("Currency data not found.");
-        $("#currencyName").text("Currency not available");
+   const displayCurrency = (iso2) => {
+    console.log("Fetching currency for:", iso2);
+  
+    $.ajax({
+      url: "php/currency.php",  // Ensure the path to your PHP file is correct
+      method: "GET",
+      data: { iso2: iso2 },      // Pass iso2 to the PHP script
+      dataType: "json",
+      success: function (data) {
+        console.log("API Response:", data);
+  
+        // Check if currencyCode exists in the response
+        if (data.currencyCode) {
+          let currencyCode = data.currencyCode;  // Get currency code
+          
+          // Display the currency code in the HTML element
+          $("#currencyName").text(currencyCode || "Currency not available");
+        } else {
+          // Handle missing or incorrect data
+          console.error("Currency data not found.");
+          $("#currencyName").text("Currency not available");
+        }
+      },
+      error: function (error) {
+        console.error("Error fetching currency data:", error);
+        $("#currencyName").text("Error loading currency");
       }
-    },
-    error: function (error) {
-      console.error("Error fetching currency data:", error);
-      $("#currencyName").text("Error loading currency");
-    }
-  });
-};
+    });
+  };
 
 
    const displayExchangeRate = (iso2) => {

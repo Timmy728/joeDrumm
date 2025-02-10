@@ -187,30 +187,75 @@ let markerClusterGroup;
   });
 
 
-   const displayWeather = (lat, lon) => {
-      $.ajax({
-       url: "php/getWeather.php",
-       method: "GET",
-       data: { lat: lat, lon: lon }, // Send lat and lon for weather
-       dataType: "json",
-       success: function (data) {
-         $("#tempToday").text(`${data.temp} °C`);
-         $("#conditionsToday").text(data.description);
-         $("#weatherImg").html(
-           `<img src="https://openweathermap.org/img/wn/${data.icon}.png" alt="Weather Icon">`
-         );
+const getCountryCoordinates = (countryName) => {
+  const apiKey = "6c0c78ec2bda4c27ae734ca2b9eaffe4";  // Your OpenCage API key
+  const apiUrl = `https://api.opencagedata.com/geocode/v1/json?q=${encodeURIComponent(countryName)}&key=${apiKey}`;
 
-         const weatherMarker = L.marker([lat, lon], { icon: markerIcon }).bindPopup(
-           `<h4>Weather Info</h4><p>${data.temp} °C - ${data.description}</p>`
-        );
-         markerClusterGroup.addLayer(weatherMarker);
-       },
-       error: function (error) {
-         console.error("Error fetching weather:", error);
-       },
-     });
-   };
+  return $.ajax({
+    url: apiUrl,
+    method: "GET",
+    dataType: "json",
+  });
+};
 
+// Function to fetch and display weather
+const displayWeather = (lat, lon) => {
+  if (!lat || !lon) {
+    console.error("Latitude and longitude are required.");
+    return;
+  }
+
+  $.ajax({
+    url: "php/getWeather.php",
+    method: "GET",
+    data: { lat: lat, lon: lon },
+    dataType: "json",
+    success: function (data) {
+      console.log("Weather Data:", data);
+
+      if (data.error) {
+        console.error("Error fetching weather:", data.error);
+        $("#tempToday").text("Error: " + data.error);
+        return;
+      }
+
+      // Populate the elements with data
+      $("#tempToday").text(data.temperature);
+      $("#conditionsToday").text(data.description);
+      $("#weatherImg").html(`<img src="${data.icon}" alt="Weather Icon">`);
+    },
+    error: function (error) {
+      console.error("Error fetching weather:", error);
+      $("#tempToday").text("Error loading weather");
+    },
+  });
+};
+
+// Event listener for country selection
+$("#selCountry").change(function () {
+  const countryName = $(this).val();  // Get selected country name
+
+  // Fetch coordinates using OpenCage API
+  getCountryCoordinates(countryName)
+    .done(function (data) {
+      if (data.results && data.results.length > 0) {
+        const lat = data.results[0].geometry.lat;
+        const lon = data.results[0].geometry.lng;
+        displayWeather(lat, lon);  // Fetch and display weather
+      } else {
+        console.error("Coordinates not found for", countryName);
+        $("#tempToday").text("Error: Location not found");
+      }
+    })
+    .fail(function (error) {
+      console.error("Error fetching coordinates:", error);
+    });
+});
+      
+displayWeather(51.5074, -0.1278);  // London (default)
+
+
+      
    const displayTimezone = (iso2) => {
      $.ajax({
        url: "php/Timezone.php",

@@ -282,22 +282,30 @@ const displayCurrency = (iso2) => {
     });
   };
 
+  const displayExchangeRate = (iso2) => {
+    $.ajax({
+        url: "php/latestExchangeRate.php",
+        method: "GET",
+        data: { iso2: iso2 },
+        dataType: "json",
+        success: function (data) {
+            console.log("API Response:", data);
 
-   const displayExchangeRate = (iso2) => {
-     $.ajax({
-       url: "php/LatestExchangeRate.php",
-       method: "GET",
-       data: { iso2: iso2 },
-       dataType: "json",
-       success: function (data) {
-         $("#txtCurrencyRate").text(data.rate);
-       },
-       error: function (error) {
-         console.error("Error fetching exchange rate:", error);
-       },
-     });
-   };
+            if (data.exchangeRate) {
+                $("#txtCurrencyRate").text(`1 USD = ${data.exchangeRate} ${data.currencyCode}`);
+            } else {
+                $("#txtCurrencyRate").text("Exchange rate not available");
+            }
+        },
+        error: function (xhr, status, error) {
+            console.error("Error fetching exchange rate:", xhr.responseText);
+            $("#txtCurrencyRate").text("Error loading exchange rate");
+        },
+    });
+};
+displayExchangeRate("GB");
 
+      
    const displayCapitalCity = (iso2) => {
      $.ajax({
        url: "php/capitalCities.php",

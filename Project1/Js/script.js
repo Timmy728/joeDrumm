@@ -271,29 +271,41 @@ displayWeather(51.5074, -0.1278);  // London (default)
      });
    };
 
+      
+
    const displayWeatherForecast = (lat, lon) => {
-     $.ajax({
-       url: "php/getWeatherForecast.php",
-       method: "GET",
-       data: { lat: lat, lon: lon },
+    console.log("Latitude:", lat);  // Log latitude
+    console.log("Longitude:", lon);  // Log longitude
+  
+    var url = `php/getWeatherForecast.php?lat=${lat}&lon=${lon}`;
+    console.log("Request URL:", url);  // Log request URL
+  
+    $.ajax({
+      url: url,  // Make sure the URL is correct
+      method: "GET",
       dataType: "json",
-       success: function (data) {
-         let forecastHtml = "<h4>16-Day Weather Forecast</h4>";
-         data.forecast.forEach((forecast) => {
-           forecastHtml += `<p>${forecast.date}: ${forecast.temp} °C, ${forecast.description}</p>`;
-         });
+      success: function (data) {
+        console.log("Weather Data:", data);  // Log the returned data
+        if (data.error) {
+          console.error("Error fetching weather data:", data.error);
+          return;
+        }
+  
+        let forecastHtml = "<h4>4-Day Weather Forecast</h4>";
+        data.forEach((forecast) => {
+          forecastHtml += `<p>${forecast.date}: ${forecast.min_temp} °C - ${forecast.max_temp} °C, ${forecast.condition}</p>`;
+        });
+  
+        // Update the weather forecast info on the webpage
+        $("#forecastInfo").html(forecastHtml);
+      },
+      error: function (error) {
+        console.error("Error fetching weather forecast:", error);
+      },
+    });
+  };
 
-         const forecastMarker = L.marker([lat, lon]).bindPopup(forecastHtml);
-         markerClusterGroup.addLayer(forecastMarker);
-         $("#forecastInfo").html(forecastHtml);
-       },
-       error: function (error) {
-         console.error("Error fetching weather forecast:", error);
-       },
-     });
-   };
 
-   
 const displayCurrency = (iso2) => {
     console.log("Fetching currency for:", iso2);
   

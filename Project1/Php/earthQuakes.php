@@ -103,5 +103,11 @@ $maxRows = 100; // Get more results
 
 $result = getEarthquakes($north, $south, $east, $west, $maxRows, $apiKey, $minDate);
 
-echo json_encode($result);
+// Check if we got data, otherwise return an error
+if (empty($result) || isset($result['error'])) {
+    echo json_encode(["error" => "No data available or an error occurred."]);
+} else {
+    // Send back the earthquake data
+    echo json_encode(["earthquakes" => $result]);
+}
 ?>

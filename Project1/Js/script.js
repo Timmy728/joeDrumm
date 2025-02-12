@@ -428,49 +428,57 @@ const displayCapitalCity = (iso2) => {
      });
    };
 
-const displayEarthquakes = () => {
-  $.ajax({
-    url: "php/earthQuakes.php", // Make sure this path is correct
-    method: "GET",
-    dataType: "json",
-    success: function (data) {
-      // Log the entire response to understand its structure
-      console.log("Earthquake data:", data);
-      
-      // Check if the data has features and if it's an array
-      if (data && Array.isArray(data.features)) {
-        data.features.forEach((earthquake) => {
-          const coords = earthquake.geometry.coordinates;
-          const magnitude = earthquake.properties.mag;
-          const place = earthquake.properties.place;
 
-          // Check if the coordinates are valid (should be an array with at least two values)
-          if (coords && coords.length >= 2) {
-            const earthquakeMarker = L.marker([coords[1], coords[0]])
-              .bindPopup(
-                `<strong>Magnitude:</strong> ${magnitude}<br><strong>Location:</strong> ${place}`
-              );
-            markerClusterGroup.addLayer(earthquakeMarker);
-          } else {
-            console.error("Invalid coordinates for earthquake:", earthquake);
-          }
-        });
-      } else {
-        console.error("Invalid data format or no features found in the response:", data);
-      }
-    },
-    error: function (xhr, status, error) {
-      // More detailed error handling
-      console.error("Error fetching earthquake data:");
-      console.error("Status: " + status);
-      console.error("Error: " + error);
-      console.error("Response Text: ", xhr.responseText);
       
-      // Notify user of failure
-      alert("Sorry, there was an error fetching earthquake data. Please try again later.");
-    },
-  });
-};
+   $(document).ready(function () {
+    function loadEarthquakes(countryCode) {
+        console.log("Loading earthquakes for:", countryCode);
+
+        $.ajax({
+            url: "http://localhost/Project1/php/earthQuakes.php",
+            type: "GET",
+            data: { country: countryCode },
+            dataType: "json",
+            success: function (response) {
+                console.log("Earthquake Data Response:", response);
+
+                let earthquakeList = $("#earthquakeList");
+                earthquakeList.html(""); // Clear old data
+
+                if (response.earthquakes && Array.isArray(response.earthquakes) && response.earthquakes.length > 0) {
+                    response.earthquakes.forEach(function (quake) {
+                        let datetime = quake.datetime || "Unknown Date";
+                        let magnitude = quake.magnitude || "N/A";
+                        let depth = quake.depth || "N/A";
+                        let lat = quake.lat || "N/A";
+                        let lng = quake.lng || "N/A";
+
+                        earthquakeList.append(
+                            `<p>📍 <strong>Magnitude:</strong> ${magnitude} | <strong>Depth:</strong> ${depth}km | <strong>Location:</strong> (Lat: ${lat}, Lng: ${lng}) | <strong>Time:</strong> ${datetime}</p>`
+                        );
+                    });
+                } else {
+                    earthquakeList.html("<p>No recent earthquakes found.</p>");
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error("AJAX Error:", status, error);
+                $("#earthquakeList").html("<p>Error fetching earthquake data.</p>");
+            }
+        });
+    }
+
+    // Trigger on country selection
+    $("#selCountry").on("change", function () {
+        let selectedCountry = $(this).val();
+        console.log("Country selected:", selectedCountry);
+        loadEarthquakes(selectedCountry);
+    });
+
+    // Load default country earthquakes (e.g., US)
+    loadEarthquakes("US");
+});
+
 
 
   $("#selCountry").on("change", function () {

@@ -363,20 +363,53 @@ const displayCurrency = (iso2) => {
 displayExchangeRate("GB");
 
       
-   const displayCapitalCity = (iso2) => {
-     $.ajax({
-       url: "php/capitalCities.php",
-       method: "GET",
-       data: { iso2: iso2 },
-       dataType: "json",
-       success: function (data) {
-         $("#capitalCity").text(data.capital);
-       },
-       error: function (error) {
-         console.error("Error fetching capital city:", error);
-       },
-     });
-   };
+$(document).ready(function() {
+  $.ajax({
+    url: "https://restcountries.com/v3.1/all", // Get all countries
+    method: "GET",
+    dataType: "json",
+    success: function(data) {
+      // Populate the select with country names and their ISO2 codes
+      const countrySelect = $("#selCountry");
+      data.forEach(country => {
+        const iso2 = country.cca2; // Country ISO2 code
+        const countryName = country.name.common; // Country name
+        countrySelect.append(new Option(countryName, iso2)); // Add option to select
+      });
+    },
+    error: function(error) {
+      console.error("Error fetching countries:", error);
+    }
+  });
+
+  // Event listener to call displayCapitalCity when a country is selected
+  $("#selCountry").change(function() {
+    const iso2 = $(this).val(); // Get the selected country's ISO2 code
+    displayCapitalCity(iso2); // Call the function to display the capital city
+  });
+});
+
+// Function to fetch and display the capital city
+const displayCapitalCity = (iso2) => {
+  $.ajax({
+    url: "php/capitalCities.php",
+    method: "GET",
+    data: { iso2: iso2 },
+    dataType: "json",
+    success: function (data) {
+      if (data.capital) {
+        $("#capitalCity").text(data.capital); // Display capital city
+      } else {
+        $("#capitalCity").text("Capital not found");
+      }
+    },
+    error: function (error) {
+      console.error("Error fetching capital city:", error);
+      $("#capitalCity").text("Error fetching capital city");
+    },
+  });
+};
+
 
    const displayWikipediaInfo = (query) => {
      $.ajax({

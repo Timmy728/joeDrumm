@@ -1,46 +1,50 @@
-<?php 
-//My GEONAME API Key
+<?php
+// My GEONAME API Key
 $apiKey = "joedrumm12";
 
-function getWikipediaLinks($searchQuery, $apiKey) {
-  $url = "http://api.geonames.org/wikipediaSearchJSON?q=" . urlencode($searchQuery) . "&maxRows=10&username=" . $apiKey;
-
-  $curl = curl_init();
-  
-    curl_setopt_array($curl, [
-        CURLOPT_URL => $url,
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_SSL_VERIFYPEER => false,
-});
-
-  // Execute the API request
-    $response = curl_exec($curl);
-
-    // Handle errors
-    if (curl_errno($curl)) {
-        echo "cURL Error: " . curl_error($curl);
-        return null;
-    }
-    curl_close($curl);
-
-    // Decode the JSON response
-    $data = json_decode($response, true);
-
-    return $data['geonames'] ?? null;
-}
-$searchQuery = "France"; // Replace with the country name or topic
-$result = getWikipediaLinks($searchQuery, $apiKey);
-
-// Display Wikipedia links
-if ($result) {
-    echo "Wikipedia Links for '$searchQuery':\n\n";
-    foreach ($result as $item) {
-        $title = $item['title'] ?? "N/A";
-        $link = $item['wikipediaUrl'] ?? "N/A";
-        echo "Title: $title, Link: https://$link\n";
-    }
-} else {
-    echo "Error fetching Wikipedia links for '$searchQuery'.\n";
+// Check if query parameter is set
+if (!isset($_GET['query'])) {
+    echo json_encode(["error" => "No query provided"]);
+    exit;
 }
 
+$searchQuery = urlencode($_GET['query']);
+$url = "http://api.geonames.org/wikipediaSearchJSON?q={$searchQuery}&maxRows=5&username={$apiKey}";
+
+$curl = curl_init();
+curl_setopt_array($curl, [
+    CURLOPT_URL => $url,
+    CURLOPT_RETURNTRANSFER => true,
+    CURLOPT_SSL_VERIFYPEER => false
+]);
+
+$response = curl_exec($curl);
+curl_close($curl);
+
+if (!$response) {
+    echo json_encode(["error" => "No response from API"]);
+    exit;
+}
+
+$data = json_decode($response, true);
+
+if (!isset($data['geonames']) || empty($data['geonames'])) {
+    echo json_encode(["error" => "No Wikipedia entries found"]);
+    exit;
+}
+
+// Process data
+$results = [];
+foreach ($data['geonames'] as $entry) {
+    $results[] = [
+        "title" => $entry['title'] ?? "No Title",
+        "summary" => $entry['summary'] ?? "No summary available.",
+        "link" => isset($entry['wikipediaUrl']) ? "https://" . $entry['wikipediaUrl'] : "#",
+        "image" => $entry['thumbnailImg'] ?? "https://via.placeholder.com/150" // Default placeholder
+    ];
+}
+
+// Return JSON response
+header('Content-Type: application/json');
+echo json_encode(["results" => $results]);
 ?>

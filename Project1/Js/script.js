@@ -410,23 +410,35 @@ const displayCapitalCity = (iso2) => {
   });
 };
 
+const displayWikipediaInfo = (query) => {
+  $.ajax({
+    url: "php/wikipediaSearch.php",
+    method: "GET",
+    data: { query: query },
+    dataType: "json",
+    success: function (response) {
+      if (response.error || response.results.length === 0) {
+        $("#wikiLink").hide().text("No Wikipedia entry found.");
+        return;
+      }
 
-   const displayWikipediaInfo = (query) => {
-     $.ajax({
-       url: "php/wikipediaSearch.php",
-       method: "GET",
-       data: { query: query },
-       dataType: "json",
-       success: function (data) {
-         $("#wiki-title").text(data.title);
-         $("#wiki-info").html(data.extract);
-         $("#wiki-img").html(`<img src="${data.thumbnail}" alt="Wiki Image">`);
-       },
-       error: function (error) {
-         console.error("Error fetching Wikipedia data:", error);
-       },
-     });
-   };
+      const firstResult = response.results[0]; // Take the first entry
+
+      $("#wikiLink")
+        .attr("href", firstResult.link)
+        .text(`View ${firstResult.title} on Wikipedia`)
+        .show(); // Ensure the link is visible
+    },
+    error: function (error) {
+      console.error("Error fetching Wikipedia data:", error);
+      $("#wikiLink").hide().text("Error fetching data.");
+    },
+  });
+};
+$("#selCountry").change(function () {
+  const selectedCountry = $("#selCountry option:selected").text();
+  displayWikipediaInfo(selectedCountry);
+});
 
 
       

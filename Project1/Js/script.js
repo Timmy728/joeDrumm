@@ -272,38 +272,43 @@ displayWeather(51.5074, -0.1278);  // London (default)
    };
 
       
+   const displayWeatherForecast = (location) => {
+    console.log("Fetching weather for:", location);
 
-   const displayWeatherForecast = (lat, lon) => {
-    console.log("Latitude:", lat);  // Log latitude
-    console.log("Longitude:", lon);  // Log longitude
-  
-    var url = `php/getWeatherForecast.php?lat=${lat}&lon=${lon}`;
-    console.log("Request URL:", url);  // Log request URL
-  
     $.ajax({
-      url: url,  // Make sure the URL is correct
-      method: "GET",
-      dataType: "json",
-      success: function (data) {
-        console.log("Weather Data:", data);  // Log the returned data
-        if (data.error) {
-          console.error("Error fetching weather data:", data.error);
-          return;
-        }
-  
-        let forecastHtml = "<h4>4-Day Weather Forecast</h4>";
-        data.forEach((forecast) => {
-          forecastHtml += `<p>${forecast.date}: ${forecast.min_temp} °C - ${forecast.max_temp} °C, ${forecast.condition}</p>`;
-        });
-  
-        // Update the weather forecast info on the webpage
-        $("#forecastInfo").html(forecastHtml);
-      },
-      error: function (error) {
-        console.error("Error fetching weather forecast:", error);
-      },
+        url: "php/getWeatherForecast.php",
+        method: "GET",
+        data: { location: location },  // Send location name instead of lat/lon
+        dataType: "json",
+        success: function (data) {
+            console.log("Weather Data:", data);
+            if (data.error) {
+                console.error("Error fetching weather:", data.error);
+                $("#forecastInfo").html(`<p>${data.error}</p>`);
+                return;
+            }
+
+            let forecastHtml = `<h1>10-Day Weather History for ${location}</h1>`;
+            data.forEach((forecast) => {
+              let minTemp = forecast.min_temp !== null ? forecast.min_temp + "°C" : "No Data";
+              let maxTemp = forecast.max_temp !== null ? forecast.max_temp + "°C" : "No Data";
+              
+              forecastHtml += `<p>${forecast.date}: ${minTemp} - ${maxTemp}</p>`;
+              
+            });
+
+            $("#forecastInfo").html(forecastHtml);
+        },
+        error: function (error) {
+            console.error("Error fetching weather forecast:", error);
+            $("#forecastInfo").html("<p>Could not retrieve forecast.</p>");
+        },
     });
-  };
+};
+$("#searchButton").on("click", function () {
+    let userLocation = $("#locationInput").val();  // Get user input from text field
+    displayWeatherForecast(userLocation);
+});
 
 
 const displayCurrency = (iso2) => {

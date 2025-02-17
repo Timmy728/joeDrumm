@@ -17,14 +17,14 @@ let markerClusterGroup;
   $(document).ready(function () {
  //Fetch country data when the page loads
   $.ajax({
-     url: "Php/countryName.php", // Ensure this URL matches the path to your PHP file
+     url: "Php/countryName.Php",
      type: "GET",
      dataType: "json",
      success: function (data) {
-    console.log("Response from countryName.php:", data); // Log raw response
+    console.log("Response from countryName.php:", data); 
 
        if (Array.isArray(data) && data.length > 0) {
-         populateCountryDropdown(data); // Populate the dropdown
+         populateCountryDropdown(data); 
        } else {
          console.error("No valid country data found.");
        }
@@ -132,9 +132,9 @@ let markerClusterGroup;
 
    const displayCountryInfo = (iso2) => {
      $.ajax({
-       url: "Php/countryName.php", // Ensure the path to PHP file is correct
+       url: "Php/countryName.Php",
        method: "GET",
-       data: { iso2: iso2 }, // Ensure iso2 is passed properly
+       data: { iso2: iso2 }, 
        dataType: "json",
        success: function (data) {
          if (data.error) {
@@ -153,7 +153,7 @@ let markerClusterGroup;
 
    const displayPopulation = (iso2) => {
     $.ajax({
-      url: "Php/Population.php", // Ensure this is the correct path to your Population.php
+      url: "Php/Population.Php", // Ensure this is the correct path to your Population.php
       method: "GET",
       data: { countryCode: iso2 },  // Pass the correct country code (iso2)
       dataType: "json",
@@ -206,7 +206,7 @@ const displayWeather = (lat, lon) => {
   }
 
   $.ajax({
-    url: "Php/getWeather.php",
+    url: "Php/getWeather.Php",
     method: "GET",
     data: { lat: lat, lon: lon },
     dataType: "json",
@@ -258,7 +258,7 @@ displayWeather(51.5074, -0.1278);  // London (default)
       
    const displayTimezone = (iso2) => {
      $.ajax({
-       url: "Php/Timezone.php",
+       url: "Php/Timezone.Php",
        method: "GET",
        data: { iso2: iso2 },
        dataType: "json",
@@ -276,7 +276,7 @@ displayWeather(51.5074, -0.1278);  // London (default)
     console.log("Fetching weather for:", location);
 
     $.ajax({
-        url: "Php/getWeatherForecast.php",
+        url: "Php/getWeatherForecast.Php",
         method: "GET",
         data: { location: location },  // Send location name instead of lat/lon
         dataType: "json",
@@ -315,7 +315,7 @@ const displayCurrency = (iso2) => {
     console.log("Fetching currency for:", iso2);
   
     $.ajax({
-      url: "Php/Currency.php",  // Ensure the path to your PHP file is correct
+      url: "Php/Currency.Php",  // Ensure the path to your PHP file is correct
       method: "GET",
       data: { iso2: iso2 },      // Pass iso2 to the PHP script
       dataType: "json",
@@ -346,7 +346,7 @@ const displayCurrency = (iso2) => {
 
   const displayExchangeRate = (iso2) => {
     $.ajax({
-        url: "Php/latestExchangeRate.php",
+        url: "Php/latestExchangeRate.Php",
         method: "GET",
         data: { iso2: iso2 },
         dataType: "json",
@@ -397,7 +397,7 @@ $(document).ready(function() {
 // Function to fetch and display the capital city
 const displayCapitalCity = (iso2) => {
   $.ajax({
-    url: "Php/capitalCities.php",
+    url: "Php/capitalCities.Php",
     method: "GET",
     data: { iso2: iso2 },
     dataType: "json",
@@ -417,7 +417,7 @@ const displayCapitalCity = (iso2) => {
 
 const displayWikipediaInfo = (query) => {
   $.ajax({
-    url: "Php/wikipediaSearch.php",
+    url: "Php/wikipediaSearch.Php",
     method: "GET",
     data: { query: query },
     dataType: "json",
@@ -452,7 +452,7 @@ $("#selCountry").change(function () {
         console.log("Loading earthquakes for:", countryCode);
 
         $.ajax({
-            url: "http://localhost/Project1/Php/earthQuakes.php?country=USA",
+            url: "http://localhost/Project1/Php/earthQuakes.Php?country=USA",
             type: "GET",
             data: { country: countryCode },
             dataType: "json",

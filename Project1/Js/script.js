@@ -452,7 +452,7 @@ $("#selCountry").change(function () {
         console.log("Loading earthquakes for:", countryCode);
 
         $.ajax({
-            url: "http://localhost/Project1/Php/earthQuakes.Php?country=USA",
+            url: "Php/earthQuakes.Php?country=USA",
             type: "GET",
             data: { country: countryCode },
             dataType: "json",

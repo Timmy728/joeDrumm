@@ -346,7 +346,7 @@ const displayCurrency = (iso2) => {
 
   const displayExchangeRate = (iso2) => {
     $.ajax({
-        url: "Php/latestExchangeRate.Php",
+        url: "/project1/php/latestExchangeRate.php?iso2=AU",
         method: "GET",
         data: { iso2: iso2 },
         dataType: "json",

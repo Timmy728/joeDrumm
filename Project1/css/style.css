@@ -1,31 +1,41 @@
-body {
-  font-family: Arial, sans-serif;
+html, body {
   margin: 0;
   padding: 0;
+  width: 100%;
+  height: 100%;
+  font-family: Arial, sans-serif;
   background-color: #f4f4f4;
-}
-
-.container {
-  width: 90%;
-  margin: 0 auto;
-  padding-top: 20px;
-}
-
-h1 {
-  text-align: center;
-  color: #333;
 }
 
 #map {
   width: 100vw;
   height: 100vh;
   margin: 0;
-  border-radius: 0;
-  box-shadow: none;
+  padding: 0;
   position: absolute;
   top: 0;
   left: 0;
   z-index: 1;
+}
+
+#selectContainer {
+  position: fixed;
+  top: 0;
+  z-index: 1000;
+  width: 100%;
+  background-color: rgba(255, 255, 255, 0.9);
+  padding: 11px 0;
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+#selCountry {
+  width: 200px;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #fff;
+  display: inline-block;
 }
 
 #preloader {
@@ -43,39 +53,6 @@ h1 {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-}
-
-#countryInfo {
-  background-color: #fff;
-  padding: 20px;
-  margin-top: 30px;
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  position: relative;
-  z-index: 10;
-  max-width: 400px;
-}
-
-#countryInfo p {
-  font-size: 16px;
-  color: #333;
-}
-
-#countryInfo strong {
-  color: #007bff;
-}
-
-#selCountry {
-  margin-bottom: 20px;
-  padding: 10px;
-  font-size: 16px;
-  width: 100%;
-  max-width: 300px;
-  border-radius: 5px;
-  border: 1px solid #ccc;
-  background-color: #fff;
-  display: block;
-  margin: 0 auto;
 }
 
 .modal {
@@ -143,47 +120,10 @@ h1 {
   cursor: pointer;
 }
 
-#weatherImg img {
-  width: 50px;
-  height: 50px;
-}
-
-#earthquake-list {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-around;
-  margin: 20px 0;
-}
-
-.earthquake-entry {
-  width: 30%;
-  margin: 15px;
-  padding: 15px;
-  background-color: #f8f8f8;
-  border: 1px solid #ddd;
-  border-radius: 5px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  text-align: center;
-  font-family: Arial, sans-serif;
-}
-
-.earthquake-entry strong {
-  display: block;
-  margin: 5px 0;
-}
-
-#wiki-info {
-  margin-top: 10px;
-}
-
 @media (max-width: 768px) {
-  .container {
-    width: 100%;
-    padding: 10px;
-  }
-
   #selCountry {
-    max-width: 100%;
+    width: 100%;
+    max-width: 300px;
   }
 
   .modal-content {
@@ -192,10 +132,6 @@ h1 {
 }
 
 @media (max-width: 480px) {
-  #countryInfo p {
-    font-size: 14px;
-  }
-
   .modal-body {
     font-size: 14px;
   }

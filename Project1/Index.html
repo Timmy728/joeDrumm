@@ -47,23 +47,26 @@
             <p><strong>Timezone:</strong> <span id="timezone"></span></p>
             <p><strong>Recent Earthquakes:</strong> <span id="earthquakeList"></span></p>
         </div>
-
-    <div id="map" style="height: 500px;"></div>
+    </div>
+    
+    <div id="map"></div>
 
     <!-- Weather Modal -->
-    <div class="modal" id="weatherModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h4>Country Weather: <span id="weatherCountry"></span></h4>
-                <button class="close" onclick="closeModal('weatherModal')">&times;</button>
-            </div>
-            <div class="modal-body">
-                <p id="conditionsToday"></p>
-                <p id="tempToday"></p>
-                <div id="weatherImg"></div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn" onclick="closeModal('weatherModal')">Close</button>
+    <div class="modal fade" id="weatherModal" tabindex="-1" aria-labelledby="weatherModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="weatherModalLabel">Country Weather: <span id="weatherCountry"></span></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="conditionsToday"></p>
+                    <p id="tempToday"></p>
+                    <div id="weatherImg"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
             </div>
         </div>
     </div>

@@ -10,11 +10,10 @@
     
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="css/leaflet.css">
+
+    <!-- MarkerCluster CSS -->
     <link rel="stylesheet" href="css/MarkerCluster.css">
     <link rel="stylesheet" href="css/MarkerCluster.Default.css">
-    
-    <!-- Leaflet EasyButton CSS -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet-easybutton/2.4.0/easy-button.min.css">
     
     <!-- Custom CSS -->
     <link rel="stylesheet" href="css/style.css">
@@ -25,70 +24,54 @@
             <span class="visually-hidden">Loading...</span>
         </div>
     </div>
-    
-    <div id="selectContainer" class="text-center py-2 bg-light shadow-sm">
-        <label for="selCountry" class="fw-bold">Select a Country:</label>
-        <select id="selCountry" class="form-select d-inline-block w-auto shadow-sm">
-            <option value="">Select a Country</option>
-        </select>
-    </div>
-    
-    <div id="map"></div>
-    
-    <!-- Information Modal -->
-    <div id="infoModal" class="modal fade" data-bs-backdrop="false" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-            <div class="modal-content shadow">
-                <div class="modal-header bg-success bg-gradient text-white">
-                    <h5 class="modal-title">Country Overview</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <table class="table table-striped">
-                        <tr>
-                            <td class="text-center"><i class="fa-solid fa-globe fa-xl text-success"></i></td>
-                            <td>Country</td>
-                            <td class="text-end" id="modalCountryName"></td>
-                        </tr>
-                        <tr>
-                            <td class="text-center"><i class="fa-solid fa-city fa-xl text-success"></i></td>
-                            <td>Capital</td>
-                            <td class="text-end" id="modalCapitalCity"></td>
-                        </tr>
-                        <tr>
-                            <td class="text-center"><i class="fa-solid fa-users fa-xl text-success"></i></td>
-                            <td>Population</td>
-                            <td class="text-end" id="modalPopulation"></td>
-                        </tr>
-                        <tr>
-                            <td class="text-center"><i class="fa-solid fa-money-bill fa-xl text-success"></i></td>
-                            <td>Currency</td>
-                            <td class="text-end" id="modalCurrency"></td>
-                        </tr>
-                        <tr>
-                            <td class="text-center"><i class="fa-solid fa-cloud-sun fa-xl text-success"></i></td>
-                            <td>Weather</td>
-                            <td class="text-end" id="modalWeather"></td>
-                        </tr>
-                        <tr>
-                            <td class="text-center"><i class="fa-solid fa-clock fa-xl text-success"></i></td>
-                            <td>Timezone</td>
-                            <td class="text-end" id="modalTimezone"></td>
-                        </tr>
-                    </table>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-success btn-sm" data-bs-dismiss="modal">Close</button>
-                </div>
+
+    <div class="container">
+        <h1>Gazetteer</h1>
+        <form>
+            <label for="selCountry">Select Country:</label>
+            <select name="sel-country" id="selCountry" class="form-select"></select>
+        </form>
+
+        <div id="countryInfo">
+            <p><strong>Country:</strong> <span id="countryNames"></span></p>
+            <p><strong>Capital City:</strong> <span id="capitalCity"></span></p>
+            <p><strong>Population:</strong> <span id="population"></span></p>
+            <p><strong>Currency:</strong> <span id="currencyName"></span> (<span id="currencySymbol"></span>)</p>
+            <p><strong>Exchange Rate:</strong> <span id="txtCurrencyRate"></span></p>
+            <p><strong>Current Weather:</strong> <span id="weather"></span></p>
+            <p><strong>Temperature:</strong> <span id="tempToday"></span></p>
+            <p><strong>Conditions:</strong> <span id="conditionsToday"></span></p>
+             <p id="weatherImg"></p>
+            <p><strong>10-Day Weather Forecast:</strong> <div id="forecastInfo"></div></p>
+            <p><strong>Wikipedia Search:</strong> <a id="wikiLink" href="#" target="_blank">View on Wikipedia</a></p>
+            <p><strong>Timezone:</strong> <span id="timezone"></span></p>
+            <p><strong>Recent Earthquakes:</strong> <span id="earthquakeList"></span></p>
+        </div>
+
+    <div id="map" style="height: 500px;"></div>
+
+    <!-- Weather Modal -->
+    <div class="modal" id="weatherModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4>Country Weather: <span id="weatherCountry"></span></h4>
+                <button class="close" onclick="closeModal('weatherModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p id="conditionsToday"></p>
+                <p id="tempToday"></p>
+                <div id="weatherImg"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn" onclick="closeModal('weatherModal')">Close</button>
             </div>
         </div>
     </div>
-    
+
     <script src="Js/bootstrap.bundle.min.js"></script>
     <script src="Js/jquery-3.7.1.min.js"></script>
     <script src="Js/leaflet.js"></script>
     <script src="Js/leaflet.markercluster.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-easybutton/2.4.0/easy-button.min.js"></script>
     <script src="Js/script.js"></script>
 </body>
 </html>

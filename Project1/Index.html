@@ -3,75 +3,60 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gazetteer</title>
-  
+    <title>Gazetteer Map</title>
+    
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="css/bootstrap.min.css">
-    
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="css/leaflet.css">
-
-    <!-- MarkerCluster CSS -->
-    <link rel="stylesheet" href="css/MarkerCluster.css">
-    <link rel="stylesheet" href="css/MarkerCluster.Default.css">
-    
+    <!-- EasyButton CSS -->
+    <link rel="stylesheet" href="css/leaflet-easybutton.css">
     <!-- Custom CSS -->
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <div id="preloader">
-        <div class="spinner-border" role="status">
-            <span class="visually-hidden">Loading...</span>
-        </div>
-    </div>
+    <!-- Country Selection Dropdown Only -->
+    <span id="selectContainer">
+        <select id="countrySelect" class="form-select shadow-sm">
+            <option value="">Select a Country</option>
+        </select>
+    </span>
 
-    <div class="container">
-        <h1>Gazetteer</h1>
-        <form>
-            <label for="selCountry">Select Country:</label>
-            <select name="sel-country" id="selCountry" class="form-select"></select>
-        </form>
+    <!-- Map Container -->
+    <div id="map"></div>
 
-        <div id="countryInfo">
-            <p><strong>Country:</strong> <span id="countryNames"></span></p>
-            <p><strong>Capital City:</strong> <span id="capitalCity"></span></p>
-            <p><strong>Population:</strong> <span id="population"></span></p>
-            <p><strong>Currency:</strong> <span id="currencyName"></span> (<span id="currencySymbol"></span>)</p>
-            <p><strong>Exchange Rate:</strong> <span id="txtCurrencyRate"></span></p>
-            <p><strong>Current Weather:</strong> <span id="weather"></span></p>
-            <p><strong>Temperature:</strong> <span id="tempToday"></span></p>
-            <p><strong>Conditions:</strong> <span id="conditionsToday"></span></p>
-             <p id="weatherImg"></p>
-            <p><strong>10-Day Weather Forecast:</strong> <div id="forecastInfo"></div></p>
-            <p><strong>Wikipedia Search:</strong> <a id="wikiLink" href="#" target="_blank">View on Wikipedia</a></p>
-            <p><strong>Timezone:</strong> <span id="timezone"></span></p>
-            <p><strong>Recent Earthquakes:</strong> <span id="earthquakeList"></span></p>
-        </div>
+    <!-- JS Libraries -->
+    <script src="js/bootstrap.bundle.min.js"></script>
+    <script src="js/jquery-3.7.1.min.js"></script>
+    <script src="js/leaflet.js"></script>
+    <script src="js/leaflet-easybutton.js"></script>
+    <script>
+        $(document).ready(function () {
+            // Populate dropdown from restcountries.org
+            $.ajax({
+                url: "https://restcountries.com/v3.1/all",
+                method: "GET",
+                dataType: "json",
+                success: function (data) {
+                    const dropdown = $("#countrySelect");
+                    dropdown.empty();
+                    dropdown.append(new Option("Select a Country", ""));
+                    
+                    data.sort((a, b) => a.name.common.localeCompare(b.name.common)); // Sort alphabetically
 
-    <div id="map" style="height: 500px;"></div>
-
-    <!-- Weather Modal -->
-    <div class="modal" id="weatherModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h4>Country Weather: <span id="weatherCountry"></span></h4>
-                <button class="close" onclick="closeModal('weatherModal')">&times;</button>
-            </div>
-            <div class="modal-body">
-                <p id="conditionsToday"></p>
-                <p id="tempToday"></p>
-                <div id="weatherImg"></div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn" onclick="closeModal('weatherModal')">Close</button>
-            </div>
-        </div>
-    </div>
-
-    <script src="Js/bootstrap.bundle.min.js"></script>
-    <script src="Js/jquery-3.7.1.min.js"></script>
-    <script src="Js/leaflet.js"></script>
-    <script src="Js/leaflet.markercluster.js"></script>
-    <script src="Js/script.js"></script>
+                    data.forEach(country => {
+                        const iso2 = country.cca2;
+                        const name = country.name.common;
+                        if (iso2 && name) {
+                            dropdown.append(new Option(name, iso2));
+                        }
+                    });
+                },
+                error: function (error) {
+                    console.error("Error fetching country list:", error);
+                }
+            });
+        });
+    </script>
 </body>
 </html>

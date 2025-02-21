@@ -60,6 +60,7 @@ $(document).ready(function () {
         displayCountryInfo(iso2);
         displayPopulation(iso2);
         displayWeather(iso2);
+        displayWeatherForecast(iso2);
         displayTimezone(iso2);
         displayCurrency(iso2);
         displayExchangeRate(iso2);
@@ -108,6 +109,16 @@ $(document).ready(function () {
         $.get('Php/getWeather.Php', { iso2: iso2 }, function (data) {
             $('#tempToday').text(data.temperature);
             $('#conditionsToday').text(data.description);
+        }, 'json');
+    }
+
+    function displayWeatherForecast(iso2) {
+        $.get('Php/getWeatherForecast.Php', { iso2: iso2 }, function (data) {
+            let forecastHtml = '';
+            data.forecast.forEach(day => {
+                forecastHtml += `<p>${day.date}: ${day.min_temp}°C - ${day.max_temp}°C</p>`;
+            });
+            $('#forecastInfo').html(forecastHtml);
         }, 'json');
     }
 

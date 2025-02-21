@@ -15,42 +15,40 @@
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <!-- Country Selection Dropdown -->
-    <span id="selectContainer">
-        <select id="countrySelect" class="form-select shadow-sm">
-            <option value="">Select a Country</option>
-        </select>
-    </span>
+    <!-- Country Selection Dropdown on Map -->
+    <div id="map">
+        <span id="selectContainer">
+            <select id="countrySelect" class="form-select shadow-sm">
+                <option value="">Select a Country</option>
+            </select>
+        </span>
+    </div>
 
-    <!-- Map Container -->
-    <div id="map"></div>
-
-    <!-- Modal for Country Info -->
+    <!-- Country Information Modal -->
     <div class="modal fade" id="countryInfoModal" tabindex="-1" aria-labelledby="countryInfoLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
-            <div class="modal-content">
-                <div class="modal-header bg-success text-white">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content shadow">
+                <div class="modal-header bg-success bg-gradient text-white">
                     <h5 class="modal-title" id="countryInfoLabel">Country Information</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <p><strong>Country:</strong> <span id="countryName"></span></p>
+                    <p><strong>Country:</strong> <span id="countryNames"></span></p>
                     <p><strong>Capital City:</strong> <span id="capitalCity"></span></p>
                     <p><strong>Population:</strong> <span id="population"></span></p>
-                    <p><strong>Currency:</strong> <span id="currencyName"></span></p>
-                    <p><strong>Exchange Rate:</strong> <span id="exchangeRate"></span></p>
-                    <p><strong>Weather:</strong> <span id="weather"></span></p>
+                    <p><strong>Currency:</strong> <span id="currencyName"></span> (<span id="currencySymbol"></span>)</p>
+                    <p><strong>Exchange Rate:</strong> <span id="txtCurrencyRate"></span></p>
+                    <p><strong>Current Weather:</strong> <span id="weather"></span></p>
                     <p><strong>Temperature:</strong> <span id="tempToday"></span></p>
                     <p><strong>Conditions:</strong> <span id="conditionsToday"></span></p>
+                    <p id="weatherImg"></p>
+                    <p><strong>10-Day Weather Forecast:</strong> <div id="forecastInfo"></div></p>
+                    <p><strong>Wikipedia Search:</strong> <a id="wikiLink" href="#" target="_blank">View on Wikipedia</a></p>
                     <p><strong>Timezone:</strong> <span id="timezone"></span></p>
-                    <p><strong>Wikipedia Link:</strong> <a id="wikiLink" href="#" target="_blank">View on Wikipedia</a></p>
-                    <p><strong>Recent Earthquakes:</strong></p>
-                    <div id="earthquakeList"></div>
-                    <p><strong>10-Day Weather Forecast:</strong></p>
-                    <div id="forecastInfo"></div>
+                    <p><strong>Recent Earthquakes:</strong> <span id="earthquakeList"></span></p>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-success" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-outline-success btn-sm" data-bs-dismiss="modal">Close</button>
                 </div>
             </div>
         </div>

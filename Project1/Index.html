@@ -25,13 +25,13 @@
     <!-- Map Container -->
     <div id="map"></div>
 
-    <!-- Modal for Country Information -->
-    <div class="modal" id="countryInfoModal" tabindex="-1">
+    <!-- Country Information Modal -->
+    <div id="countryModal" class="modal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-            <div class="modal-content shadow">
+            <div class="modal-content">
                 <div class="modal-header bg-success text-white">
                     <h5 class="modal-title">Country Information</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
                     <p><strong>Country:</strong> <span id="countryName"></span></p>
@@ -43,94 +43,24 @@
                     <p><strong>Temperature:</strong> <span id="temperature"></span></p>
                     <p><strong>Conditions:</strong> <span id="conditions"></span></p>
                     <p><strong>Timezone:</strong> <span id="timezone"></span></p>
-                    <p><strong>Wikipedia Link:</strong> <a id="wikiLink" href="#" target="_blank">View</a></p>
+                    <p><strong>Wikipedia Link:</strong> <a href="#" id="wikiLink" target="_blank">View</a></p>
+                    <p><strong>Recent Earthquakes:</strong></p>
+                    <div id="earthquakeList"></div>
+                    <p><strong>10-Day Weather Forecast:</strong></p>
+                    <div id="weatherForecast"></div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-success btn-sm" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- JS Libraries -->
-    <script src="Js/bootstrap.bundle.min.js"></script>
-    <script src="Js/jquery-3.7.1.min.js"></script>
-    <script src="Js/leaflet.js"></script>
-    <script src="Js/easy-button.js"></script>
-    <script>
-        let map;
-        $(document).ready(function () {
-            // Initialize the map
-            map = L.map('map').setView([20, 0], 2); // Centered globally
-
-            // Add OpenStreetMap tile layer
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-            }).addTo(map);
-
-            // Easy Button for showing country info modal
-            L.easyButton('fa-info', function () {
-                $('#countryInfoModal').modal('show');
-            }).addTo(map);
-
-            // Populate dropdown from restcountries.org
-            $.ajax({
-                url: "https://restcountries.com/v3.1/all",
-                method: "GET",
-                dataType: "json",
-                success: function (data) {
-                    const dropdown = $("#countrySelect");
-                    dropdown.empty();
-                    dropdown.append(new Option("Select a Country", ""));
-                    
-                    data.sort((a, b) => a.name.common.localeCompare(b.name.common));
-
-                    data.forEach(country => {
-                        const iso2 = country.cca2;
-                        const name = country.name.common;
-                        if (iso2 && name) {
-                            dropdown.append(new Option(name, iso2));
-                        }
-                    });
-                },
-                error: function (error) {
-                    console.error("Error fetching country list:", error);
-                }
-            });
-
-            // On country selection, fetch and display info
-            $('#countrySelect').change(function () {
-                const selectedCountry = $(this).val();
-                if (selectedCountry) {
-                    $.ajax({
-                        url: `Php/countryName.php`,
-                        method: "GET",
-                        data: { iso2: selectedCountry },
-                        dataType: "json",
-                        success: function (data) {
-                            $('#countryName').text(data.name);
-                            $('#capitalCity').text(data.capital);
-                            $('#population').text(data.population);
-                            $('#currency').text(`${data.currencyName} (${data.currencyCode}) - ${data.currencySymbol}`);
-                            $('#exchangeRate').text(data.exchangeRate);
-                            $('#weather').text(data.weather);
-                            $('#temperature').text(data.temperature);
-                            $('#conditions').text(data.conditions);
-                            $('#timezone').text(data.timezone);
-                            $('#wikiLink').attr('href', data.wikipedia);
-
-                            // Zoom to the selected country
-                            if (data.lat && data.lon) {
-                                map.setView([data.lat, data.lon], 5);
-                            }
-                        },
-                        error: function (error) {
-                            console.error("Error fetching country data:", error);
-                        }
-                    });
-                }
-            });
-        });
-    </script>
+    <script src="js/bootstrap.bundle.min.js"></script>
+    <script src="js/jquery-3.7.1.min.js"></script>
+    <script src="js/leaflet.js"></script>
+    <script src="js/easy-button.js"></script>
+    <script src="js/script.js"></script>
 </body>
 </html>

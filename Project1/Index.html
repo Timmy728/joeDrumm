@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gazetteer Map</title>
-    
+
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="css/bootstrap.min.css">
     <!-- Leaflet CSS -->
@@ -25,13 +25,13 @@
     <!-- Map Container -->
     <div id="map"></div>
 
-    <!-- Country Information Modal -->
-    <div id="countryModal" class="modal" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+    <!-- Modal for Country Information -->
+    <div class="modal fade" id="countryInfoModal" tabindex="-1">
+        <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header bg-success text-white">
                     <h5 class="modal-title">Country Information</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <p><strong>Country:</strong> <span id="countryName"></span></p>
@@ -43,11 +43,9 @@
                     <p><strong>Temperature:</strong> <span id="temperature"></span></p>
                     <p><strong>Conditions:</strong> <span id="conditions"></span></p>
                     <p><strong>Timezone:</strong> <span id="timezone"></span></p>
-                    <p><strong>Wikipedia Link:</strong> <a href="#" id="wikiLink" target="_blank">View</a></p>
-                    <p><strong>Recent Earthquakes:</strong></p>
-                    <div id="earthquakeList"></div>
-                    <p><strong>10-Day Weather Forecast:</strong></p>
-                    <div id="weatherForecast"></div>
+                    <p><strong>Wikipedia Link:</strong> <a id="wikiLink" href="#" target="_blank">View</a></p>
+                    <p><strong>Recent Earthquakes:</strong> <span id="earthquakes"></span></p>
+                    <p><strong>10-Day Weather Forecast:</strong> <span id="weatherForecast"></span></p>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>

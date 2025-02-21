@@ -17,7 +17,7 @@
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <!-- Country Selection Dropdown Only -->
+    <!-- Country Selection Dropdown -->
     <span id="selectContainer">
         <select id="countrySelect" class="form-select shadow-sm">
             <option value="">Select a Country</option>
@@ -28,13 +28,12 @@
     <div id="map"></div>
 
     <!-- JS Libraries -->
-    <script src="js/bootstrap.bundle.min.js"></script>
-    <script src="js/jquery-3.7.1.min.js"></script>
-    <script src="js/leaflet.js"></script>
-    <script src="js/leaflet-easybutton.js"></script>
+    <script src="Js/bootstrap.bundle.min.js"></script>
+    <script src="Js/jquery-3.7.1.min.js"></script>
+    <script src="Js/leaflet.js"></script>
     <script>
+        
         let map;
-
         $(document).ready(function () {
             // Initialize the map
             map = L.map('map').setView([20, 0], 2); // Centered globally
@@ -54,7 +53,7 @@
                     dropdown.empty();
                     dropdown.append(new Option("Select a Country", ""));
                     
-                    data.sort((a, b) => a.name.common.localeCompare(b.name.common)); // Sort alphabetically
+                    data.sort((a, b) => a.name.common.localeCompare(b.name.common)); 
 
                     data.forEach(country => {
                         const iso2 = country.cca2;

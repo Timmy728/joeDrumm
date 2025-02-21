@@ -25,13 +25,38 @@
     <!-- Map Container -->
     <div id="map"></div>
 
+    <!-- Modal for Country Information -->
+    <div class="modal" id="countryInfoModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content shadow">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title">Country Information</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p><strong>Country:</strong> <span id="countryName"></span></p>
+                    <p><strong>Capital City:</strong> <span id="capitalCity"></span></p>
+                    <p><strong>Population:</strong> <span id="population"></span></p>
+                    <p><strong>Currency:</strong> <span id="currency"></span></p>
+                    <p><strong>Exchange Rate:</strong> <span id="exchangeRate"></span></p>
+                    <p><strong>Weather:</strong> <span id="weather"></span></p>
+                    <p><strong>Temperature:</strong> <span id="temperature"></span></p>
+                    <p><strong>Conditions:</strong> <span id="conditions"></span></p>
+                    <p><strong>Timezone:</strong> <span id="timezone"></span></p>
+                    <p><strong>Wikipedia Link:</strong> <a id="wikiLink" href="#" target="_blank">View</a></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-success btn-sm" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- JS Libraries -->
     <script src="Js/bootstrap.bundle.min.js"></script>
     <script src="Js/jquery-3.7.1.min.js"></script>
     <script src="Js/leaflet.js"></script>
-    <!-- EasyButton JS -->
     <script src="Js/easy-button.js"></script>
-    
     <script>
         let map;
         $(document).ready(function () {
@@ -41,6 +66,11 @@
             // Add OpenStreetMap tile layer
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
+
+            // Easy Button for showing country info modal
+            L.easyButton('fa-info', function () {
+                $('#countryInfoModal').modal('show');
             }).addTo(map);
 
             // Populate dropdown from restcountries.org
@@ -53,7 +83,7 @@
                     dropdown.empty();
                     dropdown.append(new Option("Select a Country", ""));
                     
-                    data.sort((a, b) => a.name.common.localeCompare(b.name.common)); 
+                    data.sort((a, b) => a.name.common.localeCompare(b.name.common));
 
                     data.forEach(country => {
                         const iso2 = country.cca2;
@@ -68,18 +98,30 @@
                 }
             });
 
-            // On country selection, zoom to that country
+            // On country selection, fetch and display info
             $('#countrySelect').change(function () {
                 const selectedCountry = $(this).val();
                 if (selectedCountry) {
                     $.ajax({
-                        url: `https://restcountries.com/v3.1/alpha/${selectedCountry}`,
+                        url: `Php/countryName.php`,
                         method: "GET",
+                        data: { iso2: selectedCountry },
                         dataType: "json",
                         success: function (data) {
-                            if (data && data[0] && data[0].latlng) {
-                                const [lat, lng] = data[0].latlng;
-                                map.setView([lat, lng], 5); // Zoom to the selected country
+                            $('#countryName').text(data.name);
+                            $('#capitalCity').text(data.capital);
+                            $('#population').text(data.population);
+                            $('#currency').text(`${data.currencyName} (${data.currencyCode}) - ${data.currencySymbol}`);
+                            $('#exchangeRate').text(data.exchangeRate);
+                            $('#weather').text(data.weather);
+                            $('#temperature').text(data.temperature);
+                            $('#conditions').text(data.conditions);
+                            $('#timezone').text(data.timezone);
+                            $('#wikiLink').attr('href', data.wikipedia);
+
+                            // Zoom to the selected country
+                            if (data.lat && data.lon) {
+                                map.setView([data.lat, data.lon], 5);
                             }
                         },
                         error: function (error) {
@@ -88,11 +130,6 @@
                     });
                 }
             });
-
-            // Adding EasyButton to open a placeholder modal
-            L.easyButton('fa-info', function () {
-                alert('EasyButton Clicked! This will later show country information via modals.');
-            }).addTo(map);
         });
     </script>
 </body>

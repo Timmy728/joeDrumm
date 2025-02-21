@@ -1,15 +1,7 @@
-$(window).on('load', function () {
-    if ($('#preloader').length) {
-        $('#preloader').delay(1000).fadeOut('slow', function () {
-            $(this).remove();
-        });
-    }
-});
-
+// Initialize map and variables
 let map;
 let bordersLayer;
 let selectedCountryISO2;
-let countryBordersData;
 
 $(document).ready(function () {
     // Initialize the map
@@ -20,64 +12,80 @@ $(document).ready(function () {
         attribution: '&copy; OpenStreetMap contributors'
     }).addTo(map);
 
-    // EasyButton to show country info
+    // Add EasyButton
     L.easyButton('fa-info', function () {
         $('#countryInfoModal').modal('show');
     }).addTo(map);
 
-    // Populate countries dropdown
+    // Populate countries dropdown from restcountries.org
     $.ajax({
-        url: 'Php/countryName.Php',
-        type: 'GET',
+        url: 'https://restcountries.com/v3.1/all',
+        method: 'GET',
         dataType: 'json',
         success: function (data) {
-            populateCountryDropdown(data);
+            const dropdown = $('#countrySelect');
+            dropdown.empty();
+            dropdown.append(new Option('Select a Country', ''));
+            data.sort((a, b) => a.name.common.localeCompare(b.name.common));
+            data.forEach(function (country) {
+                if (country.cca2 && country.name.common) {
+                    dropdown.append(new Option(country.name.common, country.cca2));
+                }
+            });
         },
         error: function (xhr, status, error) {
-            console.error('Error fetching country list:', error);
+            console.error('Error fetching countries:', error);
         }
     });
 
-    function populateCountryDropdown(countries) {
-        const dropdown = $('#selCountry');
-        dropdown.empty();
-        dropdown.append(new Option('Select Country', ''));
-        countries.forEach(function (country) {
-            if (country.name && country.iso2) {
-                dropdown.append(new Option(country.name, country.iso2));
-            }
-        });
-    }
-
-    $('#selCountry').change(function () {
+    // Handle country selection
+    $('#countrySelect').change(function () {
         const iso2 = $(this).val();
         if (iso2) {
             updateCountryData(iso2);
         }
     });
 
+    // Update country data
     function updateCountryData(iso2) {
-        displayCountryInfo(iso2);
-        displayPopulation(iso2);
-        displayWeather(iso2);
-        displayWeatherForecast(iso2);
-        displayTimezone(iso2);
-        displayCurrency(iso2);
-        displayExchangeRate(iso2);
-        displayWikipediaInfo(iso2);
+        fetchCountryDetails(iso2);
+        zoomToCountry(iso2);
         displayEarthquakeData(iso2);
-        updateCountryBorders(iso2);
+        displayWeatherForecast(iso2);
     }
 
-    function updateCountryBorders(iso2) {
-        if (bordersLayer) {
-            map.removeLayer(bordersLayer);
-        }
+    // Fetch and display country information
+    function fetchCountryDetails(iso2) {
+        $.get('Php/countryName.Php', { iso2: iso2 }, function (data) {
+            $('#countryName').text(data.name);
+            $('#capitalCity').text(data.capital);
+            $('#population').text(data.population);
+            $('#currencyName').text(`${data.currency} (${data.currencyCode}) - ${data.currencySymbol}`);
+        }, 'json');
+
+        $.get('Php/Timezone.Php', { iso2: iso2 }, function (data) {
+            $('#timezone').text(data.timezone);
+        }, 'json');
+
+        $.get('Php/latestExchangeRate.php', { iso2: iso2 }, function (data) {
+            $('#exchangeRate').text(`1 USD = ${data.exchangeRate} ${data.currencyCode}`);
+        }, 'json');
+
+        $.get('Php/wikipediaSearch.Php', { query: iso2 }, function (data) {
+            $('#wikiLink').attr('href', data.url).text(`View ${data.title} on Wikipedia`);
+        }, 'json');
+    }
+
+    // Zoom into the selected country
+    function zoomToCountry(iso2) {
         $.getJSON('Data/countryBorders.geo.json', function (data) {
             const country = data.features.find(
                 feature => feature.properties.iso_a2 === iso2
             );
             if (country) {
+                if (bordersLayer) {
+                    map.removeLayer(bordersLayer);
+                }
                 bordersLayer = L.geoJSON(country, {
                     style: {
                         color: 'blue',
@@ -91,61 +99,7 @@ $(document).ready(function () {
         });
     }
 
-    function displayCountryInfo(iso2) {
-        $.get('Php/countryName.Php', { iso2: iso2 }, function (data) {
-            $('#countryName').text(data.name);
-            $('#capitalCity').text(data.capital);
-            $('#population').text(data.population);
-        }, 'json');
-    }
-
-    function displayPopulation(iso2) {
-        $.get('Php/Population.Php', { countryCode: iso2 }, function (data) {
-            $('#population').text(data.population);
-        }, 'json');
-    }
-
-    function displayWeather(iso2) {
-        $.get('Php/getWeather.Php', { iso2: iso2 }, function (data) {
-            $('#tempToday').text(data.temperature);
-            $('#conditionsToday').text(data.description);
-        }, 'json');
-    }
-
-    function displayWeatherForecast(iso2) {
-        $.get('Php/getWeatherForecast.Php', { iso2: iso2 }, function (data) {
-            let forecastHtml = '';
-            data.forecast.forEach(day => {
-                forecastHtml += `<p>${day.date}: ${day.min_temp}°C - ${day.max_temp}°C</p>`;
-            });
-            $('#forecastInfo').html(forecastHtml);
-        }, 'json');
-    }
-
-    function displayTimezone(iso2) {
-        $.get('Php/Timezone.Php', { iso2: iso2 }, function (data) {
-            $('#timezone').text(data.timezone);
-        }, 'json');
-    }
-
-    function displayCurrency(iso2) {
-        $.get('Php/Currency.Php', { iso2: iso2 }, function (data) {
-            $('#currencyName').text(`${data.name} (${data.code}) - ${data.symbol}`);
-        }, 'json');
-    }
-
-    function displayExchangeRate(iso2) {
-        $.get('Php/latestExchangeRate.php', { iso2: iso2 }, function (data) {
-            $('#exchangeRate').text(`1 USD = ${data.exchangeRate} ${data.currencyCode}`);
-        }, 'json');
-    }
-
-    function displayWikipediaInfo(iso2) {
-        $.get('Php/wikipediaSearch.Php', { query: iso2 }, function (data) {
-            $('#wikiLink').attr('href', data.url).text(`View ${data.title} on Wikipedia`);
-        }, 'json');
-    }
-
+    // Display recent earthquakes
     function displayEarthquakeData(iso2) {
         $.get('Php/earthQuakes.Php', { country: iso2 }, function (data) {
             let earthquakeHtml = '';
@@ -153,6 +107,17 @@ $(document).ready(function () {
                 earthquakeHtml += `<p>📍 Magnitude: ${quake.magnitude} | Depth: ${quake.depth}km | Location: (${quake.lat}, ${quake.lng}) | Time: ${quake.datetime}</p>`;
             });
             $('#earthquakeList').html(earthquakeHtml);
+        }, 'json');
+    }
+
+    // Display 10-day weather forecast
+    function displayWeatherForecast(iso2) {
+        $.get('Php/getWeatherForecast.Php', { iso2: iso2 }, function (data) {
+            let forecastHtml = '';
+            data.forEach(forecast => {
+                forecastHtml += `<p>${forecast.date}: ${forecast.min_temp}°C - ${forecast.max_temp}°C</p>`;
+            });
+            $('#forecastInfo').html(forecastHtml);
         }, 'json');
     }
 });

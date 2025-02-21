@@ -11,8 +11,6 @@
     <link rel="stylesheet" href="css/leaflet.css">
     <!-- EasyButton CSS -->
     <link rel="stylesheet" href="css/easy-button.css">
-    <- EasyButton Js -->
-    <script src="Js/easy-button.js"></script>
     <!-- Custom CSS -->
     <link rel="stylesheet" href="css/style.css">
 </head>
@@ -31,8 +29,10 @@
     <script src="Js/bootstrap.bundle.min.js"></script>
     <script src="Js/jquery-3.7.1.min.js"></script>
     <script src="Js/leaflet.js"></script>
+    <!-- EasyButton JS -->
+    <script src="Js/easy-button.js"></script>
+    
     <script>
-        
         let map;
         $(document).ready(function () {
             // Initialize the map
@@ -88,6 +88,11 @@
                     });
                 }
             });
+
+            // Adding EasyButton to open a placeholder modal
+            L.easyButton('fa-info', function () {
+                alert('EasyButton Clicked! This will later show country information via modals.');
+            }).addTo(map);
         });
     </script>
 </body>

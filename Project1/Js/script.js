@@ -56,7 +56,7 @@ $(document).ready(function () {
     function fetchAllCountryData(iso2) {
         displayCountryInfo(iso2);
         displayPopulation(iso2);
-        displayWeather(iso2);
+        fetchCoordinatesAndDisplayWeather(iso2);
         displayTimezone(iso2);
         displayCurrency(iso2);
         displayExchangeRate(iso2);
@@ -64,6 +64,15 @@ $(document).ready(function () {
         displayEarthquakeData(iso2);
         displayWeatherForecast(iso2);
         updateCountryBorders(iso2);
+    }
+
+    function fetchCoordinatesAndDisplayWeather(iso2) {
+        $.get('https://restcountries.com/v3.1/alpha/' + iso2, function (data) {
+            if (data && data[0] && data[0].latlng) {
+                const [lat, lon] = data[0].latlng;
+                displayWeather(lat, lon);
+            }
+        }, 'json');
     }
 
     function updateCountryBorders(iso2) {
@@ -102,11 +111,11 @@ $(document).ready(function () {
         }, 'json');
     }
 
-    function displayWeather(iso2) {
-        $.get('Php/getWeather.Php', { iso2: iso2 }, function (data) {
+    function displayWeather(lat, lon) {
+        $.get('Php/getWeather.Php', { lat: lat, lon: lon }, function (data) {
             $('#tempToday').text(data.temperature);
             $('#conditionsToday').text(data.description);
-            $('#weatherImg').html(<img src="${data.icon}" alt="Weather Icon">);
+            $('#weatherImg').html(`<img src="${data.icon}" alt="Weather Icon">`);
         }, 'json');
     }
 
@@ -118,19 +127,29 @@ $(document).ready(function () {
 
     function displayCurrency(iso2) {
         $.get('Php/Currency.Php', { iso2: iso2 }, function (data) {
-            $('#currencyName').text(${data.name} (${data.code}) - ${data.symbol});
+            if (data && data.currencies && data.currencies.length > 0) {
+                let currency = data.currencies[0];
+                $('#currencyName').text(`${currency.name} (${currency.code}) - ${currency.symbol}`);
+            } else {
+                $('#currencyName').text('Currency not available');
+            }
         }, 'json');
     }
 
     function displayExchangeRate(iso2) {
         $.get('Php/latestExchangeRate.php', { iso2: iso2 }, function (data) {
-            $('#txtCurrencyRate').text(1 USD = ${data.exchangeRate} ${data.currencyCode});
+            $('#txtCurrencyRate').text(`1 USD = ${data.exchangeRate} ${data.currencyCode}`);
         }, 'json');
     }
 
     function displayWikipediaInfo(iso2) {
-        $.get('Php/wikipediaSearch.Php', { query: iso2 }, function (data) {
-            $('#wikiLink').attr('href', data.url).text(View ${data.title} on Wikipedia);
+        $.get('https://restcountries.com/v3.1/alpha/' + iso2, function (data) {
+            if (data && data[0]) {
+                const countryName = data[0].name.common;
+                $.get('Php/wikipediaSearch.Php', { query: countryName }, function (wikiData) {
+                    $('#wikiLink').attr('href', wikiData.url).text(`View ${wikiData.title} on Wikipedia`);
+                }, 'json');
+            }
         }, 'json');
     }
 
@@ -138,7 +157,7 @@ $(document).ready(function () {
         $.get('Php/earthQuakes.Php', { country: iso2 }, function (data) {
             let earthquakeHtml = '';
             data.earthquakes.forEach(quake => {
-                earthquakeHtml += <p>📍 Magnitude: ${quake.magnitude} | Depth: ${quake.depth}km | Location: (${quake.lat}, ${quake.lng}) | Time: ${quake.datetime}</p>;
+                earthquakeHtml += `<p>📍 Magnitude: ${quake.magnitude} | Depth: ${quake.depth}km | Location: (${quake.lat}, ${quake.lng}) | Time: ${quake.datetime}</p>`;
             });
             $('#earthquakeList').html(earthquakeHtml);
         }, 'json');
@@ -150,7 +169,7 @@ $(document).ready(function () {
             data.forEach(forecast => {
                 let minTemp = forecast.min_temp !== null ? forecast.min_temp + '°C' : 'No Data';
                 let maxTemp = forecast.max_temp !== null ? forecast.max_temp + '°C' : 'No Data';
-                forecastHtml += <p>${forecast.date}: ${minTemp} - ${maxTemp}</p>;
+                forecastHtml += `<p>${forecast.date}: ${minTemp} - ${maxTemp}</p>`;
             });
             $('#forecastInfo').html(forecastHtml);
         }, 'json');

@@ -15,13 +15,33 @@ h1 {
   text-align: center;
   color: #333;
 }
+
 #map {
   width: 100%;
   height: 100vh;
-  margin-top: 20px;
+  border-radius: 5px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  position: relative;
+}
+
+#selectContainer {
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  background-color: white;
+  padding: 5px;
   border-radius: 5px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
+
+#countrySelect {
+  width: 200px;
+  padding: 5px;
+  font-size: 14px;
+}
+
 #preloader {
   position: fixed;
   top: 0;
@@ -38,6 +58,7 @@ h1 {
   left: 50%;
   transform: translate(-50%, -50%);
 }
+
 #countryInfo {
   background-color: #fff;
   padding: 20px;
@@ -68,6 +89,7 @@ h1 {
   display: block;
   margin: 0 auto;
 }
+
 .modal {
   display: none;
   position: fixed;
@@ -84,8 +106,8 @@ h1 {
 .modal-content {
   background-color: #fff;
   padding: 20px;
-  width: 80%;
-  max-width: 600px;
+  width: 90%;
+  max-width: 800px;
   border-radius: 10px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
@@ -99,6 +121,8 @@ h1 {
 }
 
 .modal-body {
+  max-height: 70vh;
+  overflow-y: auto;
   padding: 20px;
   font-size: 16px;
   color: #333;
@@ -122,17 +146,6 @@ h1 {
   background-color: #0056b3;
 }
 
-.modal .close {
-  background-color: transparent;
-  border: none;
-  color: #fff;
-  font-size: 24px;
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  cursor: pointer;
-}
-
 /* Weather and Earthquake Info */
 #weatherImg img {
   width: 50px;
@@ -143,27 +156,22 @@ h1 {
   display: flex;
   flex-wrap: wrap;
   justify-content: space-around;
-  margin: 20px 0; /* Optional: Adjust margin for spacing */
+  margin: 20px 0;
 }
 
 .earthquake-entry {
-  width: 30%; /* Adjust this value as necessary for the horizontal layout */
-  margin: 15px; /* Spacing between earthquake entries */
+  width: 45%;
+  margin: 15px;
   padding: 15px;
-  background-color: #f8f8f8; /* Light background */
-  border: 1px solid #ddd; /* Light border */
-  border-radius: 5px; /* Rounded corners */
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Soft shadow */
+  background-color: #f8f8f8;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   text-align: center;
-  font-family: Arial, sans-serif;
 }
 
 .earthquake-entry strong {
   display: block;
-  margin: 5px 0;
-}
-
-#earthquakeInfo p {
   margin: 5px 0;
 }
 
@@ -173,25 +181,15 @@ h1 {
 
 /* Responsive Design */
 @media (max-width: 768px) {
-  .container {
-    width: 100%;
-    padding: 10px;
+  #countrySelect {
+    width: 150px;
+    font-size: 12px;
   }
-
-  #selCountry {
-    max-width: 100%;
-  }
-
   .modal-content {
     width: 95%;
   }
-
   #map {
     height: 400px;
-  }
-
-  h1 {
-    font-size: 22px;
   }
 }
 
@@ -199,12 +197,13 @@ h1 {
   #countryInfo p {
     font-size: 14px;
   }
-
   .modal-body {
     font-size: 14px;
   }
-
   .modal-footer button {
     padding: 8px 16px;
+  }
+  #countrySelect {
+    width: 120px;
   }
 }

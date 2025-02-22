@@ -56,7 +56,7 @@ $(document).ready(function () {
     function fetchAllCountryData(iso2) {
         displayCountryInfo(iso2);
         displayPopulation(iso2);
-        displayWeather(iso2);
+        fetchCoordinatesAndDisplayWeather(iso2);
         displayTimezone(iso2);
         displayCurrency(iso2);
         displayExchangeRate(iso2);
@@ -64,6 +64,15 @@ $(document).ready(function () {
         displayEarthquakeData(iso2);
         displayWeatherForecast(iso2);
         updateCountryBorders(iso2);
+    }
+
+    function fetchCoordinatesAndDisplayWeather(iso2) {
+        $.get('https://restcountries.com/v3.1/alpha/' + iso2, function (data) {
+            if (data && data[0] && data[0].latlng) {
+                const [lat, lon] = data[0].latlng;
+                displayWeather(lat, lon);
+            }
+        }, 'json');
     }
 
     function updateCountryBorders(iso2) {
@@ -102,8 +111,8 @@ $(document).ready(function () {
         }, 'json');
     }
 
-    function displayWeather(iso2) {
-        $.get('Php/getWeather.Php', { iso2: iso2 }, function (data) {
+    function displayWeather(lat, lon) {
+        $.get('Php/getWeather.Php', { lat: lat, lon: lon }, function (data) {
             $('#tempToday').text(data.temperature);
             $('#conditionsToday').text(data.description);
             $('#weatherImg').html(`<img src="${data.icon}" alt="Weather Icon">`);
@@ -118,7 +127,12 @@ $(document).ready(function () {
 
     function displayCurrency(iso2) {
         $.get('Php/Currency.Php', { iso2: iso2 }, function (data) {
-            $('#currencyName').text(`${data.name} (${data.code}) - ${data.symbol}`);
+            if (data && data.currencies && data.currencies.length > 0) {
+                let currency = data.currencies[0];
+                $('#currencyName').text(`${currency.name} (${currency.code}) - ${currency.symbol}`);
+            } else {
+                $('#currencyName').text('Currency not available');
+            }
         }, 'json');
     }
 
@@ -129,8 +143,13 @@ $(document).ready(function () {
     }
 
     function displayWikipediaInfo(iso2) {
-        $.get('Php/wikipediaSearch.Php', { query: iso2 }, function (data) {
-            $('#wikiLink').attr('href', data.url).text(`View ${data.title} on Wikipedia`);
+        $.get('https://restcountries.com/v3.1/alpha/' + iso2, function (data) {
+            if (data && data[0]) {
+                const countryName = data[0].name.common;
+                $.get('Php/wikipediaSearch.Php', { query: countryName }, function (wikiData) {
+                    $('#wikiLink').attr('href', wikiData.url).text(`View ${wikiData.title} on Wikipedia`);
+                }, 'json');
+            }
         }, 'json');
     }
 

@@ -143,18 +143,29 @@ $(document).ready(function () {
         }, 'json');
     }
 
-function displayWikipediaInfo(countryName) {
-    $.get('Php/wikipediaSearch.Php', { query: countryName }, function (wikiData) {
-        if (wikiData && wikiData.results && wikiData.results.length > 0) {
-            const firstResult = wikiData.results[0]; // Use the first Wikipedia result
-            $('#wikiLink').attr('href', firstResult.link).text(`View ${firstResult.title} on Wikipedia`);
+function displayWikipediaInfo(iso2) {
+    $.get('https://restcountries.com/v3.1/alpha/' + iso2, function (data) {
+        if (data && data[0]) {
+            const countryName = data[0].name.common;
+            $.get('Php/wikipediaSearch.Php', { query: countryName }, function (wikiData) {
+                if (wikiData && wikiData.results && wikiData.results.length > 0) {
+                    const firstResult = wikiData.results[0];
+                    $('#wikiLink').attr('href', firstResult.link).text(`View ${firstResult.title} on Wikipedia`);
+                } else {
+                    $('#wikiLink').attr('href', '#').text('No Wikipedia entry found.');
+                }
+            }, 'json').fail(function () {
+                $('#wikiLink').attr('href', '#').text('Error fetching Wikipedia data.');
+            });
+
         } else {
-            $('#wikiLink').attr('href', '#').text('No Wikipedia entry found.');
+            console.error("Could not fetch country name from RESTCountries API.");
         }
     }, 'json').fail(function () {
-        $('#wikiLink').attr('href', '#').text('Error fetching Wikipedia data');
+        console.error("Failed to fetch country data from RESTCountries API.");
     });
 }
+
 
 
     function displayEarthquakeData(iso2) {

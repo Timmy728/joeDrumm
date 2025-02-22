@@ -54,14 +54,14 @@ $(document).ready(function () {
         }
     });
 
-    function fetchAllCountryData(iso2, countryName) {
+    function fetchAllCountryData(iso2) {
         displayCountryInfo(iso2);
         displayPopulation(iso2);
         fetchCoordinatesAndDisplayWeather(iso2);
         displayTimezone(iso2);
         displayCurrency(iso2);
         displayExchangeRate(iso2);
-        displayWikipediaInfo(iso2, countryName);
+        displayWikipediaInfo(iso2);
         displayEarthquakeData(iso2);
         displayWeatherForecast(iso2);
         updateCountryBorders(iso2);

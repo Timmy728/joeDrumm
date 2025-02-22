@@ -12,13 +12,56 @@ let selectedCountryISO2;
 let countryBordersData;
 
 $(document).ready(function () {
-    // Initialize the map
-    map = L.map('map').setView([20, 0], 2);
+    // Initialize the map with Esri tile layers
+    map = L.map('map', {
+        layers: [
+            L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}", {
+                attribution: "Tiles &copy; Esri &mdash; Source: Esri, DeLorme, NAVTEQ, USGS, Intermap, iPC, NRCAN, Esri Japan, METI, Esri China (Hong Kong), Esri (Thailand), TomTom, 2012"
+            })
+        ]
+    }).setView([20, 0], 2); // Initial global view
 
-    // Add tile layer
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; OpenStreetMap contributors'
-    }).addTo(map);
+    let satellite = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", {
+        attribution: "Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community"
+    });
+
+    let basemaps = {
+        "Streets": map._layers[Object.keys(map._layers)[0]],
+        "Satellite": satellite
+    };
+
+    L.control.layers(basemaps).addTo(map);
+
+    // Load and display country borders on map load
+    fetchCountryBorders();
+
+    function fetchCountryBorders() {
+        $.getJSON('Data/countryBorders.geo.json', function (data) {
+            countryBordersData = data;
+
+            bordersLayer = L.geoJSON(countryBordersData, {
+                style: {
+                    color: 'gray',
+                    weight: 1,
+                    fillColor: 'lightgray',
+                    fillOpacity: 0.2
+                }
+            }).addTo(map);
+        }).fail(function () {
+            console.error('Failed to load country borders');
+        });
+    }
+
+    // Highlight selected country when picked
+    function updateCountryBorders(iso2) {
+        if (bordersLayer) {
+            map.removeLayer(bordersLayer);
+        }
+
+        const country = countryBordersData.features.find(
+            feature => feature.properties.iso_a2 === iso2
+        );
+
 
     // Add EasyButton for displaying country info
     L.easyButton('fa-info', function () {

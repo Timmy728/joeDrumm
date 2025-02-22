@@ -61,7 +61,7 @@ $(document).ready(function () {
         displayTimezone(iso2);
         displayCurrency(iso2);
         displayExchangeRate(iso2);
-        displayWikipediaInfo(countryName);
+        displayWikipediaInfo(iso2, countryName);
         displayEarthquakeData(iso2);
         displayWeatherForecast(iso2);
         updateCountryBorders(iso2);
@@ -144,27 +144,15 @@ $(document).ready(function () {
     }
 
 function displayWikipediaInfo(iso2) {
-    $.get('https://restcountries.com/v3.1/alpha/' + iso2, function (data) {
-        if (data && data[0]) {
-            const countryName = data[0].name.common;
-            $.get('Php/wikipediaSearch.Php', { query: countryName }, function (wikiData) {
-                if (wikiData && wikiData.results && wikiData.results.length > 0) {
-                    const firstResult = wikiData.results[0];
-                    $('#wikiLink').attr('href', firstResult.link).text(`View ${firstResult.title} on Wikipedia`);
-                } else {
-                    $('#wikiLink').attr('href', '#').text('No Wikipedia entry found.');
-                }
-            }, 'json').fail(function () {
-                $('#wikiLink').attr('href', '#').text('Error fetching Wikipedia data.');
-            });
-
-        } else {
-            console.error("Could not fetch country name from RESTCountries API.");
-        }
-    }, 'json').fail(function () {
-        console.error("Failed to fetch country data from RESTCountries API.");
-    });
-}
+        $.get('https://restcountries.com/v3.1/alpha/' + iso2, function (data) {
+            if (data && data[0]) {
+                const countryName = data[0].name.common;
+                $.get('Php/wikipediaSearch.Php', { query: countryName }, function (wikiData) {
+                    $('#wikiLink').attr('href', wikiData.url).text(View ${wikiData.title} on Wikipedia);
+                }, 'json');
+            }
+        }, 'json');
+    }
 
 
 

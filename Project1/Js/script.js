@@ -12,56 +12,13 @@ let selectedCountryISO2;
 let countryBordersData;
 
 $(document).ready(function () {
-    // Initialize the map with Esri tile layers
-    map = L.map('map', {
-        layers: [
-            L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}", {
-                attribution: "Tiles &copy; Esri &mdash; Source: Esri, DeLorme, NAVTEQ, USGS, Intermap, iPC, NRCAN, Esri Japan, METI, Esri China (Hong Kong), Esri (Thailand), TomTom, 2012"
-            })
-        ]
-    }).setView([20, 0], 2); // Initial global view
+    // Initialize the map
+    map = L.map('map').setView([20, 0], 2);
 
-    let satellite = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", {
-        attribution: "Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community"
-    });
-
-    let basemaps = {
-        "Streets": map._layers[Object.keys(map._layers)[0]],
-        "Satellite": satellite
-    };
-
-    L.control.layers(basemaps).addTo(map);
-
-    // Load and display country borders on map load
-    fetchCountryBorders();
-
-    function fetchCountryBorders() {
-        $.getJSON('Data/countryBorders.geo.json', function (data) {
-            countryBordersData = data;
-
-            bordersLayer = L.geoJSON(countryBordersData, {
-                style: {
-                    color: 'gray',
-                    weight: 1,
-                    fillColor: 'lightgray',
-                    fillOpacity: 0.2
-                }
-            }).addTo(map);
-        }).fail(function () {
-            console.error('Failed to load country borders');
-        });
-    }
-
-    // Highlight selected country when picked
-    function updateCountryBorders(iso2) {
-        if (bordersLayer) {
-            map.removeLayer(bordersLayer);
-        }
-
-        const country = countryBordersData.features.find(
-            feature => feature.properties.iso_a2 === iso2
-        );
-
+    // Add tile layer
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
 
     // Add EasyButton for displaying country info
     L.easyButton('fa-info', function () {
@@ -158,7 +115,7 @@ $(document).ready(function () {
         $.get('Php/getWeather.Php', { lat: lat, lon: lon }, function (data) {
             $('#tempToday').text(data.temperature);
             $('#conditionsToday').text(data.description);
-            $('#weatherImg').html(`<img src="${data.icon}" alt="Weather Icon">`);
+            $('#weatherImg').html(<img src="${data.icon}" alt="Weather Icon">);
         }, 'json');
     }
 
@@ -172,7 +129,7 @@ $(document).ready(function () {
         $.get('Php/Currency.Php', { iso2: iso2 }, function (data) {
             if (data && data.currencies && data.currencies.length > 0) {
                 let currency = data.currencies[0];
-                $('#currencyName').text(`${currency.name} (${currency.code}) - ${currency.symbol}`);
+                $('#currencyName').text(${currency.name} (${currency.code}) - ${currency.symbol});
             } else {
                 $('#currencyName').text('Currency not available');
             }
@@ -181,7 +138,7 @@ $(document).ready(function () {
 
     function displayExchangeRate(iso2) {
         $.get('Php/latestExchangeRate.php', { iso2: iso2 }, function (data) {
-            $('#txtCurrencyRate').text(`1 USD = ${data.exchangeRate} ${data.currencyCode}`);
+            $('#txtCurrencyRate').text(1 USD = ${data.exchangeRate} ${data.currencyCode});
         }, 'json');
     }
 
@@ -190,7 +147,7 @@ $(document).ready(function () {
             if (data && data[0]) {
                 const countryName = data[0].name.common;
                 $.get('Php/wikipediaSearch.Php', { query: countryName }, function (wikiData) {
-                    $('#wikiLink').attr('href', wikiData.url).text(`View ${wikiData.title} on Wikipedia`);
+                    $('#wikiLink').attr('href', wikiData.url).text(View ${wikiData.title} on Wikipedia);
                 }, 'json');
             }
         }, 'json');
@@ -200,7 +157,7 @@ $(document).ready(function () {
         $.get('Php/earthQuakes.Php', { country: iso2 }, function (data) {
             let earthquakeHtml = '';
             data.earthquakes.forEach(quake => {
-                earthquakeHtml += `<p>📍 Magnitude: ${quake.magnitude} | Depth: ${quake.depth}km | Location: (${quake.lat}, ${quake.lng}) | Time: ${quake.datetime}</p>`;
+                earthquakeHtml += <p>📍 Magnitude: ${quake.magnitude} | Depth: ${quake.depth}km | Location: (${quake.lat}, ${quake.lng}) | Time: ${quake.datetime}</p>;
             });
             $('#earthquakeList').html(earthquakeHtml);
         }, 'json');
@@ -212,7 +169,7 @@ $(document).ready(function () {
             data.forEach(forecast => {
                 let minTemp = forecast.min_temp !== null ? forecast.min_temp + '°C' : 'No Data';
                 let maxTemp = forecast.max_temp !== null ? forecast.max_temp + '°C' : 'No Data';
-                forecastHtml += `<p>${forecast.date}: ${minTemp} - ${maxTemp}</p>`;
+                forecastHtml += <p>${forecast.date}: ${minTemp} - ${maxTemp}</p>;
             });
             $('#forecastInfo').html(forecastHtml);
         }, 'json');

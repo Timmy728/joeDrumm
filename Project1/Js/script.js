@@ -115,7 +115,7 @@ $(document).ready(function () {
         $.get('Php/getWeather.Php', { lat: lat, lon: lon }, function (data) {
             $('#tempToday').text(data.temperature);
             $('#conditionsToday').text(data.description);
-            $('#weatherImg').html(<img src="${data.icon}" alt="Weather Icon">);
+            $('#weatherImg').html(`<img src="${data.icon}" alt="Weather Icon">`);
         }, 'json');
     }
 
@@ -129,7 +129,7 @@ $(document).ready(function () {
         $.get('Php/Currency.Php', { iso2: iso2 }, function (data) {
             if (data && data.currencies && data.currencies.length > 0) {
                 let currency = data.currencies[0];
-                $('#currencyName').text(${currency.name} (${currency.code}) - ${currency.symbol});
+                $('#currencyName').text(`${currency.name} (${currency.code}) - ${currency.symbol}`);
             } else {
                 $('#currencyName').text('Currency not available');
             }
@@ -138,7 +138,7 @@ $(document).ready(function () {
 
     function displayExchangeRate(iso2) {
         $.get('Php/latestExchangeRate.php', { iso2: iso2 }, function (data) {
-            $('#txtCurrencyRate').text(1 USD = ${data.exchangeRate} ${data.currencyCode});
+            $('#txtCurrencyRate').text(`1 USD = ${data.exchangeRate} ${data.currencyCode}`);
         }, 'json');
     }
 
@@ -147,7 +147,7 @@ $(document).ready(function () {
             if (data && data[0]) {
                 const countryName = data[0].name.common;
                 $.get('Php/wikipediaSearch.Php', { query: countryName }, function (wikiData) {
-                    $('#wikiLink').attr('href', wikiData.url).text(View ${wikiData.title} on Wikipedia);
+                    $('#wikiLink').attr('href', wikiData.url).text(`View ${wikiData.title} on Wikipedia`);
                 }, 'json');
             }
         }, 'json');
@@ -157,7 +157,7 @@ $(document).ready(function () {
         $.get('Php/earthQuakes.Php', { country: iso2 }, function (data) {
             let earthquakeHtml = '';
             data.earthquakes.forEach(quake => {
-                earthquakeHtml += <p>📍 Magnitude: ${quake.magnitude} | Depth: ${quake.depth}km | Location: (${quake.lat}, ${quake.lng}) | Time: ${quake.datetime}</p>;
+                earthquakeHtml += `<p>📍 Magnitude: ${quake.magnitude} | Depth: ${quake.depth}km | Location: (${quake.lat}, ${quake.lng}) | Time: ${quake.datetime}</p>`;
             });
             $('#earthquakeList').html(earthquakeHtml);
         }, 'json');
@@ -169,7 +169,7 @@ $(document).ready(function () {
             data.forEach(forecast => {
                 let minTemp = forecast.min_temp !== null ? forecast.min_temp + '°C' : 'No Data';
                 let maxTemp = forecast.max_temp !== null ? forecast.max_temp + '°C' : 'No Data';
-                forecastHtml += <p>${forecast.date}: ${minTemp} - ${maxTemp}</p>;
+                forecastHtml += `<p>${forecast.date}: ${minTemp} - ${maxTemp}</p>`;
             });
             $('#forecastInfo').html(forecastHtml);
         }, 'json');

@@ -48,19 +48,20 @@ $(document).ready(function () {
     // On country selection
     $('#countrySelect').change(function () {
         const iso2 = $(this).val();
+        const countryName = $('#countrySelect option: selected').text();
         if (iso2) {
-            fetchAllCountryData(iso2);
+            fetchAllCountryData(iso2, countryName);
         }
     });
 
-    function fetchAllCountryData(iso2) {
+    function fetchAllCountryData(iso2, countryName) {
         displayCountryInfo(iso2);
         displayPopulation(iso2);
         fetchCoordinatesAndDisplayWeather(iso2);
         displayTimezone(iso2);
         displayCurrency(iso2);
         displayExchangeRate(iso2);
-        displayWikipediaInfo(iso2);
+        displayWikipediaInfo(countryName);
         displayEarthquakeData(iso2);
         displayWeatherForecast(iso2);
         updateCountryBorders(iso2);
@@ -142,16 +143,19 @@ $(document).ready(function () {
         }, 'json');
     }
 
-    function displayWikipediaInfo(iso2) {
-        $.get('https://restcountries.com/v3.1/alpha/' + iso2, function (data) {
-            if (data && data[0]) {
-                const countryName = data[0].name.common;
-                $.get('Php/wikipediaSearch.Php', { query: countryName }, function (wikiData) {
-                    $('#wikiLink').attr('href', wikiData.url).text(`View ${wikiData.title} on Wikipedia`);
-                }, 'json');
-            }
-        }, 'json');
-    }
+function displayWikipediaInfo(countryName) {
+    $.get('Php/wikipediaSearch.Php', { query: countryName }, function (wikiData) {
+        if (wikiData && wikiData.results && wikiData.results.length > 0) {
+            const firstResult = wikiData.results[0]; // Use the first Wikipedia result
+            $('#wikiLink').attr('href', firstResult.link).text(`View ${firstResult.title} on Wikipedia`);
+        } else {
+            $('#wikiLink').attr('href', '#').text('No Wikipedia entry found.');
+        }
+    }, 'json').fail(function () {
+        $('#wikiLink').attr('href', '#').text('Error fetching Wikipedia data');
+    });
+}
+
 
     function displayEarthquakeData(iso2) {
         $.get('Php/earthQuakes.Php', { country: iso2 }, function (data) {

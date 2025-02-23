@@ -41,31 +41,144 @@
 
     <!-- Dynamic Modals for Each Data Source -->
     <div id="modals-container">
-        <!-- Country Information Modal -->
-        <div class="modal fade" id="countryInfoModal" tabindex="-1" aria-labelledby="countryInfoLabel" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-                <div class="modal-content shadow">
-                    <div class="modal-header bg-success bg-gradient text-white">
-                        <h5 class="modal-title" id="countryInfoLabel">Country Information</h5>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        <!-- Modals for 10 Different PHP Files -->
+        <div id="countryInfoModal" class="modal fade" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header bg-success text-white">
+                        <h5 class="modal-title">Country Information</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body">
                         <p><strong>Country:</strong> <span id="countryNames"></span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="capitalCityModal" class="modal fade" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header bg-success text-white">
+                        <h5 class="modal-title">Capital City</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
                         <p><strong>Capital City:</strong> <span id="capitalCity"></span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="populationModal" class="modal fade" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header bg-success text-white">
+                        <h5 class="modal-title">Population</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
                         <p><strong>Population:</strong> <span id="population"></span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="currencyModal" class="modal fade" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header bg-success text-white">
+                        <h5 class="modal-title">Currency</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
                         <p><strong>Currency:</strong> <span id="currencyName"></span> (<span id="currencySymbol"></span>)</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="exchangeRateModal" class="modal fade" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header bg-success text-white">
+                        <h5 class="modal-title">Exchange Rate</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
                         <p><strong>Exchange Rate:</strong> <span id="txtCurrencyRate"></span></p>
-                        <p><strong>Current Weather:</strong> <span id="weather"></span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="weatherModal" class="modal fade" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header bg-success text-white">
+                        <h5 class="modal-title">Current Weather</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
                         <p><strong>Temperature:</strong> <span id="tempToday"></span></p>
                         <p><strong>Conditions:</strong> <span id="conditionsToday"></span></p>
                         <p id="weatherImg"></p>
-                        <p><strong>10-Day Weather Forecast:</strong> <div id="forecastInfo"></div></p>
-                        <p><strong>Wikipedia Search:</strong> <a id="wikiLink" href="#" target="_blank">View on Wikipedia</a></p>
-                        <p><strong>Timezone:</strong> <span id="timezone"></span></p>
-                        <p><strong>Recent Earthquakes:</strong> <span id="earthquakeList"></span></p>
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-outline-success btn-sm" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="forecastModal" class="modal fade" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header bg-success text-white">
+                        <h5 class="modal-title">10-Day Weather Forecast</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div id="forecastInfo"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="wikipediaModal" class="modal fade" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header bg-success text-white">
+                        <h5 class="modal-title">Wikipedia Info</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p><strong>Wikipedia Search:</strong> <a id="wikiLink" href="#" target="_blank">View on Wikipedia</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="timezoneModal" class="modal fade" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header bg-success text-white">
+                        <h5 class="modal-title">Timezone</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p><strong>Timezone:</strong> <span id="timezone"></span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="earthquakeModal" class="modal fade" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header bg-success text-white">
+                        <h5 class="modal-title">Recent Earthquakes</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div id="earthquakeList"></div>
                     </div>
                 </div>
             </div>

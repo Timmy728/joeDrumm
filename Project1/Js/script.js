@@ -16,21 +16,58 @@ $(document).ready(function () {
     map = L.map('map').setView([20, 0], 2);
 
     // Add tile layer
-    var streets = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}", {
-        attribution: "Tiles &copy; Esri"
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    // Add EasyButtons for each PHP file
+    const buttonsData = [
+        { icon: 'fa-flag', modalId: '#countryNameModal', phpFile: 'countryName.Php', dataKey: 'name', label: 'Country Name' },
+        { icon: 'fa-city', modalId: '#capitalCityModal', phpFile: 'capitalCities.Php', dataKey: 'capital', label: 'Capital City' },
+        { icon: 'fa-users', modalId: '#populationModal', phpFile: 'Population.Php', dataKey: 'population', label: 'Population' },
+        { icon: 'fa-money-bill', modalId: '#currencyModal', phpFile: 'Currency.Php', dataKey: 'currencies', label: 'Currency' },
+        { icon: 'fa-dollar-sign', modalId: '#exchangeRateModal', phpFile: 'latestExchangeRate.Php', dataKey: 'exchangeRate', label: 'Exchange Rate' },
+        { icon: 'fa-cloud-sun', modalId: '#weatherModal', phpFile: 'getWeather.Php', dataKey: 'description', label: 'Current Weather' },
+        { icon: 'fa-temperature-high', modalId: '#weatherForecastModal', phpFile: 'getWeatherForecast.Php', dataKey: 'forecast', label: '10-Day Forecast' },
+        { icon: 'fa-globe', modalId: '#timezoneModal', phpFile: 'Timezone.Php', dataKey: 'timezone', label: 'Timezone' },
+        { icon: 'fa-earthquake', modalId: '#earthquakeModal', phpFile: 'earthQuakes.Php', dataKey: 'earthquakes', label: 'Recent Earthquakes' },
+        { icon: 'fa-book', modalId: '#wikipediaModal', phpFile: 'wikipediaSearch.Php', dataKey: 'title', label: 'Wikipedia Info' }
+    ];
+
+    buttonsData.forEach((button, index) => {
+        L.easyButton(button.icon, function () {
+            if (!selectedCountryISO2) {
+                alert('Please select a country first.');
+                return;
+            }
+            fetchDataAndShowModal(button);
+        }).addTo(map);
     });
 
-    var satellite = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", {
-        attribution: "Tiles &copy; Esri"
-    });
-
-    var basemaps = {
-        "Streets": streets,
-        "Satellite": satellite
-    };
-
-    streets.addTo(map);
-    L.control.layers(basemaps).addTo(map);
+    function fetchDataAndShowModal(button) {
+        $.ajax({
+            url: 'Php/' + button.phpFile,
+            method: 'GET',
+            data: { iso2: selectedCountryISO2 },
+            dataType: 'json',
+            success: function (data) {
+                console.log(`Response from ${button.phpFile}:`, data);
+                let content = '';
+                if (data[button.dataKey]) {
+                    content = data[button.dataKey];
+                } else if (Array.isArray(data[button.dataKey])) {
+                    content = data[button.dataKey].map(item => JSON.stringify(item)).join('<br>');
+                } else {
+                    content = 'Data not available.';
+                }
+                $(`${button.modalId} .modal-body`).html(`<p><strong>${button.label}:</strong> ${content}</p>`);
+                $(button.modalId).modal('show');
+            },
+            error: function (xhr, status, error) {
+                console.error(`Error fetching data from ${button.phpFile}:`, error);
+            }
+        });
+    }
 
     // Populate countries dropdown
     $.ajax({
@@ -54,16 +91,11 @@ $(document).ready(function () {
 
     // On country selection
     $('#countrySelect').change(function () {
-        const iso2 = $(this).val();
-        if (iso2) {
-            selectedCountryISO2 = iso2;
-            fetchCountryData(iso2);
+        selectedCountryISO2 = $(this).val();
+        if (selectedCountryISO2) {
+            updateCountryBorders(selectedCountryISO2);
         }
     });
-
-    function fetchCountryData(iso2) {
-        updateCountryBorders(iso2);
-    }
 
     function updateCountryBorders(iso2) {
         if (bordersLayer) {
@@ -85,82 +117,5 @@ $(document).ready(function () {
                 map.fitBounds(bordersLayer.getBounds());
             }
         });
-    }
-
-    // Setup easy buttons for each PHP file
-    const phpFiles = [
-        'countryName.Php',
-        'capitalCities.Php',
-        'Population.Php',
-        'Currency.Php',
-        'latestExchangeRate.php',
-        'getWeather.Php',
-        'getWeatherForecast.Php',
-        'Timezone.Php',
-        'wikipediaSearch.Php',
-        'earthQuakes.Php'
-    ];
-
-    phpFiles.forEach((file, index) => {
-        L.easyButton(`fa-${index + 1}`, function () {
-            if (selectedCountryISO2) {
-                fetchDataFromPHP(file, selectedCountryISO2, index + 1);
-            } else {
-                alert('Please select a country first.');
-            }
-        }).addTo(map);
-    });
-
-    function fetchDataFromPHP(file, iso2, buttonNumber) {
-        $.ajax({
-            url: `Php/${file}`,
-            method: 'GET',
-            data: { iso2: iso2 },
-            dataType: 'json',
-            success: function (data) {
-                displayDataInModal(buttonNumber, data);
-            },
-            error: function (xhr, status, error) {
-                console.error(`Error fetching data from ${file}:`, error);
-            }
-        });
-    }
-
-    function displayDataInModal(buttonNumber, data) {
-        let modalBody = '';
-        switch (buttonNumber) {
-            case 1:
-                modalBody = `<p><strong>Country:</strong> ${data.name}</p>`;
-                break;
-            case 2:
-                modalBody = `<p><strong>Capital City:</strong> ${data.capital}</p>`;
-                break;
-            case 3:
-                modalBody = `<p><strong>Population:</strong> ${data.population}</p>`;
-                break;
-            case 4:
-                modalBody = `<p><strong>Currency:</strong> ${data.currency}</p>`;
-                break;
-            case 5:
-                modalBody = `<p><strong>Exchange Rate:</strong> 1 USD = ${data.exchangeRate} ${data.currencyCode}</p>`;
-                break;
-            case 6:
-                modalBody = `<p><strong>Temperature:</strong> ${data.temperature}°C</p><p><strong>Conditions:</strong> ${data.description}</p>`;
-                break;
-            case 7:
-                modalBody = `<p><strong>10-Day Weather Forecast:</strong> ${data.forecast}</p>`;
-                break;
-            case 8:
-                modalBody = `<p><strong>Timezone:</strong> ${data.timezone}</p>`;
-                break;
-            case 9:
-                modalBody = `<p><strong>Wikipedia:</strong> <a href='${data.url}' target='_blank'>View on Wikipedia</a></p>`;
-                break;
-            case 10:
-                modalBody = `<p><strong>Recent Earthquakes:</strong> ${data.earthquakes}</p>`;
-                break;
-        }
-        $('#countryInfoModal .modal-body').html(modalBody);
-        $('#countryInfoModal').modal('show');
     }
 });

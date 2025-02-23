@@ -11,14 +11,36 @@ let bordersLayer;
 let selectedCountryISO2;
 let countryBordersData;
 
+var map;
+
 $(document).ready(function () {
-    // Initialize the map
-    map = L.map('map').setView([20, 0], 2);
+  
+  map = L.map("map", {
+    layers: [streets]
+  }).setView([54.5, -4], 6);
+
+layerControl = L.control.layers(basemaps).addTo(map);
+
+infoBtn.addTo(map);
+
+})
 
     // Add tile layer
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; OpenStreetMap contributors'
-    }).addTo(map);
+var streets = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}", {
+    attribution: "Tiles &copy; Esri &mdash; Source: Esri, DeLorme, NAVTEQ, USGS, Intermap, iPC, NRCAN, Esri Japan, METI, Esri China (Hong Kong), Esri (Thailand), TomTom, 2012"
+  }
+);
+    var satellite = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", {
+    attribution: "Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community"
+  }
+);
+    var basemaps = {
+  "Streets": streets,
+  "Satellite": satellite
+};
+    var infoBtn = L.easyButton("fa-info fa-xl", function (btn, map) {
+  $("#exampleModal").modal("show");
+});
 
     // Add EasyButton for displaying country info
     L.easyButton('fa-info', function () {

@@ -11,35 +11,31 @@ let bordersLayer;
 let selectedCountryISO2;
 let countryBordersData;
 
+var streets = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}", {
+    attribution: "Tiles &copy; Esri &mdash; Source: Esri, DeLorme, NAVTEQ, USGS, Intermap, iPC, NRCAN, Esri Japan, METI, Esri China (Hong Kong), Esri (Thailand), TomTom, 2012"
+});
+
+var satellite = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", {
+    attribution: "Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community"
+});
+
+var basemaps = {
+    "Streets": streets,
+    "Satellite": satellite
+};
+
+var infoBtn = L.easyButton('fa-info fa-xl', function (btn, map) {
+    $('#countryInfoModal').modal('show');
+});
+
 $(document).ready(function () {
-    // Tile layers
-    var streets = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}", {
-        attribution: "Tiles &copy; Esri &mdash; Source: Esri, DeLorme, NAVTEQ, USGS, Intermap, iPC, NRCAN, Esri Japan, METI, Esri China (Hong Kong), Esri (Thailand), TomTom, 2012"
-    });
-
-    var satellite = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", {
-        attribution: "Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community"
-    });
-
-    var basemaps = {
-        "Streets": streets,
-        "Satellite": satellite
-    };
-
-    // Initialize map with default view
-    map = L.map("map", {
+    map = L.map('map', {
         layers: [streets]
     }).setView([54.5, -4], 6);
 
-    // Add layer control for basemaps
-    L.control.layers(basemaps).addTo(map);
+    layerControl = L.control.layers(basemaps).addTo(map);
+    infoBtn.addTo(map);
 
-    // Add EasyButton for displaying country info
-    L.easyButton('fa-info fa-xl', function () {
-        $('#countryInfoModal').modal('show');
-    }).addTo(map);
-
-    // Populate countries dropdown
     $.ajax({
         url: 'Php/countryName.Php',
         type: 'GET',
@@ -59,7 +55,6 @@ $(document).ready(function () {
         }
     });
 
-    // On country selection
     $('#countrySelect').change(function () {
         const iso2 = $(this).val();
         if (iso2) {
@@ -100,5 +95,22 @@ $(document).ready(function () {
                 map.fitBounds(bordersLayer.getBounds());
             }
         });
+    }
+
+    function fetchCoordinatesAndDisplayWeather(iso2) {
+        $.get('https://restcountries.com/v3.1/alpha/' + iso2, function (data) {
+            if (data && data[0] && data[0].latlng) {
+                const [lat, lon] = data[0].latlng;
+                displayWeather(lat, lon);
+            }
+        }, 'json');
+    }
+
+    function displayWeather(lat, lon) {
+        $.get('Php/getWeather.Php', { lat: lat, lon: lon }, function (data) {
+            $('#tempToday').text(data.temperature);
+            $('#conditionsToday').text(data.description);
+            $('#weatherImg').html(`<img src="${data.icon}" alt="Weather Icon">`);
+        }, 'json');
     }
 });

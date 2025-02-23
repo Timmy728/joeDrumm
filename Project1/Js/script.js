@@ -35,10 +35,11 @@ $(document).ready(function () {
 
     L.control.layers(basemaps).addTo(map);
 
-    // EasyButton to show modal info
-    L.easyButton('fa-info fa-xl', function () {
-        $('#countryInfoModal').modal('show');
-    }).addTo(map);
+// Add EasyButton for displaying country info with "i" icon
+L.easyButton('<i class="fas fa-info"></i>', function () {
+    $('#countryInfoModal').modal('show');
+}).addTo(map);
+
 
     // Populate countries dropdown
     $.ajax({

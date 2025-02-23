@@ -1,35 +1,38 @@
-// Initialize global variables
+// Preloader function
+$(window).on('load', function () {
+    if ($('#preloader').length) {
+        $('#preloader').delay(1000).fadeOut('slow', function () {
+            $(this).remove();
+        });
+    }
+});
+
 let map;
 let bordersLayer;
 let selectedCountryISO2;
 let countryBordersData;
 
-// Initialize the map on document ready
 $(document).ready(function () {
-    map = L.map('map', {
-        layers: [streets]
-    }).setView([54.5, -4], 6);
+    // Initialize the map
+    map = L.map('map').setView([20, 0], 2);
 
-    // Add map layers for streets and satellite view
-    const streets = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}", {
-        attribution: "Tiles &copy; Esri"
+    // Tile layers for map
+    var streets = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
+        attribution: 'Tiles &copy; Esri &mdash; Source: Esri, DeLorme, NAVTEQ, USGS, Intermap, iPC, NRCAN, Esri Japan, METI, Esri China (Hong Kong), Esri (Thailand), TomTom, 2012'
     }).addTo(map);
 
-    const satellite = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", {
-        attribution: "Tiles &copy; Esri"
+    var satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+        attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
     });
 
-    const basemaps = {
+    var basemaps = {
         "Streets": streets,
         "Satellite": satellite
     };
 
     L.control.layers(basemaps).addTo(map);
 
-    // Add EasyButtons for each modal
-    createEasyButtons();
-
-    // Populate dropdown on page load
+    // Populate countries dropdown
     $.ajax({
         url: 'Php/countryName.Php',
         type: 'GET',
@@ -49,128 +52,129 @@ $(document).ready(function () {
         }
     });
 
-    // Handle country selection from dropdown
+    // On country selection
     $('#countrySelect').change(function () {
-        selectedCountryISO2 = $(this).val();
-        if (selectedCountryISO2) {
-            updateCountryBorders(selectedCountryISO2);
+        const iso2 = $(this).val();
+        if (iso2) {
+            fetchAllCountryData(iso2);
         }
     });
-});
 
-// Function to update borders when country is selected
-function updateCountryBorders(iso2) {
-    if (bordersLayer) {
-        map.removeLayer(bordersLayer);
+    function fetchAllCountryData(iso2) {
+        updateCountryBorders(iso2);
+        displayCountryName(iso2);
+        displayCapitalCity(iso2);
+        displayPopulation(iso2);
+        displayTimezone(iso2);
+        displayCurrency(iso2);
+        displayExchangeRate(iso2);
+        displayWeather(iso2);
+        displayWeatherForecast(iso2);
+        displayWikipediaInfo(iso2);
+        displayEarthquakeData(iso2);
     }
-    $.getJSON('Data/countryBorders.geo.json', function (data) {
-        const country = data.features.find(feature => feature.properties.iso_a2 === iso2);
-        if (country) {
-            bordersLayer = L.geoJSON(country, {
-                style: {
-                    color: 'blue',
-                    weight: 2,
-                    fillColor: 'orange',
-                    fillOpacity: 0.3
-                }
-            }).addTo(map);
-            map.fitBounds(bordersLayer.getBounds());
+
+    function updateCountryBorders(iso2) {
+        if (bordersLayer) {
+            map.removeLayer(bordersLayer);
         }
-    });
-}
-
-// Function to create EasyButtons for each data type
-function createEasyButtons() {
-    const buttonActions = [
-        { icon: 'fa-flag', modal: 'countryNameModal', fetch: fetchCountryName },
-        { icon: 'fa-landmark', modal: 'capitalCityModal', fetch: fetchCapitalCity },
-        { icon: 'fa-users', modal: 'populationModal', fetch: fetchPopulation },
-        { icon: 'fa-money-bill', modal: 'currencyModal', fetch: fetchCurrency },
-        { icon: 'fa-exchange-alt', modal: 'exchangeRateModal', fetch: fetchExchangeRate },
-        { icon: 'fa-cloud-sun', modal: 'weatherModal', fetch: fetchWeather },
-        { icon: 'fa-calendar-day', modal: 'forecastModal', fetch: fetchWeatherForecast },
-        { icon: 'fa-wikipedia-w', modal: 'wikipediaModal', fetch: fetchWikipediaInfo },
-        { icon: 'fa-clock', modal: 'timezoneModal', fetch: fetchTimezone },
-        { icon: 'fa-earthquake', modal: 'earthquakeModal', fetch: fetchEarthquakeData }
-    ];
-
-    buttonActions.forEach((action, index) => {
-        L.easyButton(action.icon, function () {
-            if (selectedCountryISO2) {
-                action.fetch(selectedCountryISO2);
-                $('#' + action.modal).modal('show');
-            } else {
-                alert('Please select a country first.');
+        $.getJSON('Data/countryBorders.geo.json', function (data) {
+            const country = data.features.find(
+                feature => feature.properties.iso_a2 === iso2
+            );
+            if (country) {
+                bordersLayer = L.geoJSON(country, {
+                    style: {
+                        color: 'blue',
+                        weight: 2,
+                        fillColor: 'orange',
+                        fillOpacity: 0.3
+                    }
+                }).addTo(map);
+                map.fitBounds(bordersLayer.getBounds());
             }
-        }).addTo(map);
-    });
-}
-
-// Data fetching functions for each button
-function fetchCountryName(iso2) {
-    $.get('Php/countryName.Php', { iso2: iso2 }, function (data) {
-        $('#countryNameContent').text(data.name);
-    }, 'json');
-}
-
-function fetchCapitalCity(iso2) {
-    $.get('Php/capitalCities.Php', { iso2: iso2 }, function (data) {
-        $('#capitalCityContent').text(data.capital);
-    }, 'json');
-}
-
-function fetchPopulation(iso2) {
-    $.get('Php/Population.Php', { countryCode: iso2 }, function (data) {
-        $('#populationContent').text(data.population);
-    }, 'json');
-}
-
-function fetchCurrency(iso2) {
-    $.get('Php/Currency.Php', { iso2: iso2 }, function (data) {
-        $('#currencyContent').text(`${data.currencies[0].name} (${data.currencies[0].code}) - ${data.currencies[0].symbol}`);
-    }, 'json');
-}
-
-function fetchExchangeRate(iso2) {
-    $.get('Php/latestExchangeRate.php', { iso2: iso2 }, function (data) {
-        $('#exchangeRateContent').text(`1 USD = ${data.exchangeRate} ${data.currencyCode}`);
-    }, 'json');
-}
-
-function fetchWeather(iso2) {
-    $.get('Php/getWeather.Php', { iso2: iso2 }, function (data) {
-        $('#weatherContent').text(`${data.temperature}°C, ${data.description}`);
-    }, 'json');
-}
-
-function fetchWeatherForecast(iso2) {
-    $.get('Php/getWeatherForecast.Php', { location: iso2 }, function (data) {
-        let forecastHtml = '';
-        data.forEach(day => {
-            forecastHtml += `<p>${day.date}: ${day.min_temp}°C - ${day.max_temp}°C</p>`;
         });
-        $('#forecastContent').html(forecastHtml);
-    }, 'json');
-}
+    }
 
-function fetchWikipediaInfo(iso2) {
-    $.get('Php/wikipediaSearch.Php', { query: iso2 }, function (data) {
-        $('#wikipediaContent').html(`<a href='${data.url}' target='_blank'>View ${data.title} on Wikipedia</a>`);
-    }, 'json');
-}
+    // Functions to show each specific PHP file data per button/modal
+    function displayCountryName(iso2) {
+        $.get('Php/countryName.Php', { iso2: iso2 }, function (data) {
+            $('#countryNameModalContent').text(data.name);
+        }, 'json');
+    }
 
-function fetchTimezone(iso2) {
-    $.get('Php/Timezone.Php', { iso2: iso2 }, function (data) {
-        $('#timezoneContent').text(data.timezone);
-    }, 'json');
-}
+    function displayCapitalCity(iso2) {
+        $.get('Php/capitalCities.Php', { iso2: iso2 }, function (data) {
+            $('#capitalCityModalContent').text(data.capital);
+        }, 'json');
+    }
 
-function fetchEarthquakeData(iso2) {
-    $.get('Php/earthQuakes.Php', { country: iso2 }, function (data) {
-        let earthquakeHtml = '';
-        data.earthquakes.forEach(quake => {
-            earthquakeHtml += `<p>Magnitude: ${quake.magnitude} | Depth: ${quake.depth} km | Location: (${quake.lat}, ${quake.lng}) | Time: ${quake.datetime}</p>`;
-        });
-        $('#earthquakeContent').html(earthquakeHtml);
-    }, 'json');
-}
+    function displayPopulation(iso2) {
+        $.get('Php/Population.Php', { countryCode: iso2 }, function (data) {
+            $('#populationModalContent').text(data.population);
+        }, 'json');
+    }
+
+    function displayTimezone(iso2) {
+        $.get('Php/Timezone.Php', { iso2: iso2 }, function (data) {
+            $('#timezoneModalContent').text(data.timezone);
+        }, 'json');
+    }
+
+    function displayCurrency(iso2) {
+        $.get('Php/Currency.Php', { iso2: iso2 }, function (data) {
+            let currency = data.currencies[0];
+            $('#currencyModalContent').text(`${currency.name} (${currency.code}) - ${currency.symbol}`);
+        }, 'json');
+    }
+
+    function displayExchangeRate(iso2) {
+        $.get('Php/latestExchangeRate.php', { iso2: iso2 }, function (data) {
+            $('#exchangeRateModalContent').text(`1 USD = ${data.exchangeRate} ${data.currencyCode}`);
+        }, 'json');
+    }
+
+    function displayWeather(iso2) {
+        $.get('Php/getWeather.Php', { iso2: iso2 }, function (data) {
+            $('#weatherModalContent').text(`Temperature: ${data.temperature}°C, Condition: ${data.description}`);
+        }, 'json');
+    }
+
+    function displayWeatherForecast(iso2) {
+        $.get('Php/getWeatherForecast.Php', { location: iso2 }, function (data) {
+            let forecast = '';
+            data.forEach(day => {
+                forecast += `${day.date}: ${day.min_temp}°C - ${day.max_temp}°C\n`;
+            });
+            $('#forecastModalContent').text(forecast);
+        }, 'json');
+    }
+
+    function displayWikipediaInfo(iso2) {
+        $.get('Php/wikipediaSearch.Php', { query: iso2 }, function (data) {
+            $('#wikipediaModalContent').html(`<a href="${data.url}" target="_blank">${data.title}</a>`);
+        }, 'json');
+    }
+
+    function displayEarthquakeData(iso2) {
+        $.get('Php/earthQuakes.Php', { country: iso2 }, function (data) {
+            let earthquakes = '';
+            data.earthquakes.forEach(eq => {
+                earthquakes += `Magnitude: ${eq.magnitude}, Depth: ${eq.depth}km, Time: ${eq.datetime}\n`;
+            });
+            $('#earthquakeModalContent').text(earthquakes);
+        }, 'json');
+    }
+
+    // Attach Easy Buttons for each PHP file/modal
+    L.easyButton('fa-flag', function () { $('#countryInfoModal').modal('show'); }).addTo(map);
+    L.easyButton('fa-landmark', function () { $('#capitalCityModal').modal('show'); }).addTo(map);
+    L.easyButton('fa-users', function () { $('#populationModal').modal('show'); }).addTo(map);
+    L.easyButton('fa-clock', function () { $('#timezoneModal').modal('show'); }).addTo(map);
+    L.easyButton('fa-coins', function () { $('#currencyModal').modal('show'); }).addTo(map);
+    L.easyButton('fa-dollar-sign', function () { $('#exchangeRateModal').modal('show'); }).addTo(map);
+    L.easyButton('fa-cloud-sun', function () { $('#weatherModal').modal('show'); }).addTo(map);
+    L.easyButton('fa-calendar', function () { $('#forecastModal').modal('show'); }).addTo(map);
+    L.easyButton('fa-globe', function () { $('#wikipediaModal').modal('show'); }).addTo(map);
+    L.easyButton('fa-exclamation-triangle', function () { $('#earthquakeModal').modal('show'); }).addTo(map);
+});

@@ -11,48 +11,20 @@ let bordersLayer;
 let selectedCountryISO2;
 let countryBordersData;
 
-// Initialize the map with basemaps and easy buttons
 $(document).ready(function () {
-    var streets = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}", {
-        attribution: "Tiles &copy; Esri"
-    });
-
-    var satellite = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", {
-        attribution: "Tiles &copy; Esri"
-    });
-
-    var basemaps = {
-        "Streets": streets,
-        "Satellite": satellite
-    };
-
     map = L.map('map', {
-        layers: [streets]
-    }).setView([20, 0], 2);
+        layers: [
+            L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}", {
+                attribution: "Tiles &copy; Esri &mdash; Source: Esri, DeLorme, NAVTEQ, USGS, Intermap, iPC, NRCAN, Esri Japan, METI, Esri China (Hong Kong), Esri (Thailand), TomTom, 2012"
+            })
+        ]
+    }).setView([54.5, -4], 6);
 
-    L.control.layers(basemaps).addTo(map);
+    L.control.layers({
+        "Streets": L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}"),
+        "Satellite": L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}")
+    }).addTo(map);
 
-    // EasyButtons for each PHP file
-    const modals = [
-        { id: 'countryInfoModal', label: 'fa-flag', modal: '#countryInfoModal' },
-        { id: 'capitalCityModal', label: 'fa-city', modal: '#capitalCityModal' },
-        { id: 'populationModal', label: 'fa-users', modal: '#populationModal' },
-        { id: 'currencyModal', label: 'fa-money-bill', modal: '#currencyModal' },
-        { id: 'exchangeRateModal', label: 'fa-exchange-alt', modal: '#exchangeRateModal' },
-        { id: 'currentWeatherModal', label: 'fa-cloud-sun', modal: '#currentWeatherModal' },
-        { id: 'weatherForecastModal', label: 'fa-calendar-alt', modal: '#weatherForecastModal' },
-        { id: 'wikipediaModal', label: 'fa-wikipedia-w', modal: '#wikipediaModal' },
-        { id: 'timezoneModal', label: 'fa-clock', modal: '#timezoneModal' },
-        { id: 'earthquakeModal', label: 'fa-mountain', modal: '#earthquakeModal' }
-    ];
-
-    modals.forEach(btn => {
-        L.easyButton(btn.label, function () {
-            $(btn.modal).modal('show');
-        }).addTo(map);
-    });
-
-    // Populate countries dropdown
     $.ajax({
         url: 'Php/countryName.Php',
         type: 'GET',
@@ -72,28 +44,13 @@ $(document).ready(function () {
         }
     });
 
-    // On country selection
     $('#countrySelect').change(function () {
         const iso2 = $(this).val();
         if (iso2) {
-            fetchAllCountryData(iso2);
+            selectedCountryISO2 = iso2;
+            updateCountryBorders(iso2);
         }
     });
-
-    // Fetch data for all categories
-    function fetchAllCountryData(iso2) {
-        displayCountryInfo(iso2);
-        displayCapitalCity(iso2);
-        displayPopulation(iso2);
-        displayCurrency(iso2);
-        displayExchangeRate(iso2);
-        displayCurrentWeather(iso2);
-        displayWeatherForecast(iso2);
-        displayWikipediaInfo(iso2);
-        displayTimezone(iso2);
-        displayEarthquakeData(iso2);
-        updateCountryBorders(iso2);
-    }
 
     function updateCountryBorders(iso2) {
         if (bordersLayer) {
@@ -117,12 +74,70 @@ $(document).ready(function () {
         });
     }
 
-    // Example function for fetching country info
-    function displayCountryInfo(iso2) {
-        $.get('Php/countryName.Php', { iso2: iso2 }, function (data) {
-            $('#countryNames').text(data.name);
+    const phpFiles = [
+        'countryName',
+        'Population',
+        'getWeather',
+        'Timezone',
+        'Currency',
+        'latestExchangeRate',
+        'wikipediaSearch',
+        'earthQuakes',
+        'getWeatherForecast'
+    ];
+
+    phpFiles.forEach((phpFile, index) => {
+        L.easyButton(`fa-info fa-${index + 1}`, function () {
+            if (selectedCountryISO2) {
+                fetchDataAndShowModal(phpFile, selectedCountryISO2);
+            } else {
+                alert('Please select a country first.');
+            }
+        }).addTo(map);
+    });
+
+    function fetchDataAndShowModal(phpFile, iso2) {
+        $.get(`Php/${phpFile}.Php`, { iso2: iso2 }, function (data) {
+            let modalBody = '';
+            switch (phpFile) {
+                case 'countryName':
+                    modalBody = `<p><strong>Country:</strong> ${data.name}</p><p><strong>Capital City:</strong> ${data.capital}</p>`;
+                    break;
+                case 'Population':
+                    modalBody = `<p><strong>Population:</strong> ${data.population}</p>`;
+                    break;
+                case 'getWeather':
+                    modalBody = `<p><strong>Temperature:</strong> ${data.temperature}°C</p><p><strong>Conditions:</strong> ${data.description}</p>`;
+                    break;
+                case 'Timezone':
+                    modalBody = `<p><strong>Timezone:</strong> ${data.timezone}</p>`;
+                    break;
+                case 'Currency':
+                    modalBody = `<p><strong>Currency:</strong> ${data.name} (${data.code}) - ${data.symbol}</p>`;
+                    break;
+                case 'latestExchangeRate':
+                    modalBody = `<p><strong>Exchange Rate:</strong> 1 USD = ${data.exchangeRate} ${data.currencyCode}</p>`;
+                    break;
+                case 'wikipediaSearch':
+                    modalBody = `<p><a href='${data.url}' target='_blank'>View on Wikipedia</a></p>`;
+                    break;
+                case 'earthQuakes':
+                    modalBody = data.earthquakes.map(quake =>
+                        `<p>Magnitude: ${quake.magnitude}, Depth: ${quake.depth}km, Location: (${quake.lat}, ${quake.lng}), Time: ${quake.datetime}</p>`
+                    ).join('');
+                    break;
+                case 'getWeatherForecast':
+                    modalBody = data.map(forecast =>
+                        `<p>${forecast.date}: ${forecast.min_temp}°C - ${forecast.max_temp}°C</p>`
+                    ).join('');
+                    break;
+                default:
+                    modalBody = '<p>No data available.</p>';
+            }
+
+            $('#countryInfoLabel').text(`${phpFile.replace(/([A-Z])/g, ' $1')}`);
+            $('.modal-body').html(modalBody);
+            $('#countryInfoModal').modal('show');
         }, 'json');
     }
-
-    // Similarly, implement other display functions for the remaining modals
 });

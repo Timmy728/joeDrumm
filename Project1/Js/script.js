@@ -33,45 +33,47 @@ $(document).ready(function () {
     streets.addTo(map);
 
     // Add 10 EasyButtons for each modal
-    L.easyButton('fa-flag', function () {
-        $('#countryInfoModal').modal('show');
-    }).addTo(map);
+ // Add 10 EasyButtons with the "i" icon for each modal
+L.easyButton('fa-info', function () {
+    $('#countryInfoModal').modal('show');
+}).addTo(map);
 
-    L.easyButton('fa-city', function () {
-        $('#capitalCityModal').modal('show');
-    }).addTo(map);
+L.easyButton('fa-info', function () {
+    $('#capitalCityModal').modal('show');
+}).addTo(map);
 
-    L.easyButton('fa-users', function () {
-        $('#populationModal').modal('show');
-    }).addTo(map);
+L.easyButton('fa-info', function () {
+    $('#populationModal').modal('show');
+}).addTo(map);
 
-    L.easyButton('fa-money-bill', function () {
-        $('#currencyModal').modal('show');
-    }).addTo(map);
+L.easyButton('fa-info', function () {
+    $('#currencyModal').modal('show');
+}).addTo(map);
 
-    L.easyButton('fa-exchange-alt', function () {
-        $('#exchangeRateModal').modal('show');
-    }).addTo(map);
+L.easyButton('fa-info', function () {
+    $('#exchangeRateModal').modal('show');
+}).addTo(map);
 
-    L.easyButton('fa-cloud-sun', function () {
-        $('#weatherModal').modal('show');
-    }).addTo(map);
+L.easyButton('fa-info', function () {
+    $('#weatherModal').modal('show');
+}).addTo(map);
 
-    L.easyButton('fa-calendar-day', function () {
-        $('#forecastModal').modal('show');
-    }).addTo(map);
+L.easyButton('fa-info', function () {
+    $('#forecastModal').modal('show');
+}).addTo(map);
 
-    L.easyButton('fa-wikipedia-w', function () {
-        $('#wikipediaModal').modal('show');
-    }).addTo(map);
+L.easyButton('fa-info', function () {
+    $('#wikipediaModal').modal('show');
+}).addTo(map);
 
-    L.easyButton('fa-clock', function () {
-        $('#timezoneModal').modal('show');
-    }).addTo(map);
+L.easyButton('fa-info', function () {
+    $('#timezoneModal').modal('show');
+}).addTo(map);
 
-    L.easyButton('fa-globe', function () {
-        $('#earthquakeModal').modal('show');
-    }).addTo(map);
+L.easyButton('fa-info', function () {
+    $('#earthquakeModal').modal('show');
+}).addTo(map);
+
 
     // Populate countries dropdown
     $.ajax({

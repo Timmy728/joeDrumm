@@ -32,47 +32,47 @@ $(document).ready(function () {
     L.control.layers(basemaps).addTo(map);
     streets.addTo(map);
 
-    // Add 10 EasyButtons for each modal
- // Add 10 EasyButtons with the "i" icon for each modal
-L.easyButton('fa-info', function () {
+// Add 10 EasyButtons with the "i" info icon for each modal
+L.easyButton('<i class="fas fa-info"></i>', function () {
     $('#countryInfoModal').modal('show');
 }).addTo(map);
 
-L.easyButton('fa-info', function () {
+L.easyButton('<i class="fas fa-info"></i>', function () {
     $('#capitalCityModal').modal('show');
 }).addTo(map);
 
-L.easyButton('fa-info', function () {
+L.easyButton('<i class="fas fa-info"></i>', function () {
     $('#populationModal').modal('show');
 }).addTo(map);
 
-L.easyButton('fa-info', function () {
+L.easyButton('<i class="fas fa-info"></i>', function () {
     $('#currencyModal').modal('show');
 }).addTo(map);
 
-L.easyButton('fa-info', function () {
+L.easyButton('<i class="fas fa-info"></i>', function () {
     $('#exchangeRateModal').modal('show');
 }).addTo(map);
 
-L.easyButton('fa-info', function () {
+L.easyButton('<i class="fas fa-info"></i>', function () {
     $('#weatherModal').modal('show');
 }).addTo(map);
 
-L.easyButton('fa-info', function () {
+L.easyButton('<i class="fas fa-info"></i>', function () {
     $('#forecastModal').modal('show');
 }).addTo(map);
 
-L.easyButton('fa-info', function () {
+L.easyButton('<i class="fas fa-info"></i>', function () {
     $('#wikipediaModal').modal('show');
 }).addTo(map);
 
-L.easyButton('fa-info', function () {
+L.easyButton('<i class="fas fa-info"></i>', function () {
     $('#timezoneModal').modal('show');
 }).addTo(map);
 
-L.easyButton('fa-info', function () {
+L.easyButton('<i class="fas fa-info"></i>', function () {
     $('#earthquakeModal').modal('show');
 }).addTo(map);
+
 
 
     // Populate countries dropdown

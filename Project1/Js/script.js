@@ -32,23 +32,23 @@ $(document).ready(function () {
 
     // Add 5 EasyButtons for each modal
     L.easyButton('fa-flag', function () {
-        $('#modal1').modal('show');
+        $('#infoModal1').modal('show');
     }).addTo(map);
 
     L.easyButton('fa-users', function () {
-        $('#modal2').modal('show');
+        $('#infoModal2').modal('show');
     }).addTo(map);
 
     L.easyButton('fa-exchange-alt', function () {
-        $('#modal3').modal('show');
+        $('#infoModal3').modal('show');
     }).addTo(map);
 
     L.easyButton('fa-cloud-sun', function () {
-        $('#modal4').modal('show');
+        $('#infoModal4').modal('show');
     }).addTo(map);
 
     L.easyButton('fa-globe', function () {
-        $('#modal5').modal('show');
+        $('#infoModal5').modal('show');
     }).addTo(map);
 
     // Populate countries dropdown
@@ -86,7 +86,6 @@ $(document).ready(function () {
         displayCurrency(iso2);
         displayExchangeRate(iso2);
         displayWeather(iso2);
-        displayWeatherForecast(iso2);
         displayWikipediaInfo(iso2);
         displayTimezone(iso2);
         displayEarthquakeData(iso2);
@@ -115,7 +114,6 @@ $(document).ready(function () {
         });
     }
 
-    // Functions to fetch and display data for each modal
     function displayCountryInfo(iso2) {
         $.get('Php/countryName.Php', { iso2: iso2 }, function (data) {
             $('#countryNames').text(data.name);
@@ -150,15 +148,6 @@ $(document).ready(function () {
         $.get('Php/getWeather.Php', { iso2: iso2 }, function (data) {
             $('#tempToday').text(data.temperature);
             $('#conditionsToday').text(data.description);
-        }, 'json');
-    }
-
-    function displayWeatherForecast(iso2) {
-        $.get('Php/getWeatherForecast.Php', { location: iso2 }, function (data) {
-            $('#forecastInfo').html('');
-            data.forEach(forecast => {
-                $('#forecastInfo').append(`<p>${forecast.date}: ${forecast.min_temp}°C - ${forecast.max_temp}°C</p>`);
-            });
         }, 'json');
     }
 

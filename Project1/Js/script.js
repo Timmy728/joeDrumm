@@ -32,48 +32,26 @@ $(document).ready(function () {
     L.control.layers(basemaps).addTo(map);
     streets.addTo(map);
 
-// Add 10 EasyButtons with the "i" info icon for each modal
-L.easyButton('<i class="fas fa-info"></i>', function () {
-    $('#countryInfoModal').modal('show');
-}).addTo(map);
+    // Add 5 EasyButtons with paired info
+    L.easyButton('fa-flag', function () {
+        $('#countryCapitalModal').modal('show');
+    }).addTo(map);
 
-L.easyButton('<i class="fas fa-info"></i>', function () {
-    $('#capitalCityModal').modal('show');
-}).addTo(map);
+    L.easyButton('fa-users', function () {
+        $('#populationCurrencyModal').modal('show');
+    }).addTo(map);
 
-L.easyButton('<i class="fas fa-info"></i>', function () {
-    $('#populationModal').modal('show');
-}).addTo(map);
+    L.easyButton('fa-exchange-alt', function () {
+        $('#exchangeTimezoneModal').modal('show');
+    }).addTo(map);
 
-L.easyButton('<i class="fas fa-info"></i>', function () {
-    $('#currencyModal').modal('show');
-}).addTo(map);
+    L.easyButton('fa-cloud-sun', function () {
+        $('#weatherForecastModal').modal('show');
+    }).addTo(map);
 
-L.easyButton('<i class="fas fa-info"></i>', function () {
-    $('#exchangeRateModal').modal('show');
-}).addTo(map);
-
-L.easyButton('<i class="fas fa-info"></i>', function () {
-    $('#weatherModal').modal('show');
-}).addTo(map);
-
-L.easyButton('<i class="fas fa-info"></i>', function () {
-    $('#forecastModal').modal('show');
-}).addTo(map);
-
-L.easyButton('<i class="fas fa-info"></i>', function () {
-    $('#wikipediaModal').modal('show');
-}).addTo(map);
-
-L.easyButton('<i class="fas fa-info"></i>', function () {
-    $('#timezoneModal').modal('show');
-}).addTo(map);
-
-L.easyButton('<i class="fas fa-info"></i>', function () {
-    $('#earthquakeModal').modal('show');
-}).addTo(map);
-
-
+    L.easyButton('fa-globe', function () {
+        $('#wikipediaEarthquakeModal').modal('show');
+    }).addTo(map);
 
     // Populate countries dropdown
     $.ajax({
@@ -139,7 +117,7 @@ L.easyButton('<i class="fas fa-info"></i>', function () {
         });
     }
 
-    // Display country information
+    // Data Display Functions
     function displayCountryInfo(iso2) {
         $.get('Php/countryName.Php', { iso2: iso2 }, function (data) {
             $('#countryNames').text(data.name);
@@ -158,16 +136,11 @@ L.easyButton('<i class="fas fa-info"></i>', function () {
         }, 'json');
     }
 
-function displayCurrency(iso2) {
-    $.get('Php/Currency.Php', { iso2: iso2 }, function (data) {
-        if (data && data.currencies && data.currencies.length > 0) {
-            let currency = data.currencies[0];
-            $('#currencyName').text(`${currency.name} (${currency.code}) - ${currency.symbol}`);
-        } else {
-            $('#currencyName').text('Currency not available');
-        }
-    }, 'json');
-}
+    function displayCurrency(iso2) {
+        $.get('Php/Currency.Php', { iso2: iso2 }, function (data) {
+            $('#currencyName').text(data.name);
+        }, 'json');
+    }
 
     function displayExchangeRate(iso2) {
         $.get('Php/latestExchangeRate.php', { iso2: iso2 }, function (data) {
@@ -175,36 +148,20 @@ function displayCurrency(iso2) {
         }, 'json');
     }
 
-function displayWeather(iso2) {
-    $.get('https://restcountries.com/v3.1/alpha/' + iso2, function (data) {
-        if (data && data[0] && data[0].latlng) {
-            const [lat, lon] = data[0].latlng;
-
-            $.get('Php/getWeather.Php', { lat: lat, lon: lon }, function (weatherData) {
-                if (weatherData && weatherData.temperature && weatherData.description) {
-                    $('#tempToday').text(`${weatherData.temperature}°C`);
-                    $('#conditionsToday').text(weatherData.description);
-                    $('#weatherImg').html(`<img src="${weatherData.icon}" alt="Weather Icon">`);
-                } else {
-                    $('#tempToday').text('No weather data available');
-                    $('#conditionsToday').text('No description available');
-                    $('#weatherImg').empty();
-                }
-            }, 'json');
-        } else {
-            $('#tempToday').text('Coordinates not found');
-            $('#conditionsToday').text('No description available');
-            $('#weatherImg').empty();
-        }
-    }, 'json');
-}
+    function displayWeather(iso2) {
+        $.get('Php/getWeather.Php', { iso2: iso2 }, function (data) {
+            $('#tempToday').text(data.temperature);
+            $('#conditionsToday').text(data.description);
+        }, 'json');
+    }
 
     function displayWeatherForecast(iso2) {
         $.get('Php/getWeatherForecast.Php', { location: iso2 }, function (data) {
-            $('#forecastInfo').html('');
+            let forecastHtml = '';
             data.forEach(forecast => {
-                $('#forecastInfo').append(`<p>${forecast.date}: ${forecast.min_temp}°C - ${forecast.max_temp}°C</p>`);
+                forecastHtml += `<p>${forecast.date}: ${forecast.min_temp}°C - ${forecast.max_temp}°C</p>`;
             });
+            $('#forecastInfo').html(forecastHtml);
         }, 'json');
     }
 

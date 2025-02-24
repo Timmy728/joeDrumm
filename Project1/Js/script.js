@@ -32,25 +32,25 @@ $(document).ready(function () {
     L.control.layers(basemaps).addTo(map);
     streets.addTo(map);
 
-    // Add 5 EasyButtons with 2 data points each
+    // Add 5 EasyButtons for modals
     L.easyButton('fa-flag', function () {
-        $('#countryInfoModal').modal('show');
+        $('#infoModal1').modal('show');
     }).addTo(map);
 
     L.easyButton('fa-users', function () {
-        $('#populationCurrencyModal').modal('show');
+        $('#infoModal2').modal('show');
     }).addTo(map);
 
-    L.easyButton('fa-exchange-alt', function () {
-        $('#exchangeRateTimezoneModal').modal('show');
+    L.easyButton('fa-money-bill', function () {
+        $('#infoModal3').modal('show');
     }).addTo(map);
 
     L.easyButton('fa-cloud-sun', function () {
-        $('#weatherForecastModal').modal('show');
+        $('#infoModal4').modal('show');
     }).addTo(map);
 
     L.easyButton('fa-globe', function () {
-        $('#wikipediaEarthquakeModal').modal('show');
+        $('#infoModal5').modal('show');
     }).addTo(map);
 
     // Populate countries dropdown
@@ -87,10 +87,10 @@ $(document).ready(function () {
         displayPopulation(iso2);
         displayCurrency(iso2);
         displayExchangeRate(iso2);
-        displayTimezone(iso2);
         displayWeather(iso2);
         displayWeatherForecast(iso2);
         displayWikipediaInfo(iso2);
+        displayTimezone(iso2);
         displayEarthquakeData(iso2);
         updateCountryBorders(iso2);
     }
@@ -117,7 +117,6 @@ $(document).ready(function () {
         });
     }
 
-    // Display country information
     function displayCountryInfo(iso2) {
         $.get('Php/countryName.Php', { iso2: iso2 }, function (data) {
             $('#countryNames').text(data.name);
@@ -148,16 +147,9 @@ $(document).ready(function () {
         }, 'json');
     }
 
-    function displayTimezone(iso2) {
-        $.get('Php/Timezone.Php', { iso2: iso2 }, function (data) {
-            $('#timezone').text(data.timezone);
-        }, 'json');
-    }
-
     function displayWeather(iso2) {
         $.get('Php/getWeather.Php', { iso2: iso2 }, function (data) {
             $('#tempToday').text(data.temperature);
-            $('#conditionsToday').text(data.description);
         }, 'json');
     }
 
@@ -173,6 +165,12 @@ $(document).ready(function () {
     function displayWikipediaInfo(iso2) {
         $.get('Php/wikipediaSearch.Php', { query: iso2 }, function (data) {
             $('#wikiLink').attr('href', data.url).text(`View ${data.title} on Wikipedia`);
+        }, 'json');
+    }
+
+    function displayTimezone(iso2) {
+        $.get('Php/Timezone.Php', { iso2: iso2 }, function (data) {
+            $('#timezone').text(data.timezone);
         }, 'json');
     }
 

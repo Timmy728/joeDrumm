@@ -32,9 +32,9 @@ $(document).ready(function () {
     L.control.layers(basemaps).addTo(map);
     streets.addTo(map);
 
-    // Add 5 EasyButtons with paired info
+    // Add 5 EasyButtons with 2 data points each
     L.easyButton('fa-flag', function () {
-        $('#countryCapitalModal').modal('show');
+        $('#countryInfoModal').modal('show');
     }).addTo(map);
 
     L.easyButton('fa-users', function () {
@@ -42,7 +42,7 @@ $(document).ready(function () {
     }).addTo(map);
 
     L.easyButton('fa-exchange-alt', function () {
-        $('#exchangeTimezoneModal').modal('show');
+        $('#exchangeRateTimezoneModal').modal('show');
     }).addTo(map);
 
     L.easyButton('fa-cloud-sun', function () {
@@ -87,10 +87,10 @@ $(document).ready(function () {
         displayPopulation(iso2);
         displayCurrency(iso2);
         displayExchangeRate(iso2);
+        displayTimezone(iso2);
         displayWeather(iso2);
         displayWeatherForecast(iso2);
         displayWikipediaInfo(iso2);
-        displayTimezone(iso2);
         displayEarthquakeData(iso2);
         updateCountryBorders(iso2);
     }
@@ -117,7 +117,7 @@ $(document).ready(function () {
         });
     }
 
-    // Data Display Functions
+    // Display country information
     function displayCountryInfo(iso2) {
         $.get('Php/countryName.Php', { iso2: iso2 }, function (data) {
             $('#countryNames').text(data.name);
@@ -148,6 +148,12 @@ $(document).ready(function () {
         }, 'json');
     }
 
+    function displayTimezone(iso2) {
+        $.get('Php/Timezone.Php', { iso2: iso2 }, function (data) {
+            $('#timezone').text(data.timezone);
+        }, 'json');
+    }
+
     function displayWeather(iso2) {
         $.get('Php/getWeather.Php', { iso2: iso2 }, function (data) {
             $('#tempToday').text(data.temperature);
@@ -157,23 +163,16 @@ $(document).ready(function () {
 
     function displayWeatherForecast(iso2) {
         $.get('Php/getWeatherForecast.Php', { location: iso2 }, function (data) {
-            let forecastHtml = '';
+            $('#forecastInfo').html('');
             data.forEach(forecast => {
-                forecastHtml += `<p>${forecast.date}: ${forecast.min_temp}°C - ${forecast.max_temp}°C</p>`;
+                $('#forecastInfo').append(`<p>${forecast.date}: ${forecast.min_temp}°C - ${forecast.max_temp}°C</p>`);
             });
-            $('#forecastInfo').html(forecastHtml);
         }, 'json');
     }
 
     function displayWikipediaInfo(iso2) {
         $.get('Php/wikipediaSearch.Php', { query: iso2 }, function (data) {
             $('#wikiLink').attr('href', data.url).text(`View ${data.title} on Wikipedia`);
-        }, 'json');
-    }
-
-    function displayTimezone(iso2) {
-        $.get('Php/Timezone.Php', { iso2: iso2 }, function (data) {
-            $('#timezone').text(data.timezone);
         }, 'json');
     }
 

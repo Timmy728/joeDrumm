@@ -66,6 +66,11 @@
                     <div class="modal-body">
                         <p><strong>Population:</strong> <span id="population"></span></p>
                         <p><strong>Currency:</strong> <span id="currencyName"></span> (<span id="currencySymbol"></span>)</p>
+                        <hr>
+                        <h6>Currency Converter</h6>
+                        <input type="number" id="currencyInput" placeholder="Amount in USD" class="form-control mb-2">
+                        <button id="convertCurrency" class="btn btn-success w-100">Convert</button>
+                        <p class="mt-2"><strong>Converted Amount:</strong> <span id="convertedAmount"></span></p>
                     </div>
                 </div>
             </div>
@@ -96,6 +101,9 @@
                     <div class="modal-body">
                         <p><strong>Temperature:</strong> <span id="tempToday"></span></p>
                         <p><strong>Conditions:</strong> <span id="conditionsToday"></span></p>
+                        <hr>
+                        <h6>10-Day Weather Forecast</h6>
+                        <div id="forecastInfo"></div>
                     </div>
                 </div>
             </div>

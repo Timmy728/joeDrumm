@@ -8,8 +8,6 @@ $(window).on('load', function () {
 
 let map;
 let bordersLayer;
-let selectedCountryISO2;
-let countryBordersData;
 
 $(document).ready(function () {
     // Initialize the map
@@ -32,25 +30,25 @@ $(document).ready(function () {
     L.control.layers(basemaps).addTo(map);
     streets.addTo(map);
 
-    // Add 5 EasyButtons for modals
+    // Add 5 EasyButtons for each modal
     L.easyButton('fa-flag', function () {
-        $('#infoModal1').modal('show');
+        $('#modal1').modal('show');
     }).addTo(map);
 
     L.easyButton('fa-users', function () {
-        $('#infoModal2').modal('show');
+        $('#modal2').modal('show');
     }).addTo(map);
 
-    L.easyButton('fa-money-bill', function () {
-        $('#infoModal3').modal('show');
+    L.easyButton('fa-exchange-alt', function () {
+        $('#modal3').modal('show');
     }).addTo(map);
 
     L.easyButton('fa-cloud-sun', function () {
-        $('#infoModal4').modal('show');
+        $('#modal4').modal('show');
     }).addTo(map);
 
     L.easyButton('fa-globe', function () {
-        $('#infoModal5').modal('show');
+        $('#modal5').modal('show');
     }).addTo(map);
 
     // Populate countries dropdown
@@ -117,6 +115,7 @@ $(document).ready(function () {
         });
     }
 
+    // Functions to fetch and display data for each modal
     function displayCountryInfo(iso2) {
         $.get('Php/countryName.Php', { iso2: iso2 }, function (data) {
             $('#countryNames').text(data.name);
@@ -150,6 +149,7 @@ $(document).ready(function () {
     function displayWeather(iso2) {
         $.get('Php/getWeather.Php', { iso2: iso2 }, function (data) {
             $('#tempToday').text(data.temperature);
+            $('#conditionsToday').text(data.description);
         }, 'json');
     }
 

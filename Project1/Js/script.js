@@ -10,10 +10,8 @@ let map;
 let bordersLayer;
 
 $(document).ready(function () {
-    // Initialize the map
     map = L.map('map').setView([20, 0], 2);
 
-    // Add tile layers
     var streets = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}", {
         attribution: "Tiles &copy; Esri"
     });
@@ -30,7 +28,6 @@ $(document).ready(function () {
     L.control.layers(basemaps).addTo(map);
     streets.addTo(map);
 
-    // Add 5 EasyButtons
     L.easyButton('fa-flag', function () {
         $('#infoModal1').modal('show');
     }).addTo(map);
@@ -51,7 +48,6 @@ $(document).ready(function () {
         $('#infoModal5').modal('show');
     }).addTo(map);
 
-    // Populate countries dropdown
     $.ajax({
         url: 'Php/countryName.Php',
         type: 'GET',
@@ -68,7 +64,6 @@ $(document).ready(function () {
         }
     });
 
-    // On country selection
     $('#countrySelect').change(function () {
         const iso2 = $(this).val();
         if (iso2) {
@@ -112,7 +107,6 @@ $(document).ready(function () {
         });
     }
 
-    // Functions to fetch and display data for each modal
     function displayCountryInfo(iso2) {
         $.get('Php/countryName.Php', { iso2: iso2 }, function (data) {
             $('#countryNames').text(data.name);
@@ -140,8 +134,6 @@ $(document).ready(function () {
     function displayExchangeRate(iso2) {
         $.get('Php/latestExchangeRate.php', { iso2: iso2 }, function (data) {
             $('#txtCurrencyRate').text(`1 USD = ${data.exchangeRate} ${data.currencyCode}`);
-
-            // Currency converter
             $('#convertBtn').off('click').on('click', function () {
                 const amount = parseFloat($('#currencyAmount').val());
                 if (!isNaN(amount)) {

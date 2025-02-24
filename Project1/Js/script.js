@@ -10,8 +10,10 @@ let map;
 let bordersLayer;
 
 $(document).ready(function () {
+    // Initialize the map
     map = L.map('map').setView([20, 0], 2);
 
+    // Add tile layers
     var streets = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}", {
         attribution: "Tiles &copy; Esri"
     });
@@ -28,6 +30,7 @@ $(document).ready(function () {
     L.control.layers(basemaps).addTo(map);
     streets.addTo(map);
 
+    // Add 5 EasyButtons
     L.easyButton('fa-flag', function () {
         $('#infoModal1').modal('show');
     }).addTo(map);
@@ -48,6 +51,7 @@ $(document).ready(function () {
         $('#infoModal5').modal('show');
     }).addTo(map);
 
+    // Populate countries dropdown
     $.ajax({
         url: 'Php/countryName.Php',
         type: 'GET',
@@ -64,6 +68,7 @@ $(document).ready(function () {
         }
     });
 
+    // On country selection
     $('#countrySelect').change(function () {
         const iso2 = $(this).val();
         if (iso2) {
@@ -107,9 +112,14 @@ $(document).ready(function () {
         });
     }
 
+    // Functions to fetch and display data for each modal
     function displayCountryInfo(iso2) {
-        $.get('Php/countryName.Php', { iso2: iso2 }, function (data) {
-            $('#countryNames').text(data.name);
+        $.get('https://restcountries.com/v3.1/alpha/' + iso2, function (data) {
+            if (data && data[0]) {
+                const countryName = data[0].name.common;
+                const flagUrl = `https://flagcdn.com/w80/${iso2.toLowerCase()}.png`;
+                $('#countryNames').html(`<img src='${flagUrl}' alt='Flag' style='width:30px; margin-right:10px;'>${countryName}`);
+            }
         }, 'json');
     }
 
@@ -134,20 +144,18 @@ $(document).ready(function () {
     function displayExchangeRate(iso2) {
         $.get('Php/latestExchangeRate.php', { iso2: iso2 }, function (data) {
             $('#txtCurrencyRate').text(`1 USD = ${data.exchangeRate} ${data.currencyCode}`);
-            $('#convertBtn').off('click').on('click', function () {
-                const amount = parseFloat($('#currencyAmount').val());
-                if (!isNaN(amount)) {
-                    const convertedAmount = (amount * data.exchangeRate).toFixed(2);
-                    $('#convertedCurrency').text(`${amount} USD = ${convertedAmount} ${data.currencyCode}`);
-                }
-            });
         }, 'json');
     }
 
     function displayWeather(iso2) {
-        $.get('Php/getWeather.Php', { iso2: iso2 }, function (data) {
-            $('#tempToday').text(data.temperature);
-            $('#conditionsToday').text(data.description);
+        $.get('https://restcountries.com/v3.1/alpha/' + iso2, function (data) {
+            if (data && data[0] && data[0].latlng) {
+                const [lat, lon] = data[0].latlng;
+                $.get('Php/getWeather.Php', { lat: lat, lon: lon }, function (weatherData) {
+                    $('#tempToday').text(weatherData.temperature);
+                    $('#conditionsToday').text(weatherData.description);
+                }, 'json');
+            }
         }, 'json');
     }
 

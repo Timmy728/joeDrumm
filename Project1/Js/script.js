@@ -15,11 +15,11 @@ $(document).ready(function () {
 
     // Add tile layers
     var streets = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}", {
-        attribution: "Tiles &copy; Esri &mdash; Source: Esri, DeLorme, NAVTEQ, USGS, Intermap, iPC, NRCAN, Esri Japan, METI, Esri China (Hong Kong), Esri (Thailand), TomTom, 2012"
+        attribution: "Tiles &copy; Esri"
     });
 
     var satellite = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", {
-        attribution: "Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community"
+        attribution: "Tiles &copy; Esri"
     });
 
     var basemaps = {
@@ -30,7 +30,7 @@ $(document).ready(function () {
     L.control.layers(basemaps).addTo(map);
     streets.addTo(map);
 
-    // Add 5 EasyButtons for each modal
+    // Add 5 EasyButtons
     L.easyButton('fa-flag', function () {
         $('#infoModal1').modal('show');
     }).addTo(map);
@@ -65,9 +65,6 @@ $(document).ready(function () {
                     dropdown.append(new Option(country.name, country.iso2));
                 }
             });
-        },
-        error: function (xhr, status, error) {
-            console.error('Error fetching country list:', error);
         }
     });
 
@@ -86,6 +83,7 @@ $(document).ready(function () {
         displayCurrency(iso2);
         displayExchangeRate(iso2);
         displayWeather(iso2);
+        displayWeatherForecast(iso2);
         displayWikipediaInfo(iso2);
         displayTimezone(iso2);
         displayEarthquakeData(iso2);
@@ -114,6 +112,7 @@ $(document).ready(function () {
         });
     }
 
+    // Functions to fetch and display data for each modal
     function displayCountryInfo(iso2) {
         $.get('Php/countryName.Php', { iso2: iso2 }, function (data) {
             $('#countryNames').text(data.name);
@@ -141,6 +140,15 @@ $(document).ready(function () {
     function displayExchangeRate(iso2) {
         $.get('Php/latestExchangeRate.php', { iso2: iso2 }, function (data) {
             $('#txtCurrencyRate').text(`1 USD = ${data.exchangeRate} ${data.currencyCode}`);
+
+            // Currency converter
+            $('#convertBtn').off('click').on('click', function () {
+                const amount = parseFloat($('#currencyAmount').val());
+                if (!isNaN(amount)) {
+                    const convertedAmount = (amount * data.exchangeRate).toFixed(2);
+                    $('#convertedCurrency').text(`${amount} USD = ${convertedAmount} ${data.currencyCode}`);
+                }
+            });
         }, 'json');
     }
 
@@ -148,6 +156,15 @@ $(document).ready(function () {
         $.get('Php/getWeather.Php', { iso2: iso2 }, function (data) {
             $('#tempToday').text(data.temperature);
             $('#conditionsToday').text(data.description);
+        }, 'json');
+    }
+
+    function displayWeatherForecast(iso2) {
+        $.get('Php/getWeatherForecast.Php', { location: iso2 }, function (data) {
+            $('#forecastInfo').html('');
+            data.forEach(forecast => {
+                $('#forecastInfo').append(`<p>${forecast.date}: ${forecast.min_temp}°C - ${forecast.max_temp}°C</p>`);
+            });
         }, 'json');
     }
 

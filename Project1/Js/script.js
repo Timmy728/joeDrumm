@@ -10,8 +10,10 @@ let map;
 let bordersLayer;
 
 $(document).ready(function () {
+    // Initialize the map
     map = L.map('map').setView([20, 0], 2);
 
+    // Add tile layers
     var streets = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}", {
         attribution: "Tiles &copy; Esri"
     });
@@ -110,10 +112,10 @@ $(document).ready(function () {
         });
     }
 
-    // Fetch and display country info with flag
+    // Functions to fetch and display data for each modal
     function displayCountryInfo(iso2) {
         $.get('Php/countryName.Php', { iso2: iso2 }, function (data) {
-            $('#countryNames').html(`${data.name} <img src='https://flagcdn.com/48x36/${iso2.toLowerCase()}.png' alt='Country Flag' width='30'>`);
+            $('#countryNames').html(`${data.name} <img id="countryFlag" src="${data.flag}" alt="Country Flag" width="30">`);
         }, 'json');
     }
 
@@ -131,7 +133,7 @@ $(document).ready(function () {
 
     function displayCurrency(iso2) {
         $.get('Php/Currency.Php', { iso2: iso2 }, function (data) {
-            $('#currencyName').text(data.name);
+            $('#currencyName').text(`${data.name} (${data.code})`);
             $('#currencySymbol').text(data.symbol);
         }, 'json');
     }
@@ -139,6 +141,8 @@ $(document).ready(function () {
     function displayExchangeRate(iso2) {
         $.get('Php/latestExchangeRate.php', { iso2: iso2 }, function (data) {
             $('#txtCurrencyRate').text(`1 USD = ${data.exchangeRate} ${data.currencyCode}`);
+
+            // Currency converter
             $('#convertBtn').off('click').on('click', function () {
                 const amount = parseFloat($('#currencyAmount').val());
                 if (!isNaN(amount)) {
@@ -149,12 +153,14 @@ $(document).ready(function () {
         }, 'json');
     }
 
-    // Fix current weather info display
     function displayWeather(iso2) {
         $.get('Php/getWeather.Php', { iso2: iso2 }, function (data) {
-            $('#tempToday').text(`${data.temperature}°C`);
+            $('#tempToday').text(`${data.temperature} °C`);
             $('#conditionsToday').text(data.description);
-        }, 'json');
+        }, 'json').fail(function () {
+            $('#tempToday').text('N/A');
+            $('#conditionsToday').text('N/A');
+        });
     }
 
     function displayWeatherForecast(iso2) {

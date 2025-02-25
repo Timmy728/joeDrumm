@@ -116,7 +116,7 @@ $(document).ready(function () {
     function displayCountryInfo(iso2) {
         $.get('Php/countryName.Php', { iso2: iso2 }, function (data) {
             if (data && data.name) {
-                $('#countryNames').html(`${data.name} <img id="countryFlag" src="${data.flag}" alt="${data.name} Flag" width="30">`);
+                $('#countryNames').html(`${data.name} <img id="countryFlag" src="https://flagcdn.com/w80/${iso2.toLowerCase()}.png" alt="${data.name}" width="30">`);
             }
         }, 'json');
     }

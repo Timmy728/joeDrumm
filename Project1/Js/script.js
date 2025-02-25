@@ -112,10 +112,11 @@ $(document).ready(function () {
         });
     }
 
-    // Functions to fetch and display data for each modal
+    // Functions to fetch and display data
     function displayCountryInfo(iso2) {
         $.get('Php/countryName.Php', { iso2: iso2 }, function (data) {
-            $('#countryNames').html(`${data.name} <img id="countryFlag" src="${data.flag}" alt="Country Flag" width="30">`);
+            $('#countryNames').text(data.name);
+            $('#countryFlag').attr('src', `https://flagcdn.com/w80/${iso2.toLowerCase()}.png`);
         }, 'json');
     }
 
@@ -133,16 +134,17 @@ $(document).ready(function () {
 
     function displayCurrency(iso2) {
         $.get('Php/Currency.Php', { iso2: iso2 }, function (data) {
-            $('#currencyName').text(`${data.name} (${data.code})`);
-            $('#currencySymbol').text(data.symbol);
+            if (data && data.currencies && data.currencies.length > 0) {
+                let currency = data.currencies[0];
+                $('#currencyName').text(`${currency.name}`);
+                $('#currencySymbol').text(currency.symbol);
+            }
         }, 'json');
     }
 
     function displayExchangeRate(iso2) {
         $.get('Php/latestExchangeRate.php', { iso2: iso2 }, function (data) {
             $('#txtCurrencyRate').text(`1 USD = ${data.exchangeRate} ${data.currencyCode}`);
-
-            // Currency converter
             $('#convertBtn').off('click').on('click', function () {
                 const amount = parseFloat($('#currencyAmount').val());
                 if (!isNaN(amount)) {
@@ -155,12 +157,9 @@ $(document).ready(function () {
 
     function displayWeather(iso2) {
         $.get('Php/getWeather.Php', { iso2: iso2 }, function (data) {
-            $('#tempToday').text(`${data.temperature} °C`);
+            $('#tempToday').text(`${data.temperature}°C`);
             $('#conditionsToday').text(data.description);
-        }, 'json').fail(function () {
-            $('#tempToday').text('N/A');
-            $('#conditionsToday').text('N/A');
-        });
+        }, 'json');
     }
 
     function displayWeatherForecast(iso2) {

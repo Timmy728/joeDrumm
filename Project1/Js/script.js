@@ -115,7 +115,7 @@ $(document).ready(function () {
     // Functions to fetch and display data
     function displayCountryInfo(iso2) {
         $.get('Php/countryName.Php', { iso2: iso2 }, function (data) {
-            $('#countryNames').html(`${data.name} <img id="countryFlag" src="${data.flag}" alt="Country Flag" width="30">`);
+            $('#countryNames').html(`${data.name} <img id="countryFlag" src="${data.flag}" alt="Flag" width="30">`);
         }, 'json');
     }
 
@@ -160,12 +160,12 @@ $(document).ready(function () {
                 $('#tempToday').text(`${data.temperature}°C`);
                 $('#conditionsToday').text(data.description);
             } else {
-                $('#tempToday').text("N/A");
-                $('#conditionsToday').text("N/A");
+                $('#tempToday').text("No Data");
+                $('#conditionsToday').text("No Data");
             }
         }, 'json').fail(function () {
-            $('#tempToday').text('N/A');
-            $('#conditionsToday').text('N/A');
+            $('#tempToday').text('No Data');
+            $('#conditionsToday').text('No Data');
         });
     }
 

@@ -155,15 +155,10 @@ $(document).ready(function () {
         }, 'json');
     }
 
-    function displayWeather(iso2) {
+function displayWeather(iso2) {
         $.get('Php/getWeather.Php', { iso2: iso2 }, function (data) {
-            if (data && data.temperature && data.description) {
-                $('#tempToday').text(`${data.temperature}°C`);
-                $('#conditionsToday').text(data.description);
-            } else {
-                $('#tempToday').text('No Data');
-                $('#conditionsToday').text('No Data');
-            }
+            $('#tempToday').text(data.temperature);
+            $('#conditionsToday').text(data.description);
         }, 'json');
     }
 

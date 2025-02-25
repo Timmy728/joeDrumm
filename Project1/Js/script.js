@@ -161,7 +161,11 @@ function displayWeather(iso2) {
         if (data && data[0] && data[0].latlng) {
             const [lat, lon] = data[0].latlng;
             
+            // Fetch weather using coordinates
             $.get('Php/getWeather.Php', { lat: lat, lon: lon }, function (weatherData) {
+                
+                console.log("Weather API Response:", weatherData); // DEBUG LOGGING
+
                 if (weatherData && weatherData.temperature && weatherData.description) {
                     $('#tempToday').text(`${weatherData.temperature}°C`);
                     $('#conditionsToday').text(weatherData.description);
@@ -169,9 +173,17 @@ function displayWeather(iso2) {
                     $('#tempToday').text("Weather data unavailable");
                     $('#conditionsToday').text("");
                 }
-            }, 'json');
+
+            }, 'json').fail(function(jqXHR, textStatus, errorThrown) {
+                console.log("Weather API Request Failed: ", textStatus, errorThrown);
+            });
+
+        } else {
+            console.log("Failed to fetch country coordinates");
         }
-    }, 'json');
+    }, 'json').fail(function(jqXHR, textStatus, errorThrown) {
+        console.log("Country API Request Failed: ", textStatus, errorThrown);
+    });
 }
 
 

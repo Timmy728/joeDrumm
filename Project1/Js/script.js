@@ -115,7 +115,9 @@ $(document).ready(function () {
     // Functions to fetch and display data
     function displayCountryInfo(iso2) {
         $.get('Php/countryName.Php', { iso2: iso2 }, function (data) {
-            $('#countryNames').html(`${data.name} <img id="countryFlag" src="${data.flag}" alt="Flag" width="30">`);
+            if (data && data.name) {
+                $('#countryNames').html(`${data.name} <img id="countryFlag" src="${data.flag}" alt="${data.name} Flag" width="30">`);
+            }
         }, 'json');
     }
 
@@ -135,7 +137,7 @@ $(document).ready(function () {
         $.get('Php/Currency.Php', { iso2: iso2 }, function (data) {
             if (data && data.currencies && data.currencies.length > 0) {
                 let currency = data.currencies[0];
-                $('#currencyName').text(`${currency.name}`);
+                $('#currencyName').text(currency.name);
                 $('#currencySymbol').text(currency.symbol);
             }
         }, 'json');

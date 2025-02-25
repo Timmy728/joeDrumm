@@ -10,9 +10,10 @@ let map;
 let bordersLayer;
 
 $(document).ready(function () {
+    // Initialize the map
     map = L.map('map').setView([20, 0], 2);
 
-    // Tile layers
+    // Add tile layers
     var streets = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}", {
         attribution: "Tiles &copy; Esri"
     });
@@ -21,16 +22,34 @@ $(document).ready(function () {
         attribution: "Tiles &copy; Esri"
     });
 
-    var basemaps = { "Streets": streets, "Satellite": satellite };
+    var basemaps = {
+        "Streets": streets,
+        "Satellite": satellite
+    };
+
     L.control.layers(basemaps).addTo(map);
     streets.addTo(map);
 
-    // Adding 5 EasyButtons
-    L.easyButton('fa-flag', function () { $('#infoModal1').modal('show'); }).addTo(map);
-    L.easyButton('fa-users', function () { $('#infoModal2').modal('show'); }).addTo(map);
-    L.easyButton('fa-exchange-alt', function () { $('#infoModal3').modal('show'); }).addTo(map);
-    L.easyButton('fa-cloud-sun', function () { $('#infoModal4').modal('show'); }).addTo(map);
-    L.easyButton('fa-globe', function () { $('#infoModal5').modal('show'); }).addTo(map);
+    // Add 5 EasyButtons
+    L.easyButton('fa-flag', function () {
+        $('#infoModal1').modal('show');
+    }).addTo(map);
+
+    L.easyButton('fa-users', function () {
+        $('#infoModal2').modal('show');
+    }).addTo(map);
+
+    L.easyButton('fa-exchange-alt', function () {
+        $('#infoModal3').modal('show');
+    }).addTo(map);
+
+    L.easyButton('fa-cloud-sun', function () {
+        $('#infoModal4').modal('show');
+    }).addTo(map);
+
+    L.easyButton('fa-globe', function () {
+        $('#infoModal5').modal('show');
+    }).addTo(map);
 
     // Populate countries dropdown
     $.ajax({
@@ -49,6 +68,7 @@ $(document).ready(function () {
         }
     });
 
+    // On country selection
     $('#countrySelect').change(function () {
         const iso2 = $(this).val();
         if (iso2) {
@@ -92,10 +112,11 @@ $(document).ready(function () {
         });
     }
 
+    // Functions to fetch and display data for each modal
     function displayCountryInfo(iso2) {
         $.get('Php/countryName.Php', { iso2: iso2 }, function (data) {
             $('#countryNames').text(data.name);
-            $('#countryFlag').attr('src', `https://flagcdn.com/w320/${iso2.toLowerCase()}.png`);
+            $('#countryFlag').attr('src', `https://flagsapi.com/${iso2}/flat/64.png`);
         }, 'json');
     }
 
@@ -113,7 +134,7 @@ $(document).ready(function () {
 
     function displayCurrency(iso2) {
         $.get('Php/Currency.Php', { iso2: iso2 }, function (data) {
-            $('#currencyName').text(`${data.name} (${data.code}) - ${data.symbol}`);
+            $('#currencyName').text(data.name);
         }, 'json');
     }
 
@@ -125,8 +146,6 @@ $(document).ready(function () {
                 if (!isNaN(amount)) {
                     const convertedAmount = (amount * data.exchangeRate).toFixed(2);
                     $('#convertedCurrency').text(`${amount} USD = ${convertedAmount} ${data.currencyCode}`);
-                } else {
-                    alert('Please enter a valid amount');
                 }
             });
         }, 'json');

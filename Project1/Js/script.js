@@ -10,8 +10,10 @@ let map;
 let bordersLayer;
 
 $(document).ready(function () {
+    // Initialize the map
     map = L.map('map').setView([20, 0], 2);
 
+    // Add tile layers
     var streets = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}", {
         attribution: "Tiles &copy; Esri"
     });
@@ -28,6 +30,7 @@ $(document).ready(function () {
     L.control.layers(basemaps).addTo(map);
     streets.addTo(map);
 
+    // Add 5 EasyButtons
     L.easyButton('fa-flag', function () {
         $('#infoModal1').modal('show');
     }).addTo(map);
@@ -48,6 +51,7 @@ $(document).ready(function () {
         $('#infoModal5').modal('show');
     }).addTo(map);
 
+    // Populate countries dropdown
     $.ajax({
         url: 'Php/countryName.Php',
         type: 'GET',
@@ -64,6 +68,7 @@ $(document).ready(function () {
         }
     });
 
+    // On country selection
     $('#countrySelect').change(function () {
         const iso2 = $(this).val();
         if (iso2) {
@@ -107,10 +112,11 @@ $(document).ready(function () {
         });
     }
 
+    // Functions to fetch and display data
     function displayCountryInfo(iso2) {
         $.get('Php/countryName.Php', { iso2: iso2 }, function (data) {
-            const flagUrl = `https://flagcdn.com/w80/${iso2.toLowerCase()}.png`;
-            $('#countryNames').html(`<img src="${flagUrl}" alt="Flag"> ${data.name}`);
+            $('#countryNames').text(data.name);
+            $('#countryFlag').attr('src', `https://flagcdn.com/w80/${iso2.toLowerCase()}.png`);
         }, 'json');
     }
 
@@ -128,8 +134,11 @@ $(document).ready(function () {
 
     function displayCurrency(iso2) {
         $.get('Php/Currency.Php', { iso2: iso2 }, function (data) {
-            $('#currencyName').text(data.name);
-            $('#currencySymbol').text(data.symbol);
+            if (data && data.currencies && data.currencies.length > 0) {
+                let currency = data.currencies[0];
+                $('#currencyName').text(`${currency.name}`);
+                $('#currencySymbol').text(currency.symbol);
+            }
         }, 'json');
     }
 
@@ -148,7 +157,7 @@ $(document).ready(function () {
 
     function displayWeather(iso2) {
         $.get('Php/getWeather.Php', { iso2: iso2 }, function (data) {
-            $('#tempToday').text(data.temperature);
+            $('#tempToday').text(`${data.temperature}°C`);
             $('#conditionsToday').text(data.description);
         }, 'json');
     }

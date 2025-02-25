@@ -156,11 +156,24 @@ $(document).ready(function () {
     }
 
 function displayWeather(iso2) {
-        $.get('Php/getWeather.Php', { iso2: iso2 }, function (data) {
-            $('#tempToday').text(data.temperature);
-            $('#conditionsToday').text(data.description);
-        }, 'json');
-    }
+    // Fetch country coordinates first
+    $.get(`https://restcountries.com/v3.1/alpha/${iso2}`, function (data) {
+        if (data && data[0] && data[0].latlng) {
+            const [lat, lon] = data[0].latlng;
+            
+            $.get('Php/getWeather.Php', { lat: lat, lon: lon }, function (weatherData) {
+                if (weatherData && weatherData.temperature && weatherData.description) {
+                    $('#tempToday').text(`${weatherData.temperature}°C`);
+                    $('#conditionsToday').text(weatherData.description);
+                } else {
+                    $('#tempToday').text("Weather data unavailable");
+                    $('#conditionsToday').text("");
+                }
+            }, 'json');
+        }
+    }, 'json');
+}
+
 
     function displayWeatherForecast(iso2) {
         $.get('Php/getWeatherForecast.Php', { location: iso2 }, function (data) {

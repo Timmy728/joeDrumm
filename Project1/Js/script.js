@@ -116,7 +116,7 @@ $(document).ready(function () {
     function displayCountryInfo(iso2) {
         $.get('Php/countryName.Php', { iso2: iso2 }, function (data) {
             $('#countryNames').text(data.name);
-            $('#countryFlag').attr('src', `https://flagcdn.com/w80/${iso2.toLowerCase()}.png`);
+            $('#countryFlag').attr('src', `https://flagcdn.com/w80/${iso2.toLowerCase()}.png`).show();
         }, 'json');
     }
 
@@ -157,8 +157,13 @@ $(document).ready(function () {
 
     function displayWeather(iso2) {
         $.get('Php/getWeather.Php', { iso2: iso2 }, function (data) {
-            $('#tempToday').text(`${data.temperature}°C`);
-            $('#conditionsToday').text(data.description);
+            if (data && data.temperature && data.description) {
+                $('#tempToday').text(`${data.temperature}°C`);
+                $('#conditionsToday').text(data.description);
+            } else {
+                $('#tempToday').text('No Data');
+                $('#conditionsToday').text('No Data');
+            }
         }, 'json');
     }
 

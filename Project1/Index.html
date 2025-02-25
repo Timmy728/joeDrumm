@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gazetteer Map</title>
+    <title>Gazetteer</title>
 
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="css/bootstrap.min.css">
@@ -14,20 +14,6 @@
     <!-- Custom CSS -->
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <style>
-        #selectContainer {
-            position: absolute;
-            top: 10px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 1000;
-        }
-        #countrySelect {
-            width: 200px;
-            padding: 5px;
-            font-size: 14px;
-        }
-    </style>
 </head>
 <body>
     <!-- Country Selection Dropdown on Map -->
@@ -49,7 +35,7 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body">
-                        <p><strong>Country:</strong> <span id="countryNames"></span></p>
+                        <p><strong>Country:</strong> <span id="countryNames"></span> <img id="countryFlag" src="" alt="Country Flag" width="30"></p>
                         <p><strong>Capital City:</strong> <span id="capitalCity"></span></p>
                     </div>
                 </div>
@@ -60,17 +46,12 @@
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
                     <div class="modal-header bg-success text-white">
-                        <h5 class="modal-title">Population & Currency</h5>
+                        <h5 class="modal-title">Population & Timezone</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body">
                         <p><strong>Population:</strong> <span id="population"></span></p>
-                        <p><strong>Currency:</strong> <span id="currencyName"></span> (<span id="currencySymbol"></span>)</p>
-                        <hr>
-                        <h6>Currency Converter</h6>
-                        <input type="number" id="currencyInput" placeholder="Amount in USD" class="form-control mb-2">
-                        <button id="convertCurrency" class="btn btn-success w-100">Convert</button>
-                        <p class="mt-2"><strong>Converted Amount:</strong> <span id="convertedAmount"></span></p>
+                        <p><strong>Timezone:</strong> <span id="timezone"></span></p>
                     </div>
                 </div>
             </div>
@@ -80,12 +61,18 @@
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
                     <div class="modal-header bg-success text-white">
-                        <h5 class="modal-title">Exchange Rate & Timezone</h5>
+                        <h5 class="modal-title">Currency & Exchange Rate</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body">
+                        <p><strong>Currency:</strong> <span id="currencyName"></span> (<span id="currencySymbol"></span>)</p>
                         <p><strong>Exchange Rate:</strong> <span id="txtCurrencyRate"></span></p>
-                        <p><strong>Timezone:</strong> <span id="timezone"></span></p>
+                        <div>
+                            <label for="currencyAmount">Enter amount in USD:</label>
+                            <input type="number" id="currencyAmount" class="form-control" placeholder="Enter amount">
+                            <button id="convertBtn" class="btn btn-primary mt-2">Convert</button>
+                            <p id="convertedCurrency" class="mt-2"></p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -101,8 +88,6 @@
                     <div class="modal-body">
                         <p><strong>Temperature:</strong> <span id="tempToday"></span></p>
                         <p><strong>Conditions:</strong> <span id="conditionsToday"></span></p>
-                        <hr>
-                        <h6>10-Day Weather Forecast</h6>
                         <div id="forecastInfo"></div>
                     </div>
                 </div>

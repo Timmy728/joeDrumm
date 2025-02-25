@@ -30,7 +30,7 @@ $(document).ready(function () {
     L.control.layers(basemaps).addTo(map);
     streets.addTo(map);
 
-    // Add 5 EasyButtons
+    // Add 5 EasyButtons for the modals
     L.easyButton('fa-flag', function () {
         $('#infoModal1').modal('show');
     }).addTo(map);
@@ -80,8 +80,7 @@ $(document).ready(function () {
         displayCountryInfo(iso2);
         displayCapitalCity(iso2);
         displayPopulation(iso2);
-        displayCurrency(iso2);
-        displayExchangeRate(iso2);
+        displayCurrencyAndExchangeRate(iso2);
         displayWeather(iso2);
         displayWeatherForecast(iso2);
         displayWikipediaInfo(iso2);
@@ -112,11 +111,11 @@ $(document).ready(function () {
         });
     }
 
-    // Functions to fetch and display data for each modal
+    // Fetch and display country info with flag
     function displayCountryInfo(iso2) {
         $.get('Php/countryName.Php', { iso2: iso2 }, function (data) {
-            $('#countryNames').text(data.name);
-            $('#countryFlag').attr('src', `https://flagsapi.com/${iso2}/flat/64.png`);
+            const flagUrl = `https://flagcdn.com/w80/${iso2.toLowerCase()}.png`;
+            $('#countryNames').html(`<img src="${flagUrl}" alt="Flag" style="width: 40px; height: 25px;"> ${data.name}`);
         }, 'json');
     }
 
@@ -132,22 +131,20 @@ $(document).ready(function () {
         }, 'json');
     }
 
-    function displayCurrency(iso2) {
+    function displayCurrencyAndExchangeRate(iso2) {
         $.get('Php/Currency.Php', { iso2: iso2 }, function (data) {
             $('#currencyName').text(data.name);
-        }, 'json');
-    }
-
-    function displayExchangeRate(iso2) {
-        $.get('Php/latestExchangeRate.php', { iso2: iso2 }, function (data) {
-            $('#txtCurrencyRate').text(`1 USD = ${data.exchangeRate} ${data.currencyCode}`);
-            $('#convertBtn').off('click').on('click', function () {
-                const amount = parseFloat($('#currencyAmount').val());
-                if (!isNaN(amount)) {
-                    const convertedAmount = (amount * data.exchangeRate).toFixed(2);
-                    $('#convertedCurrency').text(`${amount} USD = ${convertedAmount} ${data.currencyCode}`);
-                }
-            });
+            $.get('Php/latestExchangeRate.php', { iso2: iso2 }, function (exchangeData) {
+                $('#txtCurrencyRate').text(`1 USD = ${exchangeData.exchangeRate} ${exchangeData.currencyCode}`);
+                // Currency Converter
+                $('#convertBtn').off('click').on('click', function () {
+                    const amount = parseFloat($('#currencyAmount').val());
+                    if (!isNaN(amount)) {
+                        const convertedAmount = (amount * exchangeData.exchangeRate).toFixed(2);
+                        $('#convertedCurrency').text(`${amount} USD = ${convertedAmount} ${exchangeData.currencyCode}`);
+                    }
+                });
+            }, 'json');
         }, 'json');
     }
 

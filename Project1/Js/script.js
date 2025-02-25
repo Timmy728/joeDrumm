@@ -116,7 +116,7 @@ $(document).ready(function () {
     function displayCountryInfo(iso2) {
         $.get('Php/countryName.Php', { iso2: iso2 }, function (data) {
             $('#countryNames').text(data.name);
-            $('#countryFlag').attr('src', `https://flagcdn.com/w80/${iso2.toLowerCase()}.png`).show();
+            $('#countryFlag').attr('src', `https://flagcdn.com/w80/${iso2.toLowerCase()}.png`);
         }, 'json');
     }
 
@@ -155,37 +155,12 @@ $(document).ready(function () {
         }, 'json');
     }
 
-function displayWeather(iso2) {
-    // Fetch country coordinates first
-    $.get(`https://restcountries.com/v3.1/alpha/${iso2}`, function (data) {
-        if (data && data[0] && data[0].latlng) {
-            const [lat, lon] = data[0].latlng;
-            
-            // Fetch weather using coordinates
-            $.get('Php/getWeather.Php', { lat: lat, lon: lon }, function (weatherData) {
-                
-                console.log("Weather API Response:", weatherData); // DEBUG LOGGING
-
-                if (weatherData && weatherData.temperature && weatherData.description) {
-                    $('#tempToday').text(`${weatherData.temperature}°C`);
-                    $('#conditionsToday').text(weatherData.description);
-                } else {
-                    $('#tempToday').text("Weather data unavailable");
-                    $('#conditionsToday').text("");
-                }
-
-            }, 'json').fail(function(jqXHR, textStatus, errorThrown) {
-                console.log("Weather API Request Failed: ", textStatus, errorThrown);
-            });
-
-        } else {
-            console.log("Failed to fetch country coordinates");
-        }
-    }, 'json').fail(function(jqXHR, textStatus, errorThrown) {
-        console.log("Country API Request Failed: ", textStatus, errorThrown);
-    });
-}
-
+    function displayWeather(iso2) {
+        $.get('Php/getWeather.Php', { iso2: iso2 }, function (data) {
+            $('#tempToday').text(`${data.temperature}°C`);
+            $('#conditionsToday').text(data.description);
+        }, 'json');
+    }
 
     function displayWeatherForecast(iso2) {
         $.get('Php/getWeatherForecast.Php', { location: iso2 }, function (data) {

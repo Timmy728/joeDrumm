@@ -12,6 +12,7 @@ let bordersLayer;
 $(document).ready(function () {
     map = L.map('map').setView([20, 0], 2);
 
+    // Tile layers
     var streets = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}", {
         attribution: "Tiles &copy; Esri"
     });
@@ -20,34 +21,16 @@ $(document).ready(function () {
         attribution: "Tiles &copy; Esri"
     });
 
-    var basemaps = {
-        "Streets": streets,
-        "Satellite": satellite
-    };
-
+    var basemaps = { "Streets": streets, "Satellite": satellite };
     L.control.layers(basemaps).addTo(map);
     streets.addTo(map);
 
-    // Add 5 EasyButtons
-    L.easyButton('fa-flag', function () {
-        $('#infoModal1').modal('show');
-    }).addTo(map);
-
-    L.easyButton('fa-users', function () {
-        $('#infoModal2').modal('show');
-    }).addTo(map);
-
-    L.easyButton('fa-exchange-alt', function () {
-        $('#infoModal3').modal('show');
-    }).addTo(map);
-
-    L.easyButton('fa-cloud-sun', function () {
-        $('#infoModal4').modal('show');
-    }).addTo(map);
-
-    L.easyButton('fa-globe', function () {
-        $('#infoModal5').modal('show');
-    }).addTo(map);
+    // Adding 5 EasyButtons
+    L.easyButton('fa-flag', function () { $('#infoModal1').modal('show'); }).addTo(map);
+    L.easyButton('fa-users', function () { $('#infoModal2').modal('show'); }).addTo(map);
+    L.easyButton('fa-exchange-alt', function () { $('#infoModal3').modal('show'); }).addTo(map);
+    L.easyButton('fa-cloud-sun', function () { $('#infoModal4').modal('show'); }).addTo(map);
+    L.easyButton('fa-globe', function () { $('#infoModal5').modal('show'); }).addTo(map);
 
     // Populate countries dropdown
     $.ajax({
@@ -66,7 +49,6 @@ $(document).ready(function () {
         }
     });
 
-    // On country selection
     $('#countrySelect').change(function () {
         const iso2 = $(this).val();
         if (iso2) {
@@ -110,43 +92,46 @@ $(document).ready(function () {
         });
     }
 
-    // Display currency and converter
+    function displayCountryInfo(iso2) {
+        $.get('Php/countryName.Php', { iso2: iso2 }, function (data) {
+            $('#countryNames').text(data.name);
+            $('#countryFlag').attr('src', `https://flagcdn.com/w320/${iso2.toLowerCase()}.png`);
+        }, 'json');
+    }
+
+    function displayCapitalCity(iso2) {
+        $.get('Php/capitalCities.Php', { iso2: iso2 }, function (data) {
+            $('#capitalCity').text(data.capital);
+        }, 'json');
+    }
+
+    function displayPopulation(iso2) {
+        $.get('Php/Population.Php', { countryCode: iso2 }, function (data) {
+            $('#population').text(data.population);
+        }, 'json');
+    }
+
     function displayCurrency(iso2) {
         $.get('Php/Currency.Php', { iso2: iso2 }, function (data) {
-            $('#currencyName').text(data.name);
-            $('#currencySymbol').text(data.symbol);
+            $('#currencyName').text(`${data.name} (${data.code}) - ${data.symbol}`);
         }, 'json');
     }
 
     function displayExchangeRate(iso2) {
         $.get('Php/latestExchangeRate.php', { iso2: iso2 }, function (data) {
             $('#txtCurrencyRate').text(`1 USD = ${data.exchangeRate} ${data.currencyCode}`);
-
-            // Currency converter functionality
             $('#convertBtn').off('click').on('click', function () {
                 const amount = parseFloat($('#currencyAmount').val());
                 if (!isNaN(amount)) {
                     const convertedAmount = (amount * data.exchangeRate).toFixed(2);
                     $('#convertedCurrency').text(`${amount} USD = ${convertedAmount} ${data.currencyCode}`);
                 } else {
-                    $('#convertedCurrency').text('Please enter a valid number');
+                    alert('Please enter a valid amount');
                 }
             });
         }, 'json');
     }
 
-    // Display country info with flag
-    function displayCountryInfo(iso2) {
-        $.get('https://restcountries.com/v3.1/alpha/' + iso2, function (data) {
-            if (data && data[0]) {
-                const countryName = data[0].name.common;
-                const flagUrl = data[0].flags.svg;
-                $('#countryNames').html(`<img src="${flagUrl}" alt="${countryName} Flag" width="30"> ${countryName}`);
-            }
-        }, 'json');
-    }
-
-    // Fetch and display weather
     function displayWeather(iso2) {
         $.get('Php/getWeather.Php', { iso2: iso2 }, function (data) {
             $('#tempToday').text(data.temperature);
@@ -154,5 +139,34 @@ $(document).ready(function () {
         }, 'json');
     }
 
-    // Other data fetching functions can be added similarly...
+    function displayWeatherForecast(iso2) {
+        $.get('Php/getWeatherForecast.Php', { location: iso2 }, function (data) {
+            $('#forecastInfo').html('');
+            data.forEach(forecast => {
+                $('#forecastInfo').append(`<p>${forecast.date}: ${forecast.min_temp}°C - ${forecast.max_temp}°C</p>`);
+            });
+        }, 'json');
+    }
+
+    function displayWikipediaInfo(iso2) {
+        $.get('Php/wikipediaSearch.Php', { query: iso2 }, function (data) {
+            $('#wikiLink').attr('href', data.url).text(`View ${data.title} on Wikipedia`);
+        }, 'json');
+    }
+
+    function displayTimezone(iso2) {
+        $.get('Php/Timezone.Php', { iso2: iso2 }, function (data) {
+            $('#timezone').text(data.timezone);
+        }, 'json');
+    }
+
+    function displayEarthquakeData(iso2) {
+        $.get('Php/earthQuakes.Php', { country: iso2 }, function (data) {
+            let earthquakeHtml = '';
+            data.earthquakes.forEach(quake => {
+                earthquakeHtml += `<p>📍 Magnitude: ${quake.magnitude} | Depth: ${quake.depth}km | Location: (${quake.lat}, ${quake.lng}) | Time: ${quake.datetime}</p>`;
+            });
+            $('#earthquakeList').html(earthquakeHtml);
+        }, 'json');
+    }
 });

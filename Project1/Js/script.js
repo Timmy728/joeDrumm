@@ -115,9 +115,8 @@ $(document).ready(function () {
     // Functions to fetch and display data
     function displayCountryInfo(iso2) {
         $.get('Php/countryName.Php', { iso2: iso2 }, function (data) {
-            if (data && data.name) {
-                $('#countryNames').html(`${data.name} <img id="countryFlag" src="https://flagcdn.com/w80/${iso2.toLowerCase()}.png" alt="${data.name}" width="30">`);
-            }
+            $('#countryNames').text(data.name);
+            $('#countryFlag').attr('src', `https://flagcdn.com/w80/${iso2.toLowerCase()}.png`).show();
         }, 'json');
     }
 
@@ -137,7 +136,7 @@ $(document).ready(function () {
         $.get('Php/Currency.Php', { iso2: iso2 }, function (data) {
             if (data && data.currencies && data.currencies.length > 0) {
                 let currency = data.currencies[0];
-                $('#currencyName').text(currency.name);
+                $('#currencyName').text(`${currency.name}`);
                 $('#currencySymbol').text(currency.symbol);
             }
         }, 'json');
@@ -162,13 +161,10 @@ $(document).ready(function () {
                 $('#tempToday').text(`${data.temperature}°C`);
                 $('#conditionsToday').text(data.description);
             } else {
-                $('#tempToday').text("No Data");
-                $('#conditionsToday').text("No Data");
+                $('#tempToday').text('No Data');
+                $('#conditionsToday').text('No Data');
             }
-        }, 'json').fail(function () {
-            $('#tempToday').text('No Data');
-            $('#conditionsToday').text('No Data');
-        });
+        }, 'json');
     }
 
     function displayWeatherForecast(iso2) {

@@ -114,12 +114,9 @@ $(document).ready(function () {
 
     // Functions to fetch and display data for each modal
     function displayCountryInfo(iso2) {
-        $.get('https://restcountries.com/v3.1/alpha/' + iso2, function (data) {
-            if (data && data[0]) {
-                const countryName = data[0].name.common;
-                const flagUrl = `https://flagcdn.com/w80/${iso2.toLowerCase()}.png`;
-                $('#countryNames').html(`<img src='${flagUrl}' alt='Flag' style='width:30px; margin-right:10px;'>${countryName}`);
-            }
+        $.get('Php/countryName.Php', { iso2: iso2 }, function (data) {
+            const flagUrl = `https://flagcdn.com/w80/${iso2.toLowerCase()}.png`;
+            $('#countryNames').html(`<img src="${flagUrl}" alt="Flag" style="width: 30px; height: 20px; margin-right: 10px;"> ${data.name}`);
         }, 'json');
     }
 
@@ -137,25 +134,28 @@ $(document).ready(function () {
 
     function displayCurrency(iso2) {
         $.get('Php/Currency.Php', { iso2: iso2 }, function (data) {
-            $('#currencyName').text(data.name);
+            $('#currencyName').text(`${data.name} (${data.code}) - ${data.symbol}`);
         }, 'json');
     }
 
     function displayExchangeRate(iso2) {
         $.get('Php/latestExchangeRate.php', { iso2: iso2 }, function (data) {
             $('#txtCurrencyRate').text(`1 USD = ${data.exchangeRate} ${data.currencyCode}`);
+            // Currency converter
+            $('#convertBtn').off('click').on('click', function () {
+                const amount = parseFloat($('#currencyAmount').val());
+                if (!isNaN(amount)) {
+                    const convertedAmount = (amount * data.exchangeRate).toFixed(2);
+                    $('#convertedCurrency').text(`${amount} USD = ${convertedAmount} ${data.currencyCode}`);
+                }
+            });
         }, 'json');
     }
 
     function displayWeather(iso2) {
-        $.get('https://restcountries.com/v3.1/alpha/' + iso2, function (data) {
-            if (data && data[0] && data[0].latlng) {
-                const [lat, lon] = data[0].latlng;
-                $.get('Php/getWeather.Php', { lat: lat, lon: lon }, function (weatherData) {
-                    $('#tempToday').text(weatherData.temperature);
-                    $('#conditionsToday').text(weatherData.description);
-                }, 'json');
-            }
+        $.get('Php/getWeather.Php', { iso2: iso2 }, function (data) {
+            $('#tempToday').text(data.temperature);
+            $('#conditionsToday').text(data.description);
         }, 'json');
     }
 

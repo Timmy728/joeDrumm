@@ -10,10 +10,8 @@ let map;
 let bordersLayer;
 
 $(document).ready(function () {
-    // Initialize the map
     map = L.map('map').setView([20, 0], 2);
 
-    // Add tile layers
     var streets = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}", {
         attribution: "Tiles &copy; Esri"
     });
@@ -112,11 +110,10 @@ $(document).ready(function () {
         });
     }
 
-    // Functions to fetch and display data
+    // Fetch and display country info with flag
     function displayCountryInfo(iso2) {
         $.get('Php/countryName.Php', { iso2: iso2 }, function (data) {
-            $('#countryNames').text(data.name);
-            $('#countryFlag').attr('src', `https://flagcdn.com/w80/${iso2.toLowerCase()}.png`);
+            $('#countryNames').html(`${data.name} <img src='https://flagcdn.com/48x36/${iso2.toLowerCase()}.png' alt='Country Flag' width='30'>`);
         }, 'json');
     }
 
@@ -134,11 +131,8 @@ $(document).ready(function () {
 
     function displayCurrency(iso2) {
         $.get('Php/Currency.Php', { iso2: iso2 }, function (data) {
-            if (data && data.currencies && data.currencies.length > 0) {
-                let currency = data.currencies[0];
-                $('#currencyName').text(`${currency.name}`);
-                $('#currencySymbol').text(currency.symbol);
-            }
+            $('#currencyName').text(data.name);
+            $('#currencySymbol').text(data.symbol);
         }, 'json');
     }
 
@@ -155,6 +149,7 @@ $(document).ready(function () {
         }, 'json');
     }
 
+    // Fix current weather info display
     function displayWeather(iso2) {
         $.get('Php/getWeather.Php', { iso2: iso2 }, function (data) {
             $('#tempToday').text(`${data.temperature}°C`);

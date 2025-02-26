@@ -179,7 +179,7 @@ $(document).ready(function () {
                 console.error("Unexpected weather data format:", data);
                 return;
             }
-            $('#tempToday').text(data.temperature);
+            $('#tempToday').text(data.temperature + "°C");
             $('#conditionsToday').text(data.description);
             if (weatherLayer) {
                 map.removeLayer(weatherLayer);

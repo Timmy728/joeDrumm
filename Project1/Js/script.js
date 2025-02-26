@@ -8,7 +8,9 @@ $(window).on('load', function () {
 
 let map;
 let bordersLayer;
-let earthquakeLayer, capitalCityLayer, weatherLayer;
+let weatherLayer;
+let earthquakeLayer;
+let capitalLayer;
 
 $(document).ready(function () {
     // Initialize the map
@@ -31,7 +33,7 @@ $(document).ready(function () {
     L.control.layers(basemaps).addTo(map);
     streets.addTo(map);
 
-    // Define custom icons
+    // Define custom icons using Leaflet ExtraMarkers
     var earthquakeIcon = L.ExtraMarkers.icon({
         icon: 'fa-bolt',
         markerColor: 'red',
@@ -80,10 +82,6 @@ $(document).ready(function () {
         type: 'GET',
         dataType: 'json',
         success: function (data) {
-            if (!Array.isArray(data)) {
-                console.error("Expected an array for country list, got:", data);
-                return;
-            }
             const dropdown = $('#countrySelect');
             dropdown.empty();
             dropdown.append(new Option('Select a Country', ''));
@@ -106,8 +104,14 @@ $(document).ready(function () {
     function fetchAllCountryData(iso2) {
         displayCountryInfo(iso2);
         displayCapitalCity(iso2);
-        displayEarthquakeData(iso2);
+        displayPopulation(iso2);
+        displayCurrency(iso2);
+        displayExchangeRate(iso2);
         displayWeather(iso2);
+        displayWeatherForecast(iso2);
+        displayWikipediaInfo(iso2);
+        displayTimezone(iso2);
+        displayEarthquakeData(iso2);
         updateCountryBorders(iso2);
     }
 
@@ -143,50 +147,83 @@ $(document).ready(function () {
     function displayCapitalCity(iso2) {
         $.get('Php/capitalCities.Php', { iso2: iso2 }, function (data) {
             $('#capitalCity').text(data.capital);
-            if (capitalCityLayer) {
-                map.removeLayer(capitalCityLayer);
+
+            if (capitalLayer) {
+                map.removeLayer(capitalLayer);
+            }
+            capitalLayer = L.marker([data.lat, data.lon], { icon: capitalCityIcon })
+                .bindPopup(`<b>Capital City:</b> ${data.capital}`)
+                .addTo(map);
+        }, 'json');
+    }
+
+    function displayPopulation(iso2) {
+        $.get('Php/Population.Php', { countryCode: iso2 }, function (data) {
+            $('#population').text(data.population);
+        }, 'json');
+    }
+
+    function displayCurrency(iso2) {
+        $.get('Php/Currency.Php', { iso2: iso2 }, function (data) {
+            if (data && data.currencies && data.currencies.length > 0) {
+                let currency = data.currencies[0];
+                $('#currencyName').text(`${currency.name}`);
+                $('#currencySymbol').text(currency.symbol);
+            }
+        }, 'json');
+    }
+
+    function displayExchangeRate(iso2) {
+        $.get('Php/latestExchangeRate.php', { iso2: iso2 }, function (data) {
+            $('#txtCurrencyRate').text(`1 USD = ${data.exchangeRate} ${data.currencyCode}`);
+            $('#convertBtn').off('click').on('click', function () {
+                const amount = parseFloat($('#currencyAmount').val());
+                if (!isNaN(amount)) {
+                    const convertedAmount = (amount * data.exchangeRate).toFixed(2);
+                    $('#convertedCurrency').text(`${amount} USD = ${convertedAmount} ${data.currencyCode}`);
+                }
+            });
+        }, 'json');
+    }
+
+    function displayWeather(iso2) {
+        $.get('Php/getWeather.Php', { iso2: iso2 }, function (data) {
+            console.log("Weather API Response:", data);
+
+            let temperature = data.temperature ? `${data.temperature}°C` : "N/A";
+            let description = data.description ? data.description : "No description available";
+            let iconUrl = data.icon ? `<img src="${data.icon}" alt="Weather Icon">` : "";
+
+            $('#tempToday').text(temperature);
+            $('#conditionsToday').text(description);
+            $('#weatherImg').html(iconUrl);
+
+            if (weatherLayer) {
+                map.removeLayer(weatherLayer);
             }
             if (data.lat && data.lon) {
-                capitalCityLayer = L.marker([data.lat, data.lon], { icon: capitalCityIcon }).addTo(map);
+                weatherLayer = L.marker([data.lat, data.lon], { icon: weatherIcon })
+                    .bindPopup(`<b>Weather:</b> ${temperature}, ${description}`)
+                    .addTo(map);
             }
         }, 'json');
     }
 
     function displayEarthquakeData(iso2) {
         $.get('Php/earthQuakes.Php', { country: iso2 }, function (data) {
-            if (!data || !data.earthquakes || !Array.isArray(data.earthquakes)) {
-                console.error("Unexpected earthquake data format:", data);
-                return;
-            }
             if (earthquakeLayer) {
                 map.removeLayer(earthquakeLayer);
             }
-            earthquakeLayer = L.layerGroup();
-            data.earthquakes.forEach(quake => {
-                if (quake.lat && quake.lng) {
-                    let marker = L.marker([quake.lat, quake.lng], { icon: earthquakeIcon })
-                        .bindPopup(`Magnitude: ${quake.magnitude}<br>Depth: ${quake.depth}km`);
-                    earthquakeLayer.addLayer(marker);
-                }
-            });
-            earthquakeLayer.addTo(map);
-        }, 'json');
-    }
 
-    function displayWeather(iso2) {
-        $.get('Php/getWeather.Php', { iso2: iso2 }, function (data) {
-            if (!data || !data.temperature || !data.description) {
-                console.error("Unexpected weather data format:", data);
-                return;
-            }
-            $('#tempToday').text(data.temperature + "°C");
-            $('#conditionsToday').text(data.description);
-            if (weatherLayer) {
-                map.removeLayer(weatherLayer);
-            }
-            if (data.lat && data.lon) {
-                weatherLayer = L.marker([data.lat, data.lon], { icon: weatherIcon }).addTo(map);
-            }
+            earthquakeLayer = L.layerGroup();
+
+            data.earthquakes.forEach(quake => {
+                let marker = L.marker([quake.lat, quake.lng], { icon: earthquakeIcon })
+                    .bindPopup(`<b>Magnitude:</b> ${quake.magnitude} | Depth: ${quake.depth}km | Time: ${quake.datetime}`)
+                    .addTo(earthquakeLayer);
+            });
+
+            earthquakeLayer.addTo(map);
         }, 'json');
     }
 });

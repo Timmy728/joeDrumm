@@ -155,17 +155,29 @@ $(document).ready(function () {
         }, 'json');
     }
 
-    function displayWeather(iso2) {
-        $.get('Php/getWeather.Php', { iso2: iso2 }, function (data) {
-            if (data && data.temperature && data.description) {
-                $('#tempToday').text(`${data.temperature}°C`);
-                $('#conditionsToday').text(data.description);
-            } else {
-                $('#tempToday').text('No Data');
-                $('#conditionsToday').text('No Data');
-            }
-        }, 'json');
-    }
+  function displayWeather(iso2) {
+    $.get('https://restcountries.com/v3.1/alpha/' + iso2, function (data) {
+        if (data && data[0] && data[0].latlng) {
+            const [lat, lon] = data[0].latlng;
+
+            $.get('Php/getWeather.Php', { lat: lat, lon: lon }, function (weatherData) {
+                if (weatherData && weatherData.temperature && weatherData.description) {
+                    $('#tempToday').text(`${weatherData.temperature}°C`);
+                    $('#conditionsToday').text(weatherData.description);
+                    $('#weatherImg').html(`<img src="${weatherData.icon}" alt="Weather Icon">`);
+                } else {
+                    $('#tempToday').text('No weather data available');
+                    $('#conditionsToday').text('No description available');
+                    $('#weatherImg').empty();
+                }
+            }, 'json');
+        } else {
+            $('#tempToday').text('Coordinates not found');
+            $('#conditionsToday').text('No description available');
+            $('#weatherImg').empty();
+        }
+    }, 'json');
+}
 
     function displayWeatherForecast(iso2) {
         $.get('Php/getWeatherForecast.Php', { location: iso2 }, function (data) {

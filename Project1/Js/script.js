@@ -30,6 +30,28 @@ $(document).ready(function () {
     L.control.layers(basemaps).addTo(map);
     streets.addTo(map);
 
+    // Define custom icons using Leaflet ExtraMarkers
+    var earthquakeIcon = L.ExtraMarkers.icon({
+        icon: 'fa-bolt',
+        markerColor: 'red',
+        shape: 'circle',
+        prefix: 'fa'
+    });
+
+    var capitalCityIcon = L.ExtraMarkers.icon({
+        icon: 'fa-city',
+        markerColor: 'blue',
+        shape: 'square',
+        prefix: 'fa'
+    });
+
+    var weatherIcon = L.ExtraMarkers.icon({
+        icon: 'fa-cloud',
+        markerColor: 'green',
+        shape: 'star',
+        prefix: 'fa'
+    });
+
     // Add 5 EasyButtons
     L.easyButton('fa-flag', function () {
         $('#infoModal1').modal('show');

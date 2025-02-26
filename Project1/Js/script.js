@@ -8,9 +8,6 @@ $(window).on('load', function () {
 
 let map;
 let bordersLayer;
-let weatherLayer;
-let earthquakeLayer;
-let capitalLayer;
 
 $(document).ready(function () {
     // Initialize the map
@@ -32,28 +29,6 @@ $(document).ready(function () {
 
     L.control.layers(basemaps).addTo(map);
     streets.addTo(map);
-
-    // Define custom icons using Leaflet ExtraMarkers
-    var earthquakeIcon = L.ExtraMarkers.icon({
-        icon: 'fa-bolt',
-        markerColor: 'red',
-        shape: 'circle',
-        prefix: 'fa'
-    });
-
-    var capitalCityIcon = L.ExtraMarkers.icon({
-        icon: 'fa-city',
-        markerColor: 'blue',
-        shape: 'square',
-        prefix: 'fa'
-    });
-
-    var weatherIcon = L.ExtraMarkers.icon({
-        icon: 'fa-cloud',
-        markerColor: 'green',
-        shape: 'star',
-        prefix: 'fa'
-    });
 
     // Add 5 EasyButtons
     L.easyButton('fa-flag', function () {
@@ -137,6 +112,7 @@ $(document).ready(function () {
         });
     }
 
+    // Functions to fetch and display data
     function displayCountryInfo(iso2) {
         $.get('Php/countryName.Php', { iso2: iso2 }, function (data) {
             $('#countryNames').text(data.name);
@@ -147,13 +123,6 @@ $(document).ready(function () {
     function displayCapitalCity(iso2) {
         $.get('Php/capitalCities.Php', { iso2: iso2 }, function (data) {
             $('#capitalCity').text(data.capital);
-
-            if (capitalLayer) {
-                map.removeLayer(capitalLayer);
-            }
-            capitalLayer = L.marker([data.lat, data.lon], { icon: capitalCityIcon })
-                .bindPopup(`<b>Capital City:</b> ${data.capital}`)
-                .addTo(map);
         }, 'json');
     }
 
@@ -186,44 +155,58 @@ $(document).ready(function () {
         }, 'json');
     }
 
-    function displayWeather(iso2) {
-        $.get('Php/getWeather.Php', { iso2: iso2 }, function (data) {
-            console.log("Weather API Response:", data);
+  function displayWeather(iso2) {
+    $.get('https://restcountries.com/v3.1/alpha/' + iso2, function (data) {
+        if (data && data[0] && data[0].latlng) {
+            const [lat, lon] = data[0].latlng;
 
-            let temperature = data.temperature ? `${data.temperature}°C` : "N/A";
-            let description = data.description ? data.description : "No description available";
-            let iconUrl = data.icon ? `<img src="${data.icon}" alt="Weather Icon">` : "";
+            $.get('Php/getWeather.Php', { lat: lat, lon: lon }, function (weatherData) {
+                if (weatherData && weatherData.temperature && weatherData.description) {
+                    $('#tempToday').text(`${weatherData.temperature}°C`);
+                    $('#conditionsToday').text(weatherData.description);
+                    $('#weatherImg').html(`<img src="${weatherData.icon}" alt="Weather Icon">`);
+                } else {
+                    $('#tempToday').text('No weather data available');
+                    $('#conditionsToday').text('No description available');
+                    $('#weatherImg').empty();
+                }
+            }, 'json');
+        } else {
+            $('#tempToday').text('Coordinates not found');
+            $('#conditionsToday').text('No description available');
+            $('#weatherImg').empty();
+        }
+    }, 'json');
+}
 
-            $('#tempToday').text(temperature);
-            $('#conditionsToday').text(description);
-            $('#weatherImg').html(iconUrl);
+    function displayWeatherForecast(iso2) {
+        $.get('Php/getWeatherForecast.Php', { location: iso2 }, function (data) {
+            $('#forecastInfo').html('');
+            data.forEach(forecast => {
+                $('#forecastInfo').append(`<p>${forecast.date}: ${forecast.min_temp}°C - ${forecast.max_temp}°C</p>`);
+            });
+        }, 'json');
+    }
 
-            if (weatherLayer) {
-                map.removeLayer(weatherLayer);
-            }
-            if (data.lat && data.lon) {
-                weatherLayer = L.marker([data.lat, data.lon], { icon: weatherIcon })
-                    .bindPopup(`<b>Weather:</b> ${temperature}, ${description}`)
-                    .addTo(map);
-            }
+    function displayWikipediaInfo(iso2) {
+        $.get('Php/wikipediaSearch.Php', { query: iso2 }, function (data) {
+            $('#wikiLink').attr('href', data.url).text(`View ${data.title} on Wikipedia`);
+        }, 'json');
+    }
+
+    function displayTimezone(iso2) {
+        $.get('Php/Timezone.Php', { iso2: iso2 }, function (data) {
+            $('#timezone').text(data.timezone);
         }, 'json');
     }
 
     function displayEarthquakeData(iso2) {
         $.get('Php/earthQuakes.Php', { country: iso2 }, function (data) {
-            if (earthquakeLayer) {
-                map.removeLayer(earthquakeLayer);
-            }
-
-            earthquakeLayer = L.layerGroup();
-
+            let earthquakeHtml = '';
             data.earthquakes.forEach(quake => {
-                let marker = L.marker([quake.lat, quake.lng], { icon: earthquakeIcon })
-                    .bindPopup(`<b>Magnitude:</b> ${quake.magnitude} | Depth: ${quake.depth}km | Time: ${quake.datetime}`)
-                    .addTo(earthquakeLayer);
+                earthquakeHtml += `<p>📍 Magnitude: ${quake.magnitude} | Depth: ${quake.depth}km | Location: (${quake.lat}, ${quake.lng}) | Time: ${quake.datetime}</p>`;
             });
-
-            earthquakeLayer.addTo(map);
+            $('#earthquakeList').html(earthquakeHtml);
         }, 'json');
     }
 });

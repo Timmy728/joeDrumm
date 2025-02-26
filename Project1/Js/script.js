@@ -8,6 +8,7 @@ $(window).on('load', function () {
 
 let map;
 let bordersLayer;
+let earthquakeLayer, capitalCityLayer, weatherLayer;
 
 $(document).ready(function () {
     // Initialize the map
@@ -30,12 +31,7 @@ $(document).ready(function () {
     L.control.layers(basemaps).addTo(map);
     streets.addTo(map);
 
-    $(document).ready(function () {
-        if (typeof L.ExtraMarkers === 'undefined') {
-        console.error("Leaflet ExtraMarkers is not loaded. Check your script link.");
-        return;
-        }
-    // Custom icons using Leaflet ExtraMarkers
+    // Define custom icons
     var earthquakeIcon = L.ExtraMarkers.icon({
         icon: 'fa-bolt',
         markerColor: 'red',
@@ -56,8 +52,6 @@ $(document).ready(function () {
         shape: 'star',
         prefix: 'fa'
     });
-    });
-
 
     // Add 5 EasyButtons
     L.easyButton('fa-flag', function () {
@@ -108,14 +102,8 @@ $(document).ready(function () {
     function fetchAllCountryData(iso2) {
         displayCountryInfo(iso2);
         displayCapitalCity(iso2);
-        displayPopulation(iso2);
-        displayCurrency(iso2);
-        displayExchangeRate(iso2);
-        displayWeather(iso2);
-        displayWeatherForecast(iso2);
-        displayWikipediaInfo(iso2);
-        displayTimezone(iso2);
         displayEarthquakeData(iso2);
+        displayWeather(iso2);
         updateCountryBorders(iso2);
     }
 
@@ -141,7 +129,6 @@ $(document).ready(function () {
         });
     }
 
-    // Functions to fetch and display data
     function displayCountryInfo(iso2) {
         $.get('Php/countryName.Php', { iso2: iso2 }, function (data) {
             $('#countryNames').text(data.name);
@@ -152,90 +139,36 @@ $(document).ready(function () {
     function displayCapitalCity(iso2) {
         $.get('Php/capitalCities.Php', { iso2: iso2 }, function (data) {
             $('#capitalCity').text(data.capital);
-        }, 'json');
-    }
-
-    function displayPopulation(iso2) {
-        $.get('Php/Population.Php', { countryCode: iso2 }, function (data) {
-            $('#population').text(data.population);
-        }, 'json');
-    }
-
-    function displayCurrency(iso2) {
-        $.get('Php/Currency.Php', { iso2: iso2 }, function (data) {
-            if (data && data.currencies && data.currencies.length > 0) {
-                let currency = data.currencies[0];
-                $('#currencyName').text(`${currency.name}`);
-                $('#currencySymbol').text(currency.symbol);
+            if (capitalCityLayer) {
+                map.removeLayer(capitalCityLayer);
             }
-        }, 'json');
-    }
-
-    function displayExchangeRate(iso2) {
-        $.get('Php/latestExchangeRate.php', { iso2: iso2 }, function (data) {
-            $('#txtCurrencyRate').text(`1 USD = ${data.exchangeRate} ${data.currencyCode}`);
-            $('#convertBtn').off('click').on('click', function () {
-                const amount = parseFloat($('#currencyAmount').val());
-                if (!isNaN(amount)) {
-                    const convertedAmount = (amount * data.exchangeRate).toFixed(2);
-                    $('#convertedCurrency').text(`${amount} USD = ${convertedAmount} ${data.currencyCode}`);
-                }
-            });
-        }, 'json');
-    }
-
-  function displayWeather(iso2) {
-    $.get('https://restcountries.com/v3.1/alpha/' + iso2, function (data) {
-        if (data && data[0] && data[0].latlng) {
-            const [lat, lon] = data[0].latlng;
-
-            $.get('Php/getWeather.Php', { lat: lat, lon: lon }, function (weatherData) {
-                if (weatherData && weatherData.temperature && weatherData.description) {
-                    $('#tempToday').text(`${weatherData.temperature}°C`);
-                    $('#conditionsToday').text(weatherData.description);
-                    $('#weatherImg').html(`<img src="${weatherData.icon}" alt="Weather Icon">`);
-                } else {
-                    $('#tempToday').text('No weather data available');
-                    $('#conditionsToday').text('No description available');
-                    $('#weatherImg').empty();
-                }
-            }, 'json');
-        } else {
-            $('#tempToday').text('Coordinates not found');
-            $('#conditionsToday').text('No description available');
-            $('#weatherImg').empty();
-        }
-    }, 'json');
-}
-
-    function displayWeatherForecast(iso2) {
-        $.get('Php/getWeatherForecast.Php', { location: iso2 }, function (data) {
-            $('#forecastInfo').html('');
-            data.forEach(forecast => {
-                $('#forecastInfo').append(`<p>${forecast.date}: ${forecast.min_temp}°C - ${forecast.max_temp}°C</p>`);
-            });
-        }, 'json');
-    }
-
-    function displayWikipediaInfo(iso2) {
-        $.get('Php/wikipediaSearch.Php', { query: iso2 }, function (data) {
-            $('#wikiLink').attr('href', data.url).text(`View ${data.title} on Wikipedia`);
-        }, 'json');
-    }
-
-    function displayTimezone(iso2) {
-        $.get('Php/Timezone.Php', { iso2: iso2 }, function (data) {
-            $('#timezone').text(data.timezone);
+            capitalCityLayer = L.marker([data.lat, data.lon], { icon: capitalCityIcon }).addTo(map);
         }, 'json');
     }
 
     function displayEarthquakeData(iso2) {
         $.get('Php/earthQuakes.Php', { country: iso2 }, function (data) {
-            let earthquakeHtml = '';
+            if (earthquakeLayer) {
+                map.removeLayer(earthquakeLayer);
+            }
+            earthquakeLayer = L.layerGroup();
             data.earthquakes.forEach(quake => {
-                earthquakeHtml += `<p>📍 Magnitude: ${quake.magnitude} | Depth: ${quake.depth}km | Location: (${quake.lat}, ${quake.lng}) | Time: ${quake.datetime}</p>`;
+                let marker = L.marker([quake.lat, quake.lng], { icon: earthquakeIcon })
+                    .bindPopup(`Magnitude: ${quake.magnitude}<br>Depth: ${quake.depth}km`);
+                earthquakeLayer.addLayer(marker);
             });
-            $('#earthquakeList').html(earthquakeHtml);
+            earthquakeLayer.addTo(map);
+        }, 'json');
+    }
+
+    function displayWeather(iso2) {
+        $.get('Php/getWeather.Php', { iso2: iso2 }, function (data) {
+            $('#tempToday').text(data.temperature);
+            $('#conditionsToday').text(data.description);
+            if (weatherLayer) {
+                map.removeLayer(weatherLayer);
+            }
+            weatherLayer = L.marker([data.lat, data.lon], { icon: weatherIcon }).addTo(map);
         }, 'json');
     }
 });

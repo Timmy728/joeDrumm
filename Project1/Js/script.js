@@ -30,7 +30,12 @@ $(document).ready(function () {
     L.control.layers(basemaps).addTo(map);
     streets.addTo(map);
 
-    // Define custom icons using Leaflet ExtraMarkers
+    $(document).ready(function () {
+        if (typeof L.ExtraMarkers === 'undefined') {
+        console.error("Leaflet ExtraMarkers is not loaded. Check your script link.");
+        return;
+        }
+    // Custom icons using Leaflet ExtraMarkers
     var earthquakeIcon = L.ExtraMarkers.icon({
         icon: 'fa-bolt',
         markerColor: 'red',
@@ -51,6 +56,8 @@ $(document).ready(function () {
         shape: 'star',
         prefix: 'fa'
     });
+    });
+
 
     // Add 5 EasyButtons
     L.easyButton('fa-flag', function () {

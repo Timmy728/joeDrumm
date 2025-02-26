@@ -14,7 +14,6 @@
     <!-- Custom CSS -->
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    
     <!-- Leaflet ExtraMarkers CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet-extra-markers/1.2.1/css/leaflet.extra-markers.min.css">
 </head>
@@ -28,107 +27,20 @@
         </span>
     </div>
 
-    <!-- Modals for 5 Different Easy Buttons -->
-    <div id="modals-container">
-        <div id="infoModal1" class="modal fade" tabindex="-1">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content">
-                    <div class="modal-header bg-success text-white">
-                        <h5 class="modal-title">Country Info</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                    </div>
-                    <div class="modal-body">
-                        <p><strong>Country:</strong> <span id="countryNames"></span> <img id="countryFlag" src="" alt="" width="30" style="display:none;"></p>
-                        <p><strong>Capital City:</strong> <span id="capitalCity"></span></p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div id="infoModal2" class="modal fade" tabindex="-1">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content">
-                    <div class="modal-header bg-success text-white">
-                        <h5 class="modal-title">Population & Timezone</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                    </div>
-                    <div class="modal-body">
-                        <p><strong>Population:</strong> <span id="population"></span></p>
-                        <p><strong>Timezone:</strong> <span id="timezone"></span></p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div id="infoModal3" class="modal fade" tabindex="-1">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content">
-                    <div class="modal-header bg-success text-white">
-                        <h5 class="modal-title">Currency & Exchange Rate</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                    </div>
-                    <div class="modal-body">
-                        <p><strong>Currency:</strong> <span id="currencyName"></span> (<span id="currencySymbol"></span>)</p>
-                        <p><strong>Exchange Rate:</strong> <span id="txtCurrencyRate"></span></p>
-                        <div>
-                            <label for="currencyAmount">Enter amount in USD:</label>
-                            <input type="number" id="currencyAmount" class="form-control" placeholder="Enter amount">
-                            <button id="convertBtn" class="btn btn-primary mt-2">Convert</button>
-                            <p id="convertedCurrency" class="mt-2"></p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div id="infoModal4" class="modal fade" tabindex="-1">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content">
-                    <div class="modal-header bg-success text-white">
-                        <h5 class="modal-title">Current Weather</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                    </div>
-                    <div class="modal-body">
-                        <p><strong>Temperature:</strong> <span id="tempToday"></span></p>
-                        <p><strong>Conditions:</strong> <span id="conditionsToday"></span></p>
-                        <p id="weatherImg"></p>
-                        <h4 class="modal-title">10-Day Weather Forecast</h4>
-                        <div id="forecastInfo"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div id="infoModal5" class="modal fade" tabindex="-1">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content">
-                    <div class="modal-header bg-success text-white">
-                        <h5 class="modal-title">Wikipedia & Earthquakes</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                    </div>
-                    <div class="modal-body">
-                        <p><strong>Wikipedia Search:</strong> <a id="wikiLink" href="#" target="_blank">View on Wikipedia</a></p>
-                        <p><strong>Recent Earthquakes:</strong> <span id="earthquakeList"></span></p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- JS Libraries -->
+    <!-- JS Libraries (Order is Important) -->
     <script src="Js/jquery-3.7.1.min.js"></script>
     <script src="Js/bootstrap.bundle.min.js"></script>
 
-    <!-- Leaflet Core (Load Before ExtraMarkers) -->
+    <!-- Load Leaflet Core FIRST -->
     <script src="Js/leaflet.js"></script>
 
-    <!-- Leaflet ExtraMarkers (Load AFTER Leaflet) -->
+    <!-- Load Leaflet ExtraMarkers AFTER Leaflet -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-extra-markers/1.2.1/js/leaflet.extra-markers.min.js"></script>
 
-    <!-- EasyButton -->
+    <!-- Load EasyButton -->
     <script src="Js/easy-button.js"></script>
 
-    <!-- Main Script -->
+    <!-- Load Main Script -->
     <script src="Js/script.js"></script>
 </body>
 </html>

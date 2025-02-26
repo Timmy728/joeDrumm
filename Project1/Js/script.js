@@ -80,6 +80,10 @@ $(document).ready(function () {
         type: 'GET',
         dataType: 'json',
         success: function (data) {
+            if (!Array.isArray(data)) {
+                console.error("Expected an array for country list, got:", data);
+                return;
+            }
             const dropdown = $('#countrySelect');
             dropdown.empty();
             dropdown.append(new Option('Select a Country', ''));
@@ -148,6 +152,10 @@ $(document).ready(function () {
 
     function displayEarthquakeData(iso2) {
         $.get('Php/earthQuakes.Php', { country: iso2 }, function (data) {
+            if (!data || !data.earthquakes || !Array.isArray(data.earthquakes)) {
+                console.error("Unexpected earthquake data format:", data);
+                return;
+            }
             if (earthquakeLayer) {
                 map.removeLayer(earthquakeLayer);
             }
@@ -163,6 +171,10 @@ $(document).ready(function () {
 
     function displayWeather(iso2) {
         $.get('Php/getWeather.Php', { iso2: iso2 }, function (data) {
+            if (!data || !data.temperature || !data.description) {
+                console.error("Unexpected weather data format:", data);
+                return;
+            }
             $('#tempToday').text(data.temperature);
             $('#conditionsToday').text(data.description);
             if (weatherLayer) {

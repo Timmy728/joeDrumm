@@ -146,7 +146,9 @@ $(document).ready(function () {
             if (capitalCityLayer) {
                 map.removeLayer(capitalCityLayer);
             }
-            capitalCityLayer = L.marker([data.lat, data.lon], { icon: capitalCityIcon }).addTo(map);
+            if (data.lat && data.lon) {
+                capitalCityLayer = L.marker([data.lat, data.lon], { icon: capitalCityIcon }).addTo(map);
+            }
         }, 'json');
     }
 
@@ -161,9 +163,11 @@ $(document).ready(function () {
             }
             earthquakeLayer = L.layerGroup();
             data.earthquakes.forEach(quake => {
-                let marker = L.marker([quake.lat, quake.lng], { icon: earthquakeIcon })
-                    .bindPopup(`Magnitude: ${quake.magnitude}<br>Depth: ${quake.depth}km`);
-                earthquakeLayer.addLayer(marker);
+                if (quake.lat && quake.lng) {
+                    let marker = L.marker([quake.lat, quake.lng], { icon: earthquakeIcon })
+                        .bindPopup(`Magnitude: ${quake.magnitude}<br>Depth: ${quake.depth}km`);
+                    earthquakeLayer.addLayer(marker);
+                }
             });
             earthquakeLayer.addTo(map);
         }, 'json');
@@ -180,7 +184,9 @@ $(document).ready(function () {
             if (weatherLayer) {
                 map.removeLayer(weatherLayer);
             }
-            weatherLayer = L.marker([data.lat, data.lon], { icon: weatherIcon }).addTo(map);
+            if (data.lat && data.lon) {
+                weatherLayer = L.marker([data.lat, data.lon], { icon: weatherIcon }).addTo(map);
+            }
         }, 'json');
     }
 });

@@ -152,22 +152,31 @@ $(document).ready(function () {
 
 function displayEarthquakeData(iso2) {
     $.get('Php/earthQuakes.Php', { country: iso2 }, function (data) {
+        console.log("Earthquake Data Received:", data); // Debugging
+
         if (data.earthquakes && data.earthquakes.length > 0) {
             data.earthquakes.forEach(quake => {
-                let marker = L.marker([quake.lat, quake.lng], {
-                    icon: L.ExtraMarkers.icon({
-                        icon: 'fa-bolt',
-                        markerColor: 'red',
-                        shape: 'square',
-                        prefix: 'fa'
-                    })
-                }).addTo(map)
-                .bindPopup(`<strong>Magnitude:</strong> ${quake.magnitude}<br>
-                            <strong>Depth:</strong> ${quake.depth}km<br>
-                            <strong>Time:</strong> ${quake.datetime}`);
+                let lat = parseFloat(quake.lat);
+                let lng = parseFloat(quake.lng);
+                
+                if (!isNaN(lat) && !isNaN(lng)) {
+                    L.marker([lat, lng], {
+                        icon: L.ExtraMarkers.icon({
+                            icon: 'fa-bolt',
+                            markerColor: 'red',
+                            shape: 'square',
+                            prefix: 'fa'
+                        })
+                    }).addTo(map)
+                    .bindPopup(`<strong>Magnitude:</strong> ${quake.magnitude}<br>
+                                <strong>Depth:</strong> ${quake.depth}km<br>
+                                <strong>Time:</strong> ${quake.datetime}`);
+                } else {
+                    console.warn("Invalid earthquake coordinates:", quake);
+                }
             });
         } else {
-            console.warn("No earthquake data available for this country.");
+            console.warn("No earthquake data available.");
         }
     }, 'json').fail(function (jqXHR, textStatus, errorThrown) {
         console.error("Error fetching earthquake data:", textStatus, errorThrown);

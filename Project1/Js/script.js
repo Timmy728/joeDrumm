@@ -181,4 +181,3 @@ function displayEarthquakeData(iso2) {
     }, 'json').fail(function (jqXHR, textStatus, errorThrown) {
         console.error("Error fetching earthquake data:", textStatus, errorThrown);
     });
-}

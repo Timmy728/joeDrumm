@@ -150,17 +150,26 @@ $(document).ready(function () {
         }, 'json');
     }
 
-    function displayEarthquakeData(iso2) {
-        earthquakeMarkers.clearLayers();
-        $.get('Php/earthQuakes.Php', { country: iso2 }, function (data) {
+function displayEarthquakeData(iso2) {
+    $.get('Php/earthQuakes.Php', { country: iso2 }, function (data) {
+        if (data.earthquakes && data.earthquakes.length > 0) {
             data.earthquakes.forEach(quake => {
-                let marker = L.marker([quake.lat, quake.lng], { icon: L.icon({
-                    iconUrl: 'quake-icon.png',
-                    iconSize: [25, 25]
-                }) }).bindPopup(`Magnitude: ${quake.magnitude}<br>Depth: ${quake.depth}km`);
-                earthquakeMarkers.addLayer(marker);
+                let marker = L.marker([quake.lat, quake.lng], {
+                    icon: L.ExtraMarkers.icon({
+                        icon: 'fa-bolt',
+                        markerColor: 'red',
+                        shape: 'square',
+                        prefix: 'fa'
+                    })
+                }).addTo(map)
+                .bindPopup(`<strong>Magnitude:</strong> ${quake.magnitude}<br>
+                            <strong>Depth:</strong> ${quake.depth}km<br>
+                            <strong>Time:</strong> ${quake.datetime}`);
             });
-            map.addLayer(earthquakeMarkers);
-        }, 'json');
-    }
-});
+        } else {
+            console.warn("No earthquake data available for this country.");
+        }
+    }, 'json').fail(function (jqXHR, textStatus, errorThrown) {
+        console.error("Error fetching earthquake data:", textStatus, errorThrown);
+    });
+}

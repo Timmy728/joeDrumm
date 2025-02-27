@@ -154,30 +154,38 @@ function displayEarthquakeData(iso2) {
     $.get('Php/earthQuakes.Php', { country: iso2 }, function (data) {
         console.log("Earthquake Data Received:", data); // Debugging
 
+        // Clear old markers before adding new ones
+        earthquakeMarkers.clearLayers();
+
         if (data.earthquakes && data.earthquakes.length > 0) {
             data.earthquakes.forEach(quake => {
                 let lat = parseFloat(quake.lat);
                 let lng = parseFloat(quake.lng);
                 
                 if (!isNaN(lat) && !isNaN(lng)) {
-                    L.marker([lat, lng], {
+                    let marker = L.marker([lat, lng], {
                         icon: L.ExtraMarkers.icon({
                             icon: 'fa-bolt',
                             markerColor: 'red',
                             shape: 'square',
                             prefix: 'fa'
                         })
-                    }).addTo(map)
-                    .bindPopup(`<strong>Magnitude:</strong> ${quake.magnitude}<br>
+                    }).bindPopup(`<strong>Magnitude:</strong> ${quake.magnitude}<br>
                                 <strong>Depth:</strong> ${quake.depth}km<br>
                                 <strong>Time:</strong> ${quake.datetime}`);
+
+                    earthquakeMarkers.addLayer(marker);
                 } else {
                     console.warn("Invalid earthquake coordinates:", quake);
                 }
             });
+
+            // Add all earthquake markers to the map
+            map.addLayer(earthquakeMarkers);
         } else {
             console.warn("No earthquake data available.");
         }
     }, 'json').fail(function (jqXHR, textStatus, errorThrown) {
         console.error("Error fetching earthquake data:", textStatus, errorThrown);
     });
+}

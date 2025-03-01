@@ -94,6 +94,7 @@ $(document).ready(function () {
         const iso2 = $(this).val();
         if (iso2) {
             fetchAllCountryData(iso2);
+            displayNearbyInfo(iso2);
         }
     });
 

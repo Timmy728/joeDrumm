@@ -111,7 +111,6 @@ $(document).ready(function () {
         displayTimezone(iso2);
         //displayEarthquakeData(iso2);
         updateCountryBorders(iso2);
-        displayNearbyInfo(iso2);
     }
 
     function getWikiResults(north, south, east, west){

@@ -110,7 +110,7 @@ $(document).ready(function () {
         displayTimezone(iso2);
         //displayEarthquakeData(iso2);
         updateCountryBorders(iso2);
-        displayNearByInfo(iso2);
+        displayNearbyInfo(iso2);
     }
 
     function getWikiResults(north, south, east, west){
@@ -278,36 +278,47 @@ $(document).ready(function () {
         }, 'json');
     }
 
-    function displayNearbyInfo(iso2) {
-    $.get(`https://restcountries.com/v3.1/alpha/${iso2}`, function (countryData) {
-        if (countryData && countryData[0] && countryData[0].latlng) {
-            let lat = countryData[0].latlng[0];
-            let lon = countryData[0].latlng[1];
-
-            // Fetch all 4 new PHP APIs using lat/lon
-            $.get('Php/findNearbyStreets.php', { lat, lon }, function (streetData) {
-                $('#nearbyStreets').text(streetData.length > 0 ? streetData.map(street => street.name).join(", ") : "No streets found.");
-            }, 'json');
-
-            $.get('Php/findNearbyPlaceName.php', { lat, lon }, function (placeData) {
-                $('#nearbyPlaces').text(placeData.length > 0 ? placeData.map(place => place.name).join(", ") : "No places found.");
-            }, 'json');
-
-            $.get('Php/astergdem.php', { lat, lon }, function (elevationData) {
-                $('#elevation').text(elevationData.elevation ? `${elevationData.elevation}m` : "No elevation data.");
-            }, 'json');
-
-            $.get('Php/geoCodeAddress.php', { lat, lon }, function (addressData) {
-                $('#geoAddress').text(addressData.street ? `${addressData.street}, ${addressData.adminName1}` : "No address found.");
-            }, 'json');
-
-        } else {
-            console.warn("No lat/lon data available for this country.");
+    $(document).ready(function () {
+    // When a country is selected, fetch all country data
+    $('#countrySelect').change(function () {
+        const iso2 = $(this).val();
+        if (iso2) {
+            fetchAllCountryData(iso2);
+            displayNearbyInfo(iso2); // ✅ Function must be called here!
         }
-    }, 'json').fail(function () {
-        console.error("Error fetching country lat/lon data from RestCountries API.");
     });
-}
+
+    function displayNearbyInfo(iso2) {
+        $.get(`https://restcountries.com/v3.1/alpha/${iso2}`, function (countryData) {
+            if (countryData && countryData[0] && countryData[0].latlng) {
+                let lat = countryData[0].latlng[0];
+                let lon = countryData[0].latlng[1];
+
+                // Fetch all 4 PHP APIs using lat/lon
+                $.get('Php/findNearbyStreets.php', { lat, lon }, function (streetData) {
+                    $('#nearbyStreets').text(streetData.length > 0 ? streetData.map(street => street.name).join(", ") : "No streets found.");
+                }, 'json');
+
+                $.get('Php/findNearbyPlaceName.php', { lat, lon }, function (placeData) {
+                    $('#nearbyPlaces').text(placeData.length > 0 ? placeData.map(place => place.name).join(", ") : "No places found.");
+                }, 'json');
+
+                $.get('Php/astergdem.php', { lat, lon }, function (elevationData) {
+                    $('#elevation').text(elevationData.elevation ? `${elevationData.elevation}m` : "No elevation data.");
+                }, 'json');
+
+                $.get('Php/geoCodeAddress.php', { lat, lon }, function (addressData) {
+                    $('#geoAddress').text(addressData.street ? `${addressData.street}, ${addressData.adminName1}` : "No address found.");
+                }, 'json');
+
+            } else {
+                console.warn("No lat/lon data available for this country.");
+            }
+        }, 'json').fail(function () {
+            console.error("Error fetching country lat/lon data from RestCountries API.");
+        });
+    }
+});
 
 
     // function displayEarthquakeData(iso2) {

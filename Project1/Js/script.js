@@ -27,6 +27,24 @@ $(document).ready(function () {
         "Satellite": satellite
     };
 
+    map.on('locationfound', function(options){
+        console.log(options);
+
+        $.ajax({
+            url: 'Php/CountryCode.php',
+            type: 'GET',
+            dataType: 'json',
+            data:{lat:options.latitude, lng:options.longitude},
+            success: function (data) {
+               console.log(data);
+               $('#countrySelect').val(data.data.countryCode).change();
+            },error:function(err){
+                console.log(err);
+            }
+        });
+
+    });
+
     L.control.layers(basemaps).addTo(map);
     streets.addTo(map);
 
@@ -53,10 +71,11 @@ $(document).ready(function () {
 
     // Populate countries dropdown
     $.ajax({
-        url: 'Php/countryName.Php',
+        url: 'Php/countryName.php',
         type: 'GET',
         dataType: 'json',
         success: function (data) {
+            console.log(data);
             const dropdown = $('#countrySelect');
             dropdown.empty();
             dropdown.append(new Option('Select a Country', ''));
@@ -65,6 +84,8 @@ $(document).ready(function () {
                     dropdown.append(new Option(country.name, country.iso2));
                 }
             });
+
+            map.locate();
         }
     });
 
@@ -77,6 +98,7 @@ $(document).ready(function () {
     });
 
     function fetchAllCountryData(iso2) {
+        getRectBounds(iso2);
         displayCountryInfo(iso2);
         displayCapitalCity(iso2);
         displayPopulation(iso2);
@@ -86,8 +108,63 @@ $(document).ready(function () {
         displayWeatherForecast(iso2);
         displayWikipediaInfo(iso2);
         displayTimezone(iso2);
-        displayEarthquakeData(iso2);
+        //displayEarthquakeData(iso2);
         updateCountryBorders(iso2);
+    }
+
+    function getWikiResults(north, south, east, west){
+        $.ajax({
+            url: 'Php/wikipediaBoundingBox.php',
+            type: 'GET',
+            dataType: 'json',
+            data:{north:north, south:south, east:east, west:west},
+            success: function (data) {
+                console.log(data);
+                $('#wikiArticles').html('');
+                for (const wikiArticle of data.data) {
+                    //placeholder
+                    $('#wikiArticles').append(`<li>${wikiArticle.summary}<br/>
+                        <a href='https://${wikiArticle.wikipediaUrl}' target='_blank'>Click to see more...</a>
+                        </li>`);
+                }
+            },error:function(err){
+                console.log(err);
+            }
+        });
+    }
+
+    function placeEarthQuakeMarkers(north, south, east, west){
+        $.ajax({
+            url: 'Php/earthQuakes.php',
+            type: 'GET',
+            dataType: 'json',
+            data:{north:north, south:south, east:east, west:west},
+            success: function (data) {
+                console.log(data);
+                for (const earthquake of data.data) {
+                    L.marker([earthquake.lat, earthquake.lng]).addTo(map);
+                }
+            },error:function(err){
+                console.log(err);
+            }
+        });
+    }
+
+    function getRectBounds(countryCode){
+        console.log(countryCode);
+        $.ajax({
+            url: 'Php/countryInfo.php',
+            type: 'GET',
+            dataType: 'json',
+            data:{country:countryCode},
+            success: function (data) {
+                console.log(data);
+                placeEarthQuakeMarkers(data.data[0].north, data.data[0].south, data.data[0].east, data.data[0].west);
+                getWikiResults(data.data[0].north, data.data[0].south, data.data[0].east, data.data[0].west);
+            },error:function(err){
+                console.log(err);
+            }
+        });
     }
 
     function updateCountryBorders(iso2) {
@@ -114,26 +191,26 @@ $(document).ready(function () {
 
     // Functions to fetch and display data
     function displayCountryInfo(iso2) {
-        $.get('Php/countryName.Php', { iso2: iso2 }, function (data) {
+        $.get('Php/countryName.php', { iso2: iso2 }, function (data) {
             $('#countryNames').text(data.name);
             $('#countryFlag').attr('src', `https://flagcdn.com/w80/${iso2.toLowerCase()}.png`).show();
         }, 'json');
     }
 
     function displayCapitalCity(iso2) {
-        $.get('Php/capitalCities.Php', { iso2: iso2 }, function (data) {
+        $.get('Php/capitalCities.php', { iso2: iso2 }, function (data) {
             $('#capitalCity').text(data.capital);
         }, 'json');
     }
 
     function displayPopulation(iso2) {
-        $.get('Php/Population.Php', { countryCode: iso2 }, function (data) {
+        $.get('Php/Population.php', { countryCode: iso2 }, function (data) {
             $('#population').text(data.population);
         }, 'json');
     }
 
     function displayCurrency(iso2) {
-        $.get('Php/Currency.Php', { iso2: iso2 }, function (data) {
+        $.get('Php/Currency.php', { iso2: iso2 }, function (data) {
             if (data && data.currencies && data.currencies.length > 0) {
                 let currency = data.currencies[0];
                 $('#currencyName').text(`${currency.name}`);
@@ -160,7 +237,7 @@ $(document).ready(function () {
         if (data && data[0] && data[0].latlng) {
             const [lat, lon] = data[0].latlng;
 
-            $.get('Php/getWeather.Php', { lat: lat, lon: lon }, function (weatherData) {
+            $.get('Php/getWeather.php', { lat: lat, lon: lon }, function (weatherData) {
                 if (weatherData && weatherData.temperature && weatherData.description) {
                     $('#tempToday').text(`${weatherData.temperature}°C`);
                     $('#conditionsToday').text(weatherData.description);
@@ -180,7 +257,7 @@ $(document).ready(function () {
 }
 
     function displayWeatherForecast(iso2) {
-        $.get('Php/getWeatherForecast.Php', { location: iso2 }, function (data) {
+        $.get('Php/getWeatherForecast.php', { location: iso2 }, function (data) {
             $('#forecastInfo').html('');
             data.forEach(forecast => {
                 $('#forecastInfo').append(`<p>${forecast.date}: ${forecast.min_temp}°C - ${forecast.max_temp}°C</p>`);
@@ -189,24 +266,25 @@ $(document).ready(function () {
     }
 
     function displayWikipediaInfo(iso2) {
-        $.get('Php/wikipediaSearch.Php', { query: iso2 }, function (data) {
+        $.get('Php/wikipediaSearch.php', { query: iso2 }, function (data) {
             $('#wikiLink').attr('href', data.url).text(`View ${data.title} on Wikipedia`);
         }, 'json');
     }
 
     function displayTimezone(iso2) {
-        $.get('Php/Timezone.Php', { iso2: iso2 }, function (data) {
+        $.get('Php/Timezone.php', { iso2: iso2 }, function (data) {
             $('#timezone').text(data.timezone);
         }, 'json');
     }
 
-    function displayEarthquakeData(iso2) {
-        $.get('Php/earthQuakes.Php', { country: iso2 }, function (data) {
-            let earthquakeHtml = '';
-            data.earthquakes.forEach(quake => {
-                earthquakeHtml += `<p>📍 Magnitude: ${quake.magnitude} | Depth: ${quake.depth}km | Location: (${quake.lat}, ${quake.lng}) | Time: ${quake.datetime}</p>`;
-            });
-            $('#earthquakeList').html(earthquakeHtml);
-        }, 'json');
-    }
+    // function displayEarthquakeData(iso2) {
+    //     $.get('Php/earthQuakes.php', { country: iso2 }, function (data) {
+    //         console.log(data);
+    //         let earthquakeHtml = '';
+    //         data.earthquakes.forEach(quake => {
+    //             earthquakeHtml += `<p>📍 Magnitude: ${quake.magnitude} | Depth: ${quake.depth}km | Location: (${quake.lat}, ${quake.lng}) | Time: ${quake.datetime}</p>`;
+    //         });
+    //         $('#earthquakeList').html(earthquakeHtml);
+    //     }, 'json');
+    // }
 });

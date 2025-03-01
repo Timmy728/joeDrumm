@@ -53,8 +53,8 @@ $(document).ready(function () {
         $('#infoModal1').modal('show');
     }).addTo(map);
 
-    L.easyButton('fa-users', function () {
-        $('#infoModal2').modal('show');
+    L.easyButton('fa-map-marker-alt', function () {
+    $('#infoModal2').modal('show');
     }).addTo(map);
 
     L.easyButton('fa-exchange-alt', function () {

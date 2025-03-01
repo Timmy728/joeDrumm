@@ -1,81 +1,125 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>API HTML Application</title>
-  <link rel="stylesheet" href="Task/libs/css/Style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gazetteer</title>
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="css/leaflet.css">
+    <!-- EasyButton CSS -->
+    <link rel="stylesheet" href="css/easy-button.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
-
 <body>
-  <div id="preloader"></div>
+    <!-- Country Selection Dropdown on Map -->
+    <div id="map">
+        <span id="selectContainer">
+            <select id="countrySelect" class="form-select shadow-sm">
+                <option value="">Select a Country</option>
+            </select>
+        </span>
+    </div>
 
-  <h1>My HTML Application</h1>
-  <table>
-    <thead>
-      <tr>
-        <th>API Name</th>
-        <th>API Description</th>
-        <th>Action</th>
-      </tr>
-    </thead>
-    <tbody>
-      <!-- Street Name Lookup -->
-      <tr>
-        <td>StreetNameLookUp</td>
-        <td>
-          Enter street name:
-          <input type="text" id="streetName" placeholder="Street Name">
-        </td>
-        <td>
-          <button id="btnStreetLookUp">Submit</button>
-        </td>
-      </tr>
+    <!-- Modals for 5 Different Easy Buttons -->
+    <div id="modals-container">
+        <div id="infoModal1" class="modal fade" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header bg-success text-white">
+                        <h5 class="modal-title">Country Info</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p><strong>Country:</strong> <span id="countryNames"></span> <img id="countryFlag" src="" alt="" width="30" style="display:none;"></p>
+                        <p><strong>Capital City:</strong> <span id="capitalCity"></span></p>
+                        <p><strong>Population:</strong> <span id="population"></span></p>
+                        <p><strong>Timezone:</strong> <span id="timezone"></span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-      <!-- Weather Lookup -->
-      <tr>
-        <td>Weather</td>
-        <td>
-          Enter location:
-          <input type="text" id="location" placeholder="Location">
-        </td>
-        <td>
-          <button id="btnWeather">Submit</button>
-        </td>
-      </tr>
+        <div id="infoModal2" class="modal fade" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content">
+              <div class="modal-header bg-success text-white">
+                <h5 class="modal-title">Nearby Information</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+              </div>
+              <div class="modal-body">
+                <p><strong>Nearby Streets:</strong> <span id="nearbyStreets"></span></p>
+                <p><strong>Nearby Places:</strong> <span id="nearbyPlaces"></span></p>
+                <p><strong>Elevation:</strong> <span id="elevation"></span></p>
+                <p><strong>Nearest Address:</strong> <span id="geoAddress"></span></p>
+              </div>
+          </div>
+    </div>
+</div>
 
-      <!-- Country Code Lookup -->
-      <tr>
-        <td>CountryCode</td>
-        <td>
-          Enter country name:
-          <input type="text" id="countryName" placeholder="Country Name">
-        </td>
-        <td>
-          <button id="btnCountryCode">Submit</button>
-        </td>
-      </tr>
-    </tbody>
-  </table>
+        <div id="infoModal3" class="modal fade" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header bg-success text-white">
+                        <h5 class="modal-title">Currency & Exchange Rate</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p><strong>Currency:</strong> <span id="currencyName"></span> (<span id="currencySymbol"></span>)</p>
+                        <p><strong>Exchange Rate:</strong> <span id="txtCurrencyRate"></span></p>
+                        <div>
+                            <label for="currencyAmount">Enter amount in USD:</label>
+                            <input type="number" id="currencyAmount" class="form-control" placeholder="Enter amount">
+                            <button id="convertBtn" class="btn btn-primary mt-2">Convert</button>
+                            <p id="convertedCurrency" class="mt-2"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-  <!-- Results Section -->
-  <h2>Results</h2>
-  <div>
-    <h3>Street Lookup Result</h3>
-    <div id="txtStreetResult">No results yet.</div>
-  </div>
-  <div>
-    <h3>Weather Result</h3>
-    <div id="txtWeatherResult">No results yet.</div>
-  </div>
-  <div>
-    <h3>Country Code Result</h3>
-    <div id="txtCountryCodeResult">No results yet.</div>
-  </div>
+        <div id="infoModal4" class="modal fade" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header bg-success text-white">
+                        <h5 class="modal-title">Current Weather</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p><strong>Temperature:</strong> <span id="tempToday"></span></p>
+                        <p><strong>Conditions:</strong> <span id="conditionsToday"></span></p>
+                        <p id="weatherImg"></p>
+                        <h4 class="modal-title">10-Day Weather Forecast</h4>
+                        <div id="forecastInfo"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-  <!-- JavaScript -->
-  <script src="Task/libs/Js/Script.js"></script>
+        <div id="infoModal5" class="modal fade" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header bg-success text-white">
+                        <h5 class="modal-title">Wikipedia Summary</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <ul id="wikiArticles"></ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JS Libraries -->
+    <script src="Js/bootstrap.bundle.min.js"></script>
+    <script src="Js/jquery-3.7.1.min.js"></script>
+    <script src="Js/leaflet.js"></script>
+    <script src="Js/easy-button.js"></script>
+    <script src="Js/script.js"></script>
 </body>
-
 </html>

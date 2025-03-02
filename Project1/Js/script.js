@@ -174,6 +174,13 @@ $(document).ready(function () {
                 console.log(data);
                 for (const earthquake of data.data) {
                     L.marker([earthquake.lat, earthquake.lng]).addTo(map);
+                   var redIcon = L.icon({
+                    iconUrl: 'fire-red.png',
+                    iconSize:     [32, 32],
+                    iconAnchor:   [22, 94], 
+                    shadowAnchor: [4, 62], 
+                    popupAnchor:  [-3, -76] 
+                    });
                 }
             },error:function(err){
                 console.log(err);

@@ -165,7 +165,8 @@ $(document).ready(function () {
     }
 
 function placeEarthQuakeMarkers(north, south, east, west) {
-    console.log("📡 Fetching Earthquake Data...");
+    console.log("📡 Fetching Earthquake Data..."); // Debugging log
+
     $.ajax({
         url: 'Php/earthQuakes.php',
         type: 'GET',
@@ -174,7 +175,7 @@ function placeEarthQuakeMarkers(north, south, east, west) {
         success: function (data) {
             console.log("✅ Earthquake Data Received:", data); // ✅ Log response
 
-            if (!data.earthquakes || data.earthquakes.length === 0) {
+            if (!data.data || data.data.length === 0) {
                 console.warn("⚠️ No earthquake data found.");
                 return;
             }
@@ -188,7 +189,7 @@ function placeEarthQuakeMarkers(north, south, east, west) {
             });
 
             // ✅ Loop through earthquake data and add markers
-            data.earthquakes.forEach(quake => {
+            data.data.forEach(quake => {
                 let lat = parseFloat(quake.lat);
                 let lng = parseFloat(quake.lng);
 
@@ -213,7 +214,6 @@ function placeEarthQuakeMarkers(north, south, east, west) {
         }
     });
 }
-
 
 
     function getRectBounds(countryCode){

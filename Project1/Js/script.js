@@ -270,29 +270,30 @@ function placeEarthQuakeMarkers(north, south, east, west) {
         }, 'json');
     }
 
-function displayCapitalOnMap(iso2) {
+    function displayCapitalOnMap(iso2) {
     $.get('Php/capitalCities.php', { iso2: iso2 }, function (data) {
-        if (data.capital && data.lat && data.lon) { 
-            let lat = data.lat;
-            let lon = data.lon;
+        if (data.capital) {
+            $.get(`https://restcountries.com/v3.1/alpha/${iso2}`, function (countryData) {
+                if (countryData && countryData[0] && countryData[0].latlng) {
+                    let lat = countryData[0].latlng[0];
+                    let lon = countryData[0].latlng[1];
 
-            // Define the city marker icon
-            var cityIcon = L.icon({
-                iconUrl: 'Images/CityBuildings.png',
-                iconSize: [32, 32], 
-                iconAnchor: [16, 32]
-            });
+                    // Define the city marker icon
+                    var cityIcon = L.icon({
+                        iconUrl: 'Images/CityBuildings.png',
+                        iconSize: [32, 32], 
+                        iconAnchor: [16, 32]
+                    });
 
-            // Add marker for the capital city
-            L.marker([lat, lon], { icon: cityIcon })
-             .addTo(map)
-             .bindPopup(`<strong>Capital:</strong> ${data.capital}`);
-        } else {
-            console.warn("No lat/lon data available for capital city.");
+                    // Add marker for the capital city
+                    L.marker([lat, lon], { icon: cityIcon })
+                     .addTo(map)
+                     .bindPopup(`<strong>Capital:</strong> ${data.capital}`);
+                }
+            }, 'json');
         }
     }, 'json');
 }
-
 
     
     function displayPopulation(iso2) {

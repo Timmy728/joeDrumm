@@ -175,7 +175,7 @@ $(document).ready(function () {
                 for (const earthquake of data.data) {
                     L.marker([earthquake.lat, earthquake.lng]).addTo(map);
                    var redIcon = L.icon({
-                    iconUrl: 'fire-red.png',
+                    iconUrl: 'Images/Fire-Icon.png',
                     iconSize:     [32, 32],
                     iconAnchor:   [22, 94], 
                     shadowAnchor: [4, 62], 

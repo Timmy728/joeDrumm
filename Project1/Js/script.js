@@ -132,6 +132,7 @@ $(document).ready(function () {
         getRectBounds(iso2);
         displayCountryInfo(iso2);
         displayCapitalCity(iso2);
+        displayCapitalOnMap(iso2);
         displayPopulation(iso2);
         displayCurrency(iso2);
         displayExchangeRate(iso2);
@@ -269,6 +270,32 @@ function placeEarthQuakeMarkers(north, south, east, west) {
         }, 'json');
     }
 
+    function displayCapitalOnMap(iso2) {
+    $.get('Php/capitalCities.php', { iso2: iso2 }, function (data) {
+        if (data.capital) {
+            $.get(`https://restcountries.com/v3.1/alpha/${iso2}`, function (countryData) {
+                if (countryData && countryData[0] && countryData[0].latlng) {
+                    let lat = countryData[0].latlng[0];
+                    let lon = countryData[0].latlng[1];
+
+                    // Define the city marker icon
+                    var cityIcon = L.icon({
+                        iconUrl: 'Images/CityBuildings.png',
+                        iconSize: [32, 32], 
+                        iconAnchor: [16, 32]
+                    });
+
+                    // Add marker for the capital city
+                    L.marker([lat, lon], { icon: cityIcon })
+                     .addTo(map)
+                     .bindPopup(`<strong>Capital:</strong> ${data.capital}`);
+                }
+            }, 'json');
+        }
+    }, 'json');
+}
+
+    
     function displayPopulation(iso2) {
         $.get('Php/Population.php', { countryCode: iso2 }, function (data) {
             $('#population').text(data.population);

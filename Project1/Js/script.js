@@ -165,47 +165,55 @@ $(document).ready(function () {
     }
 
 function placeEarthQuakeMarkers(north, south, east, west) {
+    console.log("📡 Fetching Earthquake Data...");
     $.ajax({
         url: 'Php/earthQuakes.php',
         type: 'GET',
         dataType: 'json',
         data: { north: north, south: south, east: east, west: west },
         success: function (data) {
-            console.log("Earthquake Data:", data);
+            console.log("✅ Earthquake Data Received:", data); // ✅ Log response
 
-            // ✅ Define the red fire icon outside the loop
+            if (!data.earthquakes || data.earthquakes.length === 0) {
+                console.warn("⚠️ No earthquake data found.");
+                return;
+            }
+
+            // ✅ Define fire icon outside loop
             var redIcon = L.icon({
                 iconUrl: 'Images/Fire-Icon.png', // ✅ Ensure correct path
-                iconSize: [32, 32], // ✅ Adjust size if necessary
-                iconAnchor: [16, 32], // ✅ Center bottom of icon
-                popupAnchor: [0, -32] // ✅ Popup above icon
+                iconSize: [32, 32], 
+                iconAnchor: [16, 32], 
+                popupAnchor: [0, -32] 
             });
 
-            // ✅ Loop through earthquake data and apply red icon
-            for (const earthquake of data.earthquakes) {  // ✅ Check JSON key (it should be "earthquakes", adjust if needed)
-                let lat = parseFloat(earthquake.lat);
-                let lng = parseFloat(earthquake.lng);
+            // ✅ Loop through earthquake data and add markers
+            data.earthquakes.forEach(quake => {
+                let lat = parseFloat(quake.lat);
+                let lng = parseFloat(quake.lng);
 
                 if (!isNaN(lat) && !isNaN(lng)) {
-                    // ✅ Create marker with red icon & popup
+                    console.log("📍 Adding Marker:", lat, lng);
+
                     L.marker([lat, lng], { icon: redIcon })
                         .addTo(map)
                         .bindPopup(`
-                            <strong>📍 Magnitude:</strong> ${earthquake.magnitude}<br>
-                            <strong>📏 Depth:</strong> ${earthquake.depth} km<br>
-                            <strong>⏰ Time:</strong> ${earthquake.datetime}<br>
+                            <strong>📍 Magnitude:</strong> ${quake.magnitude}<br>
+                            <strong>📏 Depth:</strong> ${quake.depth} km<br>
+                            <strong>⏰ Time:</strong> ${quake.datetime}<br>
                             <strong>🌍 Location:</strong> ${lat}, ${lng}
                         `);
                 } else {
-                    console.warn("⚠️ Invalid earthquake coordinates:", earthquake);
+                    console.warn("⚠️ Invalid earthquake coordinates:", quake);
                 }
-            }
+            });
         },
-        error: function (err) {
-            console.log("❌ Error fetching earthquake data:", err);
+        error: function (xhr, status, error) {
+            console.error("❌ Error fetching earthquake data:", status, error);
         }
     });
 }
+
 
 
     function getRectBounds(countryCode){

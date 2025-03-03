@@ -10,6 +10,7 @@ let map;
 let bordersLayer;
 let earthquakeLayer;
 let capitalMarker = null;
+let earthquakeMarkers = [];
 
 $(document).ready(function () {
     // Initialize the map
@@ -17,6 +18,7 @@ $(document).ready(function () {
     
     // Initialize marker cluster group
     earthquakeLayer = L.markerClusterGroup();
+    map.addLayer(earthquakeLayer);
 
     // Add tile layers
     var streets = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}", {
@@ -34,6 +36,7 @@ $(document).ready(function () {
 
     map.on('locationfound', function(options){
         console.log(options);
+
         $.ajax({
             url: 'Php/CountryCode.php',
             type: 'GET',
@@ -139,12 +142,6 @@ $(document).ready(function () {
         // Clear earthquake markers
         earthquakeLayer.clearLayers();
         
-        // Remove earthquake layer from map and re-add it (empty)
-        if (map.hasLayer(earthquakeLayer)) {
-            map.removeLayer(earthquakeLayer);
-        }
-        map.addLayer(earthquakeLayer);
-        
         // Remove capital marker if it exists
         if (capitalMarker) {
             map.removeLayer(capitalMarker);
@@ -194,9 +191,8 @@ $(document).ready(function () {
                     if (filteredArticles.length > 0) {
                         filteredArticles.forEach(article => {
                             $('#wikiArticles').append(`
-                                <li>
-                                    ${article.summary} <br>
-                                    <a href="https://${article.wikipediaUrl}" target="_blank">Click to see more...</a>
+                                <li>${article.summary}<br/>
+                                <a href='https://${article.wikipediaUrl}' target='_blank'>Click to see more...</a>
                                 </li>
                             `);
                         });
@@ -208,41 +204,60 @@ $(document).ready(function () {
                 }
             },
             error: function (err) {
-                console.error("Error fetching Wikipedia data:", err);
+                console.log(err);
                 $('#wikiArticles').append("<li>Error loading Wikipedia articles.</li>");
             }
         });
     }
 
-   function placeEarthQuakeMarkers(north, south, east, west) {
+    function placeEarthQuakeMarkers(north, south, east, west) {
+        console.log("📡 Fetching Earthquake Data..."); // Debugging log
+
         $.ajax({
             url: 'Php/earthQuakes.php',
             type: 'GET',
             dataType: 'json',
             data: { north: north, south: south, east: east, west: west },
             success: function (data) {
-                if (!data.data || data.data.length === 0) return;
-                
+                console.log("✅ Earthquake Data Received:", data); // ✅ Log response
+
+                if (!data.data || data.data.length === 0) {
+                    console.warn("⚠️ No earthquake data found.");
+                    return;
+                }
+
+                // ✅ Define fire icon outside loop
                 var redIcon = L.icon({
-                    iconUrl: 'Images/Fire-Icon.png',
+                    iconUrl: 'Images/Fire-Icon.png', // ✅ Ensure correct path
                     iconSize: [32, 32], 
                     iconAnchor: [16, 32], 
                     popupAnchor: [0, -32] 
                 });
-                
+
+                // ✅ Loop through earthquake data and add markers
                 data.data.forEach(quake => {
                     let lat = parseFloat(quake.lat);
                     let lng = parseFloat(quake.lng);
+
                     if (!isNaN(lat) && !isNaN(lng)) {
+                        console.log("📍 Adding Marker:", lat, lng);
+
                         let marker = L.marker([lat, lng], { icon: redIcon })
                             .bindPopup(`
-                                <strong>Magnitude:</strong> ${quake.magnitude}<br>
-                                <strong>Depth:</strong> ${quake.depth} km<br>
-                                <strong>Time:</strong> ${quake.datetime}<br>
+                                <strong>📍 Magnitude:</strong> ${quake.magnitude}<br>
+                                <strong>📏 Depth:</strong> ${quake.depth} km<br>
+                                <strong>⏰ Time:</strong> ${quake.datetime}<br>
+                                <strong>🌍 Location:</strong> ${lat}, ${lng}
                             `);
+                        
                         earthquakeLayer.addLayer(marker);
+                    } else {
+                        console.warn("⚠️ Invalid earthquake coordinates:", quake);
                     }
                 });
+            },
+            error: function (xhr, status, error) {
+                console.error("❌ Error fetching earthquake data:", status, error);
             }
         });
     }
@@ -257,7 +272,7 @@ $(document).ready(function () {
             success: function (data) {
                 console.log(data);
                 if (data.data && data.data[0]) {
-                    placeEarthQuakeMarkers(data.data[0].north, data.data[0].south, data.data[0].east, data.data[0].west, countryCode);
+                    placeEarthQuakeMarkers(data.data[0].north, data.data[0].south, data.data[0].east, data.data[0].west);
                     getWikiResults(data.data[0].north, data.data[0].south, data.data[0].east, data.data[0].west, countryCode);
                 }
             },error:function(err){
@@ -309,18 +324,22 @@ $(document).ready(function () {
                     if (countryData && countryData[0] && countryData[0].latlng) {
                         let lat = countryData[0].latlng[0];
                         let lon = countryData[0].latlng[1];
+
+                        // Define the city marker icon
                         var cityIcon = L.icon({
                             iconUrl: 'Images/CityBuildings.png',
                             iconSize: [32, 32], 
                             iconAnchor: [16, 32]
                         });
+
+                        // Add marker for the capital city
                         capitalMarker = L.marker([lat, lon], { icon: cityIcon })
                             .addTo(map)
                             .bindPopup(`<strong>Capital:</strong> ${data.capital}`);
                     }
-                });
+                }, 'json');
             }
-        });
+        }, 'json');
     }
 });
     

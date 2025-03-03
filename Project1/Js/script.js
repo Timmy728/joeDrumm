@@ -8,12 +8,15 @@ $(window).on('load', function () {
 
 let map;
 let bordersLayer;
-let earthquakeLayer = L.markerClusterGroup();
+let earthquakeLayer;
 let capitalMarker = null;
 
 $(document).ready(function () {
     // Initialize the map
     map = L.map('map').setView([20, 0], 2);
+    
+    // Initialize marker cluster group
+    earthquakeLayer = L.markerClusterGroup();
 
     // Add tile layers
     var streets = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}", {
@@ -124,16 +127,41 @@ $(document).ready(function () {
     $('#countrySelect').change(function () {
         const iso2 = $(this).val();
         if (iso2) {
+            // Clear previous data when a new country is selected
+            clearPreviousCountryData();
             fetchAllCountryData(iso2);
             displayNearbyInfo(iso2);
         }
     });
 
-    function fetchAllCountryData(iso2) {
+    // Function to clear previous country data
+    function clearPreviousCountryData() {
+        // Clear earthquake markers
         earthquakeLayer.clearLayers();
+        
+        // Remove earthquake layer from map and re-add it (empty)
+        if (map.hasLayer(earthquakeLayer)) {
+            map.removeLayer(earthquakeLayer);
+        }
+        map.addLayer(earthquakeLayer);
+        
+        // Remove capital marker if it exists
         if (capitalMarker) {
             map.removeLayer(capitalMarker);
+            capitalMarker = null;
         }
+        
+        // Clear country borders if they exist
+        if (bordersLayer) {
+            map.removeLayer(bordersLayer);
+            bordersLayer = null;
+        }
+        
+        // Clear Wikipedia articles
+        $('#wikiArticles').html('');
+    }
+
+    function fetchAllCountryData(iso2) {
         getRectBounds(iso2);
         displayCountryInfo(iso2);
         displayCapitalCity(iso2);
@@ -145,7 +173,6 @@ $(document).ready(function () {
         displayWeatherForecast(iso2);
         displayWikipediaInfo(iso2);
         displayTimezone(iso2);
-        //displayEarthquakeData(iso2);
         updateCountryBorders(iso2);
     }
 
@@ -159,32 +186,33 @@ $(document).ready(function () {
                 console.log("Wikipedia Data:", data);
                 $('#wikiArticles').html('');
                 
-           if (data.data && data.data.length > 0) {
-                let filteredArticles = data.data.filter(article => {
-                    return article.countryCode === iso2; // ✅ Keep only matching articles
-                });
+                if (data.data && data.data.length > 0) {
+                    let filteredArticles = data.data.filter(article => {
+                        return article.countryCode === iso2; // Filter articles by country code
+                    });
 
-                filteredArticles.forEach(article => {
-                    $('#wikiArticles').append(`
-                        <li>
-                            ${article.summary} <br>
-                            <a href="https://${article.wikipediaUrl}" target="_blank">Click to see more...</a>
-                        </li>
-                    `);
-                });
-
-                if (filteredArticles.length === 0) {
-                    $('#wikiArticles').append("<li>No relevant Wikipedia articles found.</li>");
+                    if (filteredArticles.length > 0) {
+                        filteredArticles.forEach(article => {
+                            $('#wikiArticles').append(`
+                                <li>
+                                    ${article.summary} <br>
+                                    <a href="https://${article.wikipediaUrl}" target="_blank">Click to see more...</a>
+                                </li>
+                            `);
+                        });
+                    } else {
+                        $('#wikiArticles').append("<li>No Wikipedia articles found for this country.</li>");
+                    }
+                } else {
+                    $('#wikiArticles').append("<li>No Wikipedia data available.</li>");
                 }
-            } else {
-                $('#wikiArticles').append("<li>No Wikipedia data available.</li>");
+            },
+            error: function (err) {
+                console.error("Error fetching Wikipedia data:", err);
+                $('#wikiArticles').append("<li>Error loading Wikipedia articles.</li>");
             }
-        },
-        error: function (err) {
-            console.error("Error fetching Wikipedia data:", err);
-        }
-    });
-}
+        });
+    }
 
    function placeEarthQuakeMarkers(north, south, east, west) {
         $.ajax({
@@ -194,12 +222,14 @@ $(document).ready(function () {
             data: { north: north, south: south, east: east, west: west },
             success: function (data) {
                 if (!data.data || data.data.length === 0) return;
+                
                 var redIcon = L.icon({
                     iconUrl: 'Images/Fire-Icon.png',
                     iconSize: [32, 32], 
                     iconAnchor: [16, 32], 
                     popupAnchor: [0, -32] 
                 });
+                
                 data.data.forEach(quake => {
                     let lat = parseFloat(quake.lat);
                     let lng = parseFloat(quake.lng);
@@ -213,11 +243,9 @@ $(document).ready(function () {
                         earthquakeLayer.addLayer(marker);
                     }
                 });
-                map.addLayer(earthquakeLayer);
             }
         });
     }
-
 
     function getRectBounds(countryCode){
         console.log(countryCode);
@@ -228,8 +256,10 @@ $(document).ready(function () {
             data:{country:countryCode},
             success: function (data) {
                 console.log(data);
-                placeEarthQuakeMarkers(data.data[0].north, data.data[0].south, data.data[0].east, data.data[0].west);
-                getWikiResults(data.data[0].north, data.data[0].south, data.data[0].east, data.data[0].west);
+                if (data.data && data.data[0]) {
+                    placeEarthQuakeMarkers(data.data[0].north, data.data[0].south, data.data[0].east, data.data[0].west, countryCode);
+                    getWikiResults(data.data[0].north, data.data[0].south, data.data[0].east, data.data[0].west, countryCode);
+                }
             },error:function(err){
                 console.log(err);
             }
@@ -379,4 +409,3 @@ $(document).ready(function () {
     //         $('#earthquakeList').html(earthquakeHtml);
     //     }, 'json');
     // }
-});

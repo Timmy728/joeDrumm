@@ -8,6 +8,8 @@ $(window).on('load', function () {
 
 let map;
 let bordersLayer;
+let earthquakeLayer = L.markerClusterGroup();
+let capitalMarker - null;
 
 $(document).ready(function () {
     // Initialize the map
@@ -29,7 +31,6 @@ $(document).ready(function () {
 
     map.on('locationfound', function(options){
         console.log(options);
-
         $.ajax({
             url: 'Php/CountryCode.php',
             type: 'GET',
@@ -129,6 +130,10 @@ $(document).ready(function () {
     });
 
     function fetchAllCountryData(iso2) {
+        earthquakeCluster.clearLayers();
+        if (capitalMarker) {
+            map.removeLayer(capitalCityMarker);
+        }
         getRectBounds(iso2);
         displayCountryInfo(iso2);
         displayCapitalCity(iso2);
@@ -144,30 +149,45 @@ $(document).ready(function () {
         updateCountryBorders(iso2);
     }
 
-    function getWikiResults(north, south, east, west){
+    function getWikiResults(north, south, east, west, iso2){
         $.ajax({
             url: 'Php/wikipediaBoundingBox.php',
             type: 'GET',
             dataType: 'json',
             data:{north:north, south:south, east:east, west:west},
             success: function (data) {
-                console.log(data);
+                console.log("Wikipedia Data:", data);
                 $('#wikiArticles').html('');
-                for (const wikiArticle of data.data) {
-                    //placeholder
-                    $('#wikiArticles').append(`<li>${wikiArticle.summary}<br/>
-                        <a href='https://${wikiArticle.wikipediaUrl}' target='_blank'>Click to see more...</a>
-                        </li>`);
+                
+           if (data.data && data.data.length > 0) {
+                let filteredArticles = data.data.filter(article => {
+                    return article.countryCode === iso2; // ✅ Keep only matching articles
+                });
+
+                filteredArticles.forEach(article => {
+                    $('#wikiArticles').append(`
+                        <li>
+                            ${article.summary} <br>
+                            <a href="https://${article.wikipediaUrl}" target="_blank">Click to see more...</a>
+                        </li>
+                    `);
+                });
+
+                if (filteredArticles.length === 0) {
+                    $('#wikiArticles').append("<li>No relevant Wikipedia articles found.</li>");
                 }
-            },error:function(err){
-                console.log(err);
+            } else {
+                $('#wikiArticles').append("<li>No Wikipedia data available.</li>");
             }
-        });
-    }
+        },
+        error: function (err) {
+            console.error("Error fetching Wikipedia data:", err);
+        }
+    });
+}
 
 function placeEarthQuakeMarkers(north, south, east, west) {
-    console.log("📡 Fetching Earthquake Data..."); // Debugging log
-
+    console.log("📡 Fetching Earthquake Data...");
     $.ajax({
         url: 'Php/earthQuakes.php',
         type: 'GET',
@@ -175,28 +195,22 @@ function placeEarthQuakeMarkers(north, south, east, west) {
         data: { north: north, south: south, east: east, west: west },
         success: function (data) {
             console.log("✅ Earthquake Data Received:", data); // ✅ Log response
-
+               earthquakeCluster.clearLayers();
             if (!data.data || data.data.length === 0) {
                 console.warn("⚠️ No earthquake data found.");
                 return;
             }
-
-            // ✅ Define fire icon outside loop
             var redIcon = L.icon({
-                iconUrl: 'Images/Fire-Icon.png', // ✅ Ensure correct path
+                iconUrl: 'Images/Fire-Icon.png',
                 iconSize: [32, 32], 
                 iconAnchor: [16, 32], 
                 popupAnchor: [0, -32] 
             });
-
-            // ✅ Loop through earthquake data and add markers
             data.data.forEach(quake => {
                 let lat = parseFloat(quake.lat);
                 let lng = parseFloat(quake.lng);
-
                 if (!isNaN(lat) && !isNaN(lng)) {
                     console.log("📍 Adding Marker:", lat, lng);
-
                     L.marker([lat, lng], { icon: redIcon })
                         .addTo(map)
                         .bindPopup(`
@@ -205,9 +219,11 @@ function placeEarthQuakeMarkers(north, south, east, west) {
                             <strong>⏰ Time:</strong> ${quake.datetime}<br>
                             <strong>🌍 Location:</strong> ${lat}, ${lng}
                         `);
-                } else {
+                } earthquakeLayer.addLayer(marker);
+                 else {
                     console.warn("⚠️ Invalid earthquake coordinates:", quake);
                 }
+                 map.addLayer(earthquakeCluster);
             });
         },
         error: function (xhr, status, error) {
@@ -278,23 +294,25 @@ function placeEarthQuakeMarkers(north, south, east, west) {
                     let lat = countryData[0].latlng[0];
                     let lon = countryData[0].latlng[1];
 
-                    // Define the city marker icon
+                     if (capitalCityMarker) {
+                map.removeLayer(capitalCityMarker); // ✅ Remove previous marker
+                    }
                     var cityIcon = L.icon({
                         iconUrl: 'Images/CityBuildings.png',
                         iconSize: [32, 32], 
                         iconAnchor: [16, 32]
                     });
-
                     // Add marker for the capital city
-                    L.marker([lat, lon], { icon: cityIcon })
+                   CapitalMarker = L.marker([lat, lon], { icon: cityIcon })
                      .addTo(map)
                      .bindPopup(`<strong>Capital:</strong> ${data.capital}`);
                 }
-            }, 'json');
+            }, 'json').fail(function () {
+                 console.error("Error fetching capital city data.");
+            };
         }
     }, 'json');
 }
-
     
     function displayPopulation(iso2) {
         $.get('Php/Population.php', { countryCode: iso2 }, function (data) {

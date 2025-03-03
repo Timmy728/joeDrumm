@@ -130,9 +130,9 @@ $(document).ready(function () {
     });
 
     function fetchAllCountryData(iso2) {
-        earthquakeCluster.clearLayers();
+        earthquakeLayer.clearLayers();
         if (capitalMarker) {
-            map.removeLayer(capitalCityMarker);
+            map.removeLayer(capitalMarker);
         }
         getRectBounds(iso2);
         displayCountryInfo(iso2);
@@ -186,51 +186,37 @@ $(document).ready(function () {
     });
 }
 
-function placeEarthQuakeMarkers(north, south, east, west) {
-    console.log("📡 Fetching Earthquake Data...");
-    $.ajax({
-        url: 'Php/earthQuakes.php',
-        type: 'GET',
-        dataType: 'json',
-        data: { north: north, south: south, east: east, west: west },
-        success: function (data) {
-            console.log("✅ Earthquake Data Received:", data); // ✅ Log response
-               earthquakeCluster.clearLayers();
-            if (!data.data || data.data.length === 0) {
-                console.warn("⚠️ No earthquake data found.");
-                return;
+   function placeEarthQuakeMarkers(north, south, east, west) {
+        $.ajax({
+            url: 'Php/earthQuakes.php',
+            type: 'GET',
+            dataType: 'json',
+            data: { north: north, south: south, east: east, west: west },
+            success: function (data) {
+                if (!data.data || data.data.length === 0) return;
+                var redIcon = L.icon({
+                    iconUrl: 'Images/Fire-Icon.png',
+                    iconSize: [32, 32], 
+                    iconAnchor: [16, 32], 
+                    popupAnchor: [0, -32] 
+                });
+                data.data.forEach(quake => {
+                    let lat = parseFloat(quake.lat);
+                    let lng = parseFloat(quake.lng);
+                    if (!isNaN(lat) && !isNaN(lng)) {
+                        let marker = L.marker([lat, lng], { icon: redIcon })
+                            .bindPopup(`
+                                <strong>Magnitude:</strong> ${quake.magnitude}<br>
+                                <strong>Depth:</strong> ${quake.depth} km<br>
+                                <strong>Time:</strong> ${quake.datetime}<br>
+                            `);
+                        earthquakeLayer.addLayer(marker);
+                    }
+                });
+                map.addLayer(earthquakeLayer);
             }
-            var redIcon = L.icon({
-                iconUrl: 'Images/Fire-Icon.png',
-                iconSize: [32, 32], 
-                iconAnchor: [16, 32], 
-                popupAnchor: [0, -32] 
-            });
-            data.data.forEach(quake => {
-                let lat = parseFloat(quake.lat);
-                let lng = parseFloat(quake.lng);
-                if (!isNaN(lat) && !isNaN(lng)) {
-                    console.log("📍 Adding Marker:", lat, lng);
-                    L.marker([lat, lng], { icon: redIcon })
-                        .addTo(map)
-                        .bindPopup(`
-                            <strong>📍 Magnitude:</strong> ${quake.magnitude}<br>
-                            <strong>📏 Depth:</strong> ${quake.depth} km<br>
-                            <strong>⏰ Time:</strong> ${quake.datetime}<br>
-                            <strong>🌍 Location:</strong> ${lat}, ${lng}
-                        `);
-                } earthquakeLayer.addLayer(marker);
-                 else {
-                    console.warn("⚠️ Invalid earthquake coordinates:", quake);
-                }
-                 map.addLayer(earthquakeCluster);
-            });
-        },
-        error: function (xhr, status, error) {
-            console.error("❌ Error fetching earthquake data:", status, error);
-        }
-    });
-}
+        });
+    }
 
 
     function getRectBounds(countryCode){
@@ -287,32 +273,26 @@ function placeEarthQuakeMarkers(north, south, east, west) {
     }
 
     function displayCapitalOnMap(iso2) {
-    $.get('Php/capitalCities.php', { iso2: iso2 }, function (data) {
-        if (data.capital) {
-            $.get(`https://restcountries.com/v3.1/alpha/${iso2}`, function (countryData) {
-                if (countryData && countryData[0] && countryData[0].latlng) {
-                    let lat = countryData[0].latlng[0];
-                    let lon = countryData[0].latlng[1];
-
-                     if (capitalCityMarker) {
-                map.removeLayer(capitalCityMarker); // ✅ Remove previous marker
+        $.get('Php/capitalCities.php', { iso2: iso2 }, function (data) {
+            if (data.capital) {
+                $.get(`https://restcountries.com/v3.1/alpha/${iso2}`, function (countryData) {
+                    if (countryData && countryData[0] && countryData[0].latlng) {
+                        let lat = countryData[0].latlng[0];
+                        let lon = countryData[0].latlng[1];
+                        var cityIcon = L.icon({
+                            iconUrl: 'Images/CityBuildings.png',
+                            iconSize: [32, 32], 
+                            iconAnchor: [16, 32]
+                        });
+                        capitalMarker = L.marker([lat, lon], { icon: cityIcon })
+                            .addTo(map)
+                            .bindPopup(`<strong>Capital:</strong> ${data.capital}`);
                     }
-                    var cityIcon = L.icon({
-                        iconUrl: 'Images/CityBuildings.png',
-                        iconSize: [32, 32], 
-                        iconAnchor: [16, 32]
-                    });
-                    // Add marker for the capital city
-                   CapitalMarker = L.marker([lat, lon], { icon: cityIcon })
-                     .addTo(map)
-                     .bindPopup(`<strong>Capital:</strong> ${data.capital}`);
-                }
-            }, 'json').fail(function () {
-                 console.error("Error fetching capital city data.");
-            };
-        }
-    }, 'json');
-}
+                });
+            }
+        });
+    }
+});
     
     function displayPopulation(iso2) {
         $.get('Php/Population.php', { countryCode: iso2 }, function (data) {

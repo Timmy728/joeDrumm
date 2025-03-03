@@ -9,7 +9,7 @@ $(window).on('load', function () {
 let map;
 let bordersLayer;
 let earthquakeLayer = L.markerClusterGroup();
-let capitalMarker - null;
+let capitalMarker = null;
 
 $(document).ready(function () {
     // Initialize the map

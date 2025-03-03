@@ -102,35 +102,37 @@ $(document).ready(function () {
     });
 
     function displayNearbyInfo(iso2) {
-    $.get(`https://restcountries.com/v3.1/alpha/${iso2}`, function (countryData) {
-        if (countryData && countryData[0] && countryData[0].latlng) {
-            let lat = countryData[0].latlng[0];
-            let lon = countryData[0].latlng[1];
+        // Use the PHP wrapper for REST Countries API instead of direct call
+        $.get('Php/getCountryData.php', { iso2: iso2 }, function (countryData) {
+            if (countryData && countryData[0] && countryData[0].latlng) {
+                let lat = countryData[0].latlng[0];
+                let lon = countryData[0].latlng[1];
 
-            // Fetch all 4 PHP APIs using lat/lon
-            $.get('Php/findNearbyStreets.php', { lat, lon }, function (streetData) {
-                $('#nearbyStreets').text(streetData.length > 0 ? streetData.map(street => street.name).join(", ") : "No streets found.");
-            }, 'json');
+                // Fetch all 4 PHP APIs using lat/lon
+                $.get('Php/findNearbyStreets.php', { lat, lon }, function (streetData) {
+                    $('#nearbyStreets').text(streetData.length > 0 ? streetData.map(street => street.name).join(", ") : "No streets found.");
+                }, 'json');
 
-            $.get('Php/findNearbyPlaceName.php', { lat, lon }, function (placeData) {
-                $('#nearbyPlaces').text(placeData.length > 0 ? placeData.map(place => place.name).join(", ") : "No places found.");
-            }, 'json');
+                $.get('Php/findNearbyPlaceName.php', { lat, lon }, function (placeData) {
+                    $('#nearbyPlaces').text(placeData.length > 0 ? placeData.map(place => place.name).join(", ") : "No places found.");
+                }, 'json');
 
-            $.get('Php/astergdem.php', { lat, lon }, function (elevationData) {
-                $('#elevation').text(elevationData.elevation ? `${elevationData.elevation}m` : "No elevation data.");
-            }, 'json');
+                $.get('Php/astergdem.php', { lat, lon }, function (elevationData) {
+                    $('#elevation').text(elevationData.elevation ? `${elevationData.elevation}m` : "No elevation data.");
+                }, 'json');
 
-            $.get('Php/geoCodeAddress.php', { lat, lon }, function (addressData) {
-                $('#geoAddress').text(addressData.street ? `${addressData.street}, ${addressData.adminName1}` : "No address found.");
-            }, 'json');
+                $.get('Php/geoCodeAddress.php', { lat, lon }, function (addressData) {
+                    $('#geoAddress').text(addressData.street ? `${addressData.street}, ${addressData.adminName1}` : "No address found.");
+                }, 'json');
 
-        } else {
-            console.warn("No lat/lon data available for this country.");
-        }
-    }, 'json').fail(function () {
-        console.error("Error fetching country lat/lon data from RestCountries API.");
-    });
-}
+            } else {
+                console.warn("No lat/lon data available for this country.");
+            }
+        }, 'json').fail(function () {
+            console.error("Error fetching country lat/lon data from RestCountries API.");
+        });
+    }
+    
     // On country selection
     $('#countrySelect').change(function () {
         const iso2 = $(this).val();
@@ -290,11 +292,10 @@ $(document).ready(function () {
         if (bordersLayer) {
             map.removeLayer(bordersLayer);
         }
-        $.getJSON('Data/countryBorders.geo.json', function (data) {
-            const country = data.features.find(
-                feature => feature.properties.iso_a2 === iso2
-            );
-            if (country) {
+        
+        // Use PHP wrapper instead of direct access to GeoJSON file
+        $.getJSON('Php/getCountryBorders.php', { iso2: iso2 }, function (country) {
+            if (country && !country.error) {
                 bordersLayer = L.geoJSON(country, {
                     style: {
                         color: 'blue',
@@ -304,6 +305,8 @@ $(document).ready(function () {
                     }
                 }).addTo(map);
                 map.fitBounds(bordersLayer.getBounds());
+            } else {
+                console.error("Error loading country borders:", country ? country.error : "Unknown error");
             }
         });
     }
@@ -325,7 +328,8 @@ $(document).ready(function () {
     function displayCapitalOnMap(iso2) {
         $.get('Php/capitalCities.php', { iso2: iso2 }, function (data) {
             if (data.capital) {
-                $.get(`https://restcountries.com/v3.1/alpha/${iso2}`, function (countryData) {
+                // Use PHP wrapper instead of direct REST Countries API call
+                $.get('Php/getCountryData.php', { iso2: iso2 }, function (countryData) {
                     if (countryData && countryData[0] && countryData[0].latlng) {
                         let lat = countryData[0].latlng[0];
                         let lon = countryData[0].latlng[1];
@@ -377,29 +381,30 @@ $(document).ready(function () {
         }, 'json');
     }
 
-  function displayWeather(iso2) {
-    $.get('https://restcountries.com/v3.1/alpha/' + iso2, function (data) {
-        if (data && data[0] && data[0].latlng) {
-            const [lat, lon] = data[0].latlng;
+    function displayWeather(iso2) {
+        // Use PHP wrapper instead of direct REST Countries API call
+        $.get('Php/getCountryData.php', { iso2: iso2 }, function (data) {
+            if (data && data[0] && data[0].latlng) {
+                const [lat, lon] = data[0].latlng;
 
-            $.get('Php/getWeather.php', { lat: lat, lon: lon }, function (weatherData) {
-                if (weatherData && weatherData.temperature && weatherData.description) {
-                    $('#tempToday').text(`${weatherData.temperature}°C`);
-                    $('#conditionsToday').text(weatherData.description);
-                    $('#weatherImg').html(`<img src="${weatherData.icon}" alt="Weather Icon">`);
-                } else {
-                    $('#tempToday').text('No weather data available');
-                    $('#conditionsToday').text('No description available');
-                    $('#weatherImg').empty();
-                }
-            }, 'json');
-        } else {
-            $('#tempToday').text('Coordinates not found');
-            $('#conditionsToday').text('No description available');
-            $('#weatherImg').empty();
-        }
-    }, 'json');
-}
+                $.get('Php/getWeather.php', { lat: lat, lon: lon }, function (weatherData) {
+                    if (weatherData && weatherData.temperature && weatherData.description) {
+                        $('#tempToday').text(`${weatherData.temperature}°C`);
+                        $('#conditionsToday').text(weatherData.description);
+                        $('#weatherImg').html(`<img src="${weatherData.icon}" alt="Weather Icon">`);
+                    } else {
+                        $('#tempToday').text('No weather data available');
+                        $('#conditionsToday').text('No description available');
+                        $('#weatherImg').empty();
+                    }
+                }, 'json');
+            } else {
+                $('#tempToday').text('Coordinates not found');
+                $('#conditionsToday').text('No description available');
+                $('#weatherImg').empty();
+            }
+        }, 'json');
+    }
 
     function displayWeatherForecast(iso2) {
         $.get('Php/getWeatherForecast.php', { location: iso2 }, function (data) {
@@ -421,15 +426,3 @@ $(document).ready(function () {
             $('#timezone').text(data.timezone);
         }, 'json');
     }
-
-
-    // function displayEarthquakeData(iso2) {
-    //     $.get('Php/earthQuakes.php', { country: iso2 }, function (data) {
-    //         console.log(data);
-    //         let earthquakeHtml = '';
-    //         data.earthquakes.forEach(quake => {
-    //             earthquakeHtml += `<p>📍 Magnitude: ${quake.magnitude} | Depth: ${quake.depth}km | Location: (${quake.lat}, ${quake.lng}) | Time: ${quake.datetime}</p>`;
-    //         });
-    //         $('#earthquakeList').html(earthquakeHtml);
-    //     }, 'json');
-    // }

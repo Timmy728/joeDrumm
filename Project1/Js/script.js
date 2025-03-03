@@ -13,8 +13,11 @@ let capitalMarker = null;
 let earthquakeMarkers = [];
 
 $(document).ready(function () {
-    // Initialize the map
-    map = L.map('map').setView([20, 0], 2);
+    // Initialize the map with maxZoom specified
+    map = L.map('map', {
+        maxZoom: 18,
+        minZoom: 2
+    }).setView([20, 0], 2);
     
     // Initialize marker cluster group
     earthquakeLayer = L.markerClusterGroup();
@@ -22,11 +25,13 @@ $(document).ready(function () {
 
     // Add tile layers
     var streets = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}", {
-        attribution: "Tiles &copy; Esri"
+        attribution: "Tiles &copy; Esri",
+        maxZoom: 18
     });
 
     var satellite = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", {
-        attribution: "Tiles &copy; Esri"
+        attribution: "Tiles &copy; Esri",
+        maxZoom: 18
     });
 
     var basemaps = {

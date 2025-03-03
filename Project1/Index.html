@@ -9,6 +9,9 @@
     <link rel="stylesheet" href="css/bootstrap.min.css">
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="css/leaflet.css">
+    <!-- Leaflet Marker Cluster CSS -->
+    <link rel="stylesheet" href="css/MarkerCluster.css">
+    <link rel="stylesheet" href="css/MarkerCluster.Default.css">
     <!-- EasyButton CSS -->
     <link rel="stylesheet" href="css/easy-button.css">
     <!-- Custom CSS -->
@@ -26,7 +29,7 @@
     </div>
 
     <!-- Modals for 5 Different Easy Buttons -->
-    <! --- Button 1 --->
+    <!-- Button 1 -->
     <div id="modals-container">
         <div id="infoModal1" class="modal fade" tabindex="-1">
             <div class="modal-dialog modal-dialog-centered">
@@ -46,23 +49,24 @@
         </div>
 
         <!-- Modal for Nearby Information (Button 2) -->
-<div id="infoModal2" class="modal fade" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header bg-success text-white">
-                <h5 class="modal-title">Nearby Information</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <p><strong>Nearby Streets:</strong> <span id="nearbyStreets"></span></p>
-                <p><strong>Nearby Places:</strong> <span id="nearbyPlaces"></span></p>
-                <p><strong>Elevation:</strong> <span id="elevation"></span></p>
-                <p><strong>Geocoded Address:</strong> <span id="geoAddress"></span></p>
+        <div id="infoModal2" class="modal fade" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header bg-success text-white">
+                        <h5 class="modal-title">Nearby Information</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p><strong>Nearby Streets:</strong> <span id="nearbyStreets"></span></p>
+                        <p><strong>Nearby Places:</strong> <span id="nearbyPlaces"></span></p>
+                        <p><strong>Elevation:</strong> <span id="elevation"></span></p>
+                        <p><strong>Geocoded Address:</strong> <span id="geoAddress"></span></p>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
-</div>
-               <!-- Button 3 --->
+        
+        <!-- Button 3 -->
         <div id="infoModal3" class="modal fade" tabindex="-1">
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
@@ -83,7 +87,8 @@
                 </div>
             </div>
         </div>
-                   <!--- Button 4 --->
+        
+        <!-- Button 4 -->
         <div id="infoModal4" class="modal fade" tabindex="-1">
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
@@ -101,7 +106,8 @@
                 </div>
             </div>
         </div>
-                     <!--- Button 5 --->
+        
+        <!-- Button 5 -->
         <div id="infoModal5" class="modal fade" tabindex="-1">
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
@@ -121,6 +127,7 @@
     <script src="Js/bootstrap.bundle.min.js"></script>
     <script src="Js/jquery-3.7.1.min.js"></script>
     <script src="Js/leaflet.js"></script>
+    <script src="Js/leaflet.markercluster.js"></script>
     <script src="Js/easy-button.js"></script>
     <script src="Js/script.js"></script>
 </body>

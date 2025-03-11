@@ -1,13 +1,16 @@
-// Preloader code
-$(window).on('load', function () {
-    if ($('.preloader').length) {
+// Preloader code - will be removed after first country loads
+let preloaderRemoved = false;
+
+function removePreloader() {
+    if (!preloaderRemoved && $('.preloader').length) {
         $('.preloader').addClass('fade-out');
         // Remove preloader after fade animation
         setTimeout(function() {
             $('.preloader').remove();
-        }, 500); 
+            preloaderRemoved = true;
+        }, 500);
     }
-});
+}
 
 let map;
 let bordersLayer;

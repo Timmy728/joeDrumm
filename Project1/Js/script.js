@@ -1,8 +1,11 @@
+// Preloader code
 $(window).on('load', function () {
-    if ($('#preloader').length) {
-        $('#preloader').delay(1000).fadeOut('slow', function () {
-            $(this).remove();
-        });
+    if ($('.preloader').length) {
+        $('.preloader').addClass('fade-out');
+        // Remove preloader after fade animation
+        setTimeout(function() {
+            $('.preloader').remove();
+        }, 500); 
     }
 });
 

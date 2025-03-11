@@ -1,6 +1,3 @@
-import React, { useState } from 'react';
-import { Plus, Minus } from 'lucide-react';
-
 // Preloader code - will be removed after first country loads
 let preloaderRemoved = false;
 let map;
@@ -131,7 +128,7 @@ $(document).ready(function () {
         },
         error: function(err) {
             console.log(err);
-            removePreloader(); // Remove preloader if countries fail to load
+            removePreloader();
         }
     });
 
@@ -156,6 +153,7 @@ $(document).ready(function () {
                 $.get('Php/geoCodeAddress.php', { lat, lon }, function (addressData) {
                     $('#geoAddress').text(addressData.street ? `${addressData.street}, ${addressData.adminName1}` : "No address found.");
                 }, 'json');
+
             } else {
                 console.warn("No lat/lon data available for this country.");
             }
@@ -175,35 +173,16 @@ $(document).ready(function () {
     });
 
     function clearPreviousCountryData() {
-        if (earthquakeLayer) {
-            earthquakeLayer.clearLayers();
-        }
-        
+        earthquakeLayer.clearLayers();
         if (capitalMarker) {
             map.removeLayer(capitalMarker);
             capitalMarker = null;
         }
-        
         if (bordersLayer) {
             map.removeLayer(bordersLayer);
             bordersLayer = null;
         }
-        
-        // Clear modal content
-        $('#countryNames').text('');
-        $('#countryFlag').attr('src', '').hide();
-        $('#capitalCity').text('');
-        $('#population').text('');
-        $('#timezone').text('');
-        $('#currencyName').text('');
-        $('#currencySymbol').text('');
-        $('#txtCurrencyRate').text('');
-        $('#convertedCurrency').text('');
-        $('#tempToday').text('');
-        $('#conditionsToday').text('');
-        $('#weatherImg').empty();
-        $('#forecastInfo').empty();
-        $('#wikiArticles').empty();
+        $('#wikiArticles').html('');
     }
 
     function fetchAllCountryData(iso2) {
@@ -236,7 +215,7 @@ $(document).ready(function () {
             url: 'Php/wikipediaBoundingBox.php',
             type: 'GET',
             dataType: 'json',
-            data: {north:north, south:south, east:east, west:west},
+            data: {north: north, south: south, east: east, west: west},
             success: function (data) {
                 console.log("Wikipedia Data:", data);
                 $('#wikiArticles').html('');
@@ -249,21 +228,23 @@ $(document).ready(function () {
                     if (filteredArticles.length > 0) {
                         filteredArticles.forEach(article => {
                             $('#wikiArticles').append(`
-                                <li>${article.summary}<br/>
-                                <a href='https://${article.wikipediaUrl}' target='_blank'>Click to see more...</a>
-                                </li>
+                                <div class="wiki-article mb-3">
+                                    <h5>${article.title}</h5>
+                                    <p>${article.summary}</p>
+                                    <a href='https://${article.wikipediaUrl}' target='_blank' class="btn btn-sm btn-primary">Read More</a>
+                                </div>
                             `);
                         });
                     } else {
-                        $('#wikiArticles').append("<li>No Wikipedia articles found for this country.</li>");
+                        $('#wikiArticles').append("<p>No Wikipedia articles found for this country.</p>");
                     }
                 } else {
-                    $('#wikiArticles').append("<li>No Wikipedia data available.</li>");
+                    $('#wikiArticles').append("<p>No Wikipedia data available.</p>");
                 }
             },
             error: function (err) {
                 console.log(err);
-                $('#wikiArticles').append("<li>Error loading Wikipedia articles.</li>");
+                $('#wikiArticles').append("<p>Error loading Wikipedia articles.</p>");
             }
         });
     }
@@ -324,7 +305,7 @@ $(document).ready(function () {
             url: 'Php/countryInfo.php',
             type: 'GET',
             dataType: 'json',
-            data: {country:countryCode},
+            data: {country: countryCode},
             success: function (data) {
                 console.log(data);
                 if (data.data && data.data[0]) {
@@ -360,127 +341,132 @@ $(document).ready(function () {
             if (callback) callback();
         });
     }
-
-    function displayCountryInfo(iso2, callback) {
-        $.get('Php/countryName.php', { iso2: iso2 }, function (data) {
-            $('#countryNames').text(data.name);
-            $('#countryFlag').attr('src', `https://flagcdn.com/w80/${iso2.toLowerCase()}.png`).show();
-            if (callback) callback();
-        }, 'json');
-    }
-
-    function displayCapitalCity(iso2, callback) {
-        $.get('Php/capitalCities.php', { iso2: iso2 }, function (data) {
-            $('#capitalCity').text(data.capital);
-            if (callback) callback();
-        }, 'json');
-    }
-
-    function displayCapitalOnMap(iso2, callback) {
-        $.get('Php/capitalCities.php', { iso2: iso2 }, function (data) {
-            if (data.capital) {
-                $.get('Php/getCountryData.php', { iso2: iso2 }, function (countryData) {
-                    if (countryData && countryData[0] && countryData[0].latlng) {
-                        let lat = countryData[0].latlng[0];
-                        let lon = countryData[0].latlng[1];
-
-                        var cityIcon = L.icon({
-                            iconUrl: 'Images/CityBuildings.png',
-                            iconSize: [32, 32],
-                            iconAnchor: [16, 32]
-                        });
-
-                        capitalMarker = L.marker([lat, lon], { icon: cityIcon })
-                            .addTo(map)
-                            .bindPopup(`<strong>Capital:</strong> ${data.capital}`);
-                    }
-                    if (callback) callback();
-                }, 'json');
-            } else {
-                if (callback) callback();
-            }
-        }, 'json');
-    }
-
-    function displayPopulation(iso2, callback) {
-        $.get('Php/Population.php', { countryCode: iso2 }, function (data) {
-            $('#population').text(data.population);
-            if (callback) callback();
-        }, 'json');
-    }
-
-    function displayCurrency(iso2, callback) {
-        $.get('Php/Currency.php', { iso2: iso2 }, function (data) {
-            if (data && data.currencies && data.currencies.length > 0) {
-                let currency = data.currencies[0];
-                $('#currencyName').text(`${currency.name}`);
-                $('#currencySymbol').text(currency.symbol);
-            }
-            if (callback) callback();
-        }, 'json');
-    }
-
-    function displayExchangeRate(iso2, callback) {
-        $.get('Php/latestExchangeRate.php', { iso2: iso2 }, function (data) {
-            $('#txtCurrencyRate').text(`1 USD = ${data.exchangeRate} ${data.currencyCode}`);
-            $('#convertBtn').off('click').on('click', function () {
-                const amount = parseFloat($('#currencyAmount').val());
-                if (!isNaN(amount)) {
-                    const convertedAmount = (amount * data.exchangeRate).toFixed(2);
-                    $('#convertedCurrency').text(`${amount} USD = ${convertedAmount} ${data.currencyCode}`);
-                }
-            });
-            if (callback) callback();
-        }, 'json');
-    }
-
-    function displayWeather(iso2, callback) {
-        $.get('Php/getCountryData.php', { iso2: iso2 }, function (data) {
-            if (data && data[0] && data[0].latlng) {
-                const [lat, lon] = data[0].latlng;
-
-                $.get('Php/getWeather.php', { lat: lat, lon: lon }, function (weatherData) {
-                    if (weatherData && weatherData.temperature && weatherData.description) {
-                        $('#tempToday').text(`${weatherData.temperature}°C`);
-                        $('#conditionsToday').text(weatherData.description);
-                        $('#weatherImg').html(`<img src="${weatherData.icon}" alt="Weather Icon">`);
-                    } else {
-                        $('#tempToday').text('No weather data available');
-                        $('#conditionsToday').text('No description available');
-                        $('#weatherImg').empty();
-                    }
-                    if (callback) callback();
-                }, 'json');
-            } else {
-                $('#tempToday').text('Coordinates not found');
-                $('#conditionsToday').text('No description available');
-                $('#weatherImg').empty();
-                if (callback) callback();
-            }
-        }, 'json');
-    }
-
-    function displayWeatherForecast(iso2, callback) {
-        $.get('Php/getWeatherForecast.php', { location: iso2 }, function (data) {
-            $('#forecastInfo').html('');
-            data.forEach(forecast => {
-                $('#forecastInfo').append(`<p>${forecast.date}: ${forecast.min_temp}°C - ${forecast.max_temp}°C</p>`);
-            });
-            if (callback) callback();
-        }, 'json');
-    }
-
-    function displayWikipediaInfo(iso2, callback) {
-        $.get('Php/wikipediaSearch.php', { query: iso2 }, function (data) {
-            $('#wikiLink').attr('href', data.url).text(`View ${data.title} on Wikipedia`);
-            if (callback) callback();
-        }, 'json');
-    }
-
-    function displayTimezone(iso2, callback) {
-        $.get('Php/Timezone.php', { iso2: iso2 }, function (data) {
-            $('#timezone').text(data.timezone);
-            if (callback) callback();
-        }, 'json');
-    }
 });
+
+function displayCountryInfo(iso2, callback) {
+    $.get('Php/countryName.php', { iso2: iso2 }, function (data) {
+        $('#countryNames').text(data.name);
+        $('#countryFlag').attr('src', `https://flagcdn.com/w80/${iso2.toLowerCase()}.png`).show();
+        if (callback) callback();
+    }, 'json');
+}
+
+function displayCapitalCity(iso2, callback) {
+    $.get('Php/capitalCities.php', { iso2: iso2 }, function (data) {
+        $('#capitalCity').text(data.capital);
+        if (callback) callback();
+    }, 'json');
+}
+
+function displayCapitalOnMap(iso2, callback) {
+    $.get('Php/capitalCities.php', { iso2: iso2 }, function (data) {
+        if (data.capital) {
+            $.get('Php/getCountryData.php', { iso2: iso2 }, function (countryData) {
+                if (countryData && countryData[0] && countryData[0].latlng) {
+                    let lat = countryData[0].latlng[0];
+                    let lon = countryData[0].latlng[1];
+
+                    var cityIcon = L.icon({
+                        iconUrl: 'Images/CityBuildings.png',
+                        iconSize: [32, 32],
+                        iconAnchor: [16, 32]
+                    });
+
+                    capitalMarker = L.marker([lat, lon], { icon: cityIcon })
+                        .addTo(map)
+                        .bindPopup(`<strong>Capital:</strong> ${data.capital}`);
+                }
+                if (callback) callback();
+            }, 'json');
+        } else {
+            if (callback) callback();
+        }
+    }, 'json');
+}
+
+function displayPopulation(iso2, callback) {
+    $.get('Php/Population.php', { countryCode: iso2 }, function (data) {
+        $('#population').text(data.population);
+        if (callback) callback();
+    }, 'json');
+}
+
+function displayCurrency(iso2, callback) {
+    $.get('Php/Currency.php', { iso2: iso2 }, function (data) {
+        if (data && data.currencies && data.currencies.length > 0) {
+            let currency = data.currencies[0];
+            $('#currencyName').text(`${currency.name}`);
+            $('#currencySymbol').text(currency.symbol);
+        }
+        if (callback) callback();
+    }, 'json');
+}
+
+function displayExchangeRate(iso2, callback) {
+    $.get('Php/latestExchangeRate.php', { iso2: iso2 }, function (data) {
+        $('#txtCurrencyRate').text(`1 USD = ${data.exchangeRate} ${data.currencyCode}`);
+        $('#convertBtn').off('click').on('click', function () {
+            const amount = parseFloat($('#currencyAmount').val());
+            if (!isNaN(amount)) {
+                const convertedAmount = (amount * data.exchangeRate).toFixed(2);
+                $('#convertedCurrency').text(`${amount} USD = ${convertedAmount} ${data.currencyCode}`);
+            }
+        });
+        if (callback) callback();
+    }, 'json');
+}
+
+function displayWeather(iso2, callback) {
+    $.get('Php/getCountryData.php', { iso2: iso2 }, function (data) {
+        if (data && data[0] && data[0].latlng) {
+            const [lat, lon] = data[0].latlng;
+
+            $.get('Php/getWeather.php', { lat: lat, lon: lon }, function (weatherData) {
+                if (weatherData && weatherData.temperature && weatherData.description) {
+                    $('#tempToday').text(`${weatherData.temperature}°C`);
+                    $('#conditionsToday').text(weatherData.description);
+                    $('#weatherImg').html(`<img src="${weatherData.icon}" alt="Weather Icon">`);
+                } else {
+                    $('#tempToday').text('No weather data available');
+                    $('#conditionsToday').text('No description available');
+                    $('#weatherImg').empty();
+                }
+                if (callback) callback();
+            }, 'json');
+        } else {
+            $('#tempToday').text('Coordinates not found');
+            $('#conditionsToday').text('No description available');
+            $('#weatherImg').empty();
+            if (callback) callback();
+        }
+    }, 'json');
+}
+
+function displayWeatherForecast(iso2, callback) {
+    $.get('Php/getWeatherForecast.php', { location: iso2 }, function (data) {
+        $('#forecastInfo').html('');
+        data.forEach(forecast => {
+            $('#forecastInfo').append(`
+                <div class="forecast-day mb-2">
+                    <strong>${forecast.date}:</strong>
+                    <span class="ms-2">${forecast.min_temp}°C - ${forecast.max_temp}°C</span>
+                </div>
+            `);
+        });
+        if (callback) callback();
+    }, 'json');
+}
+
+function displayWikipediaInfo(iso2, callback) {
+    $.get('Php/wikipediaSearch.php', { query: iso2 }, function (data) {
+        $('#wikiLink').attr('href', data.url).text(`View ${data.title} on Wikipedia`);
+        if (callback) callback();
+    }, 'json');
+}
+
+function displayTimezone(iso2, callback) {
+    $.get('Php/Timezone.php', { iso2: iso2 }, function (data) {
+        $('#timezone').text(data.timezone);
+        if (callback) callback();
+    }, 'json');
+}

@@ -1,5 +1,13 @@
+import React, { useState } from 'react';
+import { Plus, Minus } from 'lucide-react';
+
 // Preloader code - will be removed after first country loads
 let preloaderRemoved = false;
+let map;
+let bordersLayer;
+let earthquakeLayer;
+let capitalMarker = null;
+let earthquakeMarkers = [];
 
 function removePreloader() {
     if (!preloaderRemoved && $('.preloader').length) {
@@ -8,15 +16,9 @@ function removePreloader() {
         setTimeout(function() {
             $('.preloader').remove();
             preloaderRemoved = true;
-        }, 500);
+        }, 500); // Match the CSS transition duration
     }
 }
-
-let map;
-let bordersLayer;
-let earthquakeLayer;
-let capitalMarker = null;
-let earthquakeMarkers = [];
 
 $(document).ready(function () {
     // Initialize the map with maxZoom specified
@@ -58,32 +60,54 @@ $(document).ready(function () {
                $('#countrySelect').val(data.data.countryCode).change();
             },error:function(err){
                 console.log(err);
+                removePreloader();
             }
         });
-
     });
 
     L.control.layers(basemaps).addTo(map);
     streets.addTo(map);
 
-    // Add 5 EasyButtons
+    // Add 5 EasyButtons with immediate data loading
     L.easyButton('fa-flag', function () {
+        displayCountryInfo($('#countrySelect').val());
+        displayCapitalCity($('#countrySelect').val());
+        displayPopulation($('#countrySelect').val());
+        displayTimezone($('#countrySelect').val());
         $('#infoModal1').modal('show');
     }).addTo(map);
 
     L.easyButton('fa-map-marker-alt', function () {
-    $('#infoModal2').modal('show');
+        displayNearbyInfo($('#countrySelect').val());
+        $('#infoModal2').modal('show');
     }).addTo(map);
 
     L.easyButton('fa-exchange-alt', function () {
+        displayCurrency($('#countrySelect').val());
+        displayExchangeRate($('#countrySelect').val());
         $('#infoModal3').modal('show');
     }).addTo(map);
 
     L.easyButton('fa-cloud-sun', function () {
+        displayWeather($('#countrySelect').val());
+        displayWeatherForecast($('#countrySelect').val());
         $('#infoModal4').modal('show');
     }).addTo(map);
 
     L.easyButton('fa-globe', function () {
+        const iso2 = $('#countrySelect').val();
+        $.ajax({
+            url: 'Php/countryInfo.php',
+            type: 'GET',
+            dataType: 'json',
+            data: {country: iso2},
+            success: function(data) {
+                if (data.data && data.data[0]) {
+                    getWikiResults(data.data[0].north, data.data[0].south, data.data[0].east, data.data[0].west, iso2);
+                }
+            }
+        });
+        displayWikipediaInfo(iso2);
         $('#infoModal5').modal('show');
     }).addTo(map);
 
@@ -104,17 +128,19 @@ $(document).ready(function () {
             });
 
             map.locate();
+        },
+        error: function(err) {
+            console.log(err);
+            removePreloader(); // Remove preloader if countries fail to load
         }
     });
 
     function displayNearbyInfo(iso2) {
-        // Use the PHP wrapper for REST Countries API instead of direct call
         $.get('Php/getCountryData.php', { iso2: iso2 }, function (countryData) {
             if (countryData && countryData[0] && countryData[0].latlng) {
                 let lat = countryData[0].latlng[0];
                 let lon = countryData[0].latlng[1];
 
-                // Fetch all 4 PHP APIs using lat/lon
                 $.get('Php/findNearbyStreets.php', { lat, lon }, function (streetData) {
                     $('#nearbyStreets').text(streetData.length > 0 ? streetData.map(street => street.name).join(", ") : "No streets found.");
                 }, 'json');
@@ -130,7 +156,6 @@ $(document).ready(function () {
                 $.get('Php/geoCodeAddress.php', { lat, lon }, function (addressData) {
                     $('#geoAddress').text(addressData.street ? `${addressData.street}, ${addressData.adminName1}` : "No address found.");
                 }, 'json');
-
             } else {
                 console.warn("No lat/lon data available for this country.");
             }
@@ -143,62 +168,82 @@ $(document).ready(function () {
     $('#countrySelect').change(function () {
         const iso2 = $(this).val();
         if (iso2) {
-            // Clear previous data when a new country is selected
             clearPreviousCountryData();
             fetchAllCountryData(iso2);
             displayNearbyInfo(iso2);
         }
     });
 
-    // Function to clear previous country data
     function clearPreviousCountryData() {
-        // Clear earthquake markers
-        earthquakeLayer.clearLayers();
+        if (earthquakeLayer) {
+            earthquakeLayer.clearLayers();
+        }
         
-        // Remove capital marker if it exists
         if (capitalMarker) {
             map.removeLayer(capitalMarker);
             capitalMarker = null;
         }
         
-        // Clear country borders if they exist
         if (bordersLayer) {
             map.removeLayer(bordersLayer);
             bordersLayer = null;
         }
         
-        // Clear Wikipedia articles
-        $('#wikiArticles').html('');
+        // Clear modal content
+        $('#countryNames').text('');
+        $('#countryFlag').attr('src', '').hide();
+        $('#capitalCity').text('');
+        $('#population').text('');
+        $('#timezone').text('');
+        $('#currencyName').text('');
+        $('#currencySymbol').text('');
+        $('#txtCurrencyRate').text('');
+        $('#convertedCurrency').text('');
+        $('#tempToday').text('');
+        $('#conditionsToday').text('');
+        $('#weatherImg').empty();
+        $('#forecastInfo').empty();
+        $('#wikiArticles').empty();
     }
 
     function fetchAllCountryData(iso2) {
+        let loadedDataCount = 0;
+        const totalDataPoints = 11;
+
+        function checkAllDataLoaded() {
+            loadedDataCount++;
+            if (loadedDataCount === totalDataPoints) {
+                removePreloader();
+            }
+        }
+
         getRectBounds(iso2);
-        displayCountryInfo(iso2);
-        displayCapitalCity(iso2);
-        displayCapitalOnMap(iso2);
-        displayPopulation(iso2);
-        displayCurrency(iso2);
-        displayExchangeRate(iso2);
-        displayWeather(iso2);
-        displayWeatherForecast(iso2);
-        displayWikipediaInfo(iso2);
-        displayTimezone(iso2);
-        updateCountryBorders(iso2);
+        displayCountryInfo(iso2, checkAllDataLoaded);
+        displayCapitalCity(iso2, checkAllDataLoaded);
+        displayCapitalOnMap(iso2, checkAllDataLoaded);
+        displayPopulation(iso2, checkAllDataLoaded);
+        displayCurrency(iso2, checkAllDataLoaded);
+        displayExchangeRate(iso2, checkAllDataLoaded);
+        displayWeather(iso2, checkAllDataLoaded);
+        displayWeatherForecast(iso2, checkAllDataLoaded);
+        displayWikipediaInfo(iso2, checkAllDataLoaded);
+        displayTimezone(iso2, checkAllDataLoaded);
+        updateCountryBorders(iso2, checkAllDataLoaded);
     }
 
-    function getWikiResults(north, south, east, west, iso2){
+    function getWikiResults(north, south, east, west, iso2) {
         $.ajax({
             url: 'Php/wikipediaBoundingBox.php',
             type: 'GET',
             dataType: 'json',
-            data:{north:north, south:south, east:east, west:west},
+            data: {north:north, south:south, east:east, west:west},
             success: function (data) {
                 console.log("Wikipedia Data:", data);
                 $('#wikiArticles').html('');
                 
                 if (data.data && data.data.length > 0) {
                     let filteredArticles = data.data.filter(article => {
-                        return article.countryCode === iso2; // Filter articles by country code
+                        return article.countryCode === iso2;
                     });
 
                     if (filteredArticles.length > 0) {
@@ -224,7 +269,7 @@ $(document).ready(function () {
     }
 
     function placeEarthQuakeMarkers(north, south, east, west) {
-        console.log("📡 Fetching Earthquake Data..."); // Debugging log
+        console.log("📡 Fetching Earthquake Data...");
 
         $.ajax({
             url: 'Php/earthQuakes.php',
@@ -232,22 +277,20 @@ $(document).ready(function () {
             dataType: 'json',
             data: { north: north, south: south, east: east, west: west },
             success: function (data) {
-                console.log("✅ Earthquake Data Received:", data); // ✅ Log response
+                console.log("✅ Earthquake Data Received:", data);
 
                 if (!data.data || data.data.length === 0) {
                     console.warn("⚠️ No earthquake data found.");
                     return;
                 }
 
-                // ✅ Define fire icon outside loop
                 var redIcon = L.icon({
-                    iconUrl: 'Images/Fire-Icon.png', // ✅ Ensure correct path
-                    iconSize: [32, 32], 
-                    iconAnchor: [16, 32], 
-                    popupAnchor: [0, -32] 
+                    iconUrl: 'Images/Fire-Icon.png',
+                    iconSize: [32, 32],
+                    iconAnchor: [16, 32],
+                    popupAnchor: [0, -32]
                 });
 
-                // ✅ Loop through earthquake data and add markers
                 data.data.forEach(quake => {
                     let lat = parseFloat(quake.lat);
                     let lng = parseFloat(quake.lng);
@@ -275,31 +318,31 @@ $(document).ready(function () {
         });
     }
 
-    function getRectBounds(countryCode){
+    function getRectBounds(countryCode) {
         console.log(countryCode);
         $.ajax({
             url: 'Php/countryInfo.php',
             type: 'GET',
             dataType: 'json',
-            data:{country:countryCode},
+            data: {country:countryCode},
             success: function (data) {
                 console.log(data);
                 if (data.data && data.data[0]) {
                     placeEarthQuakeMarkers(data.data[0].north, data.data[0].south, data.data[0].east, data.data[0].west);
                     getWikiResults(data.data[0].north, data.data[0].south, data.data[0].east, data.data[0].west, countryCode);
                 }
-            },error:function(err){
+            },
+            error: function(err) {
                 console.log(err);
             }
         });
     }
 
-    function updateCountryBorders(iso2) {
+    function updateCountryBorders(iso2, callback) {
         if (bordersLayer) {
             map.removeLayer(bordersLayer);
         }
         
-        // Use PHP wrapper instead of direct access to GeoJSON file
         $.getJSON('Php/getCountryBorders.php', { iso2: iso2 }, function (country) {
             if (country && !country.error) {
                 bordersLayer = L.geoJSON(country, {
@@ -314,67 +357,70 @@ $(document).ready(function () {
             } else {
                 console.error("Error loading country borders:", country ? country.error : "Unknown error");
             }
+            if (callback) callback();
         });
     }
 
-    // Functions to fetch and display data
-    function displayCountryInfo(iso2) {
+    function displayCountryInfo(iso2, callback) {
         $.get('Php/countryName.php', { iso2: iso2 }, function (data) {
             $('#countryNames').text(data.name);
             $('#countryFlag').attr('src', `https://flagcdn.com/w80/${iso2.toLowerCase()}.png`).show();
+            if (callback) callback();
         }, 'json');
     }
 
-    function displayCapitalCity(iso2) {
+    function displayCapitalCity(iso2, callback) {
         $.get('Php/capitalCities.php', { iso2: iso2 }, function (data) {
             $('#capitalCity').text(data.capital);
+            if (callback) callback();
         }, 'json');
     }
 
-    function displayCapitalOnMap(iso2) {
+    function displayCapitalOnMap(iso2, callback) {
         $.get('Php/capitalCities.php', { iso2: iso2 }, function (data) {
             if (data.capital) {
-                // Use PHP wrapper instead of direct REST Countries API call
                 $.get('Php/getCountryData.php', { iso2: iso2 }, function (countryData) {
                     if (countryData && countryData[0] && countryData[0].latlng) {
                         let lat = countryData[0].latlng[0];
                         let lon = countryData[0].latlng[1];
 
-                        // Define the city marker icon
                         var cityIcon = L.icon({
                             iconUrl: 'Images/CityBuildings.png',
-                            iconSize: [32, 32], 
+                            iconSize: [32, 32],
                             iconAnchor: [16, 32]
                         });
 
-                        // Add marker for the capital city
                         capitalMarker = L.marker([lat, lon], { icon: cityIcon })
                             .addTo(map)
                             .bindPopup(`<strong>Capital:</strong> ${data.capital}`);
                     }
+                    if (callback) callback();
                 }, 'json');
+            } else {
+                if (callback) callback();
             }
         }, 'json');
     }
-});
-    
-    function displayPopulation(iso2) {
+
+    function displayPopulation(iso2, callback) {
         $.get('Php/Population.php', { countryCode: iso2 }, function (data) {
             $('#population').text(data.population);
+            if (callback) callback();
         }, 'json');
     }
 
-    function displayCurrency(iso2) {
+    function displayCurrency(iso2, callback) {
         $.get('Php/Currency.php', { iso2: iso2 }, function (data) {
             if (data && data.currencies && data.currencies.length > 0) {
                 let currency = data.currencies[0];
                 $('#currencyName').text(`${currency.name}`);
                 $('#currencySymbol').text(currency.symbol);
             }
+            if (callback) callback();
         }, 'json');
     }
 
-    function displayExchangeRate(iso2) {
+    function displayExchangeRate(iso2, callback) {
         $.get('Php/latestExchangeRate.php', { iso2: iso2 }, function (data) {
             $('#txtCurrencyRate').text(`1 USD = ${data.exchangeRate} ${data.currencyCode}`);
             $('#convertBtn').off('click').on('click', function () {
@@ -384,11 +430,11 @@ $(document).ready(function () {
                     $('#convertedCurrency').text(`${amount} USD = ${convertedAmount} ${data.currencyCode}`);
                 }
             });
+            if (callback) callback();
         }, 'json');
     }
 
-    function displayWeather(iso2) {
-        // Use PHP wrapper instead of direct REST Countries API call
+    function displayWeather(iso2, callback) {
         $.get('Php/getCountryData.php', { iso2: iso2 }, function (data) {
             if (data && data[0] && data[0].latlng) {
                 const [lat, lon] = data[0].latlng;
@@ -403,32 +449,38 @@ $(document).ready(function () {
                         $('#conditionsToday').text('No description available');
                         $('#weatherImg').empty();
                     }
+                    if (callback) callback();
                 }, 'json');
             } else {
                 $('#tempToday').text('Coordinates not found');
                 $('#conditionsToday').text('No description available');
                 $('#weatherImg').empty();
+                if (callback) callback();
             }
         }, 'json');
     }
 
-    function displayWeatherForecast(iso2) {
+    function displayWeatherForecast(iso2, callback) {
         $.get('Php/getWeatherForecast.php', { location: iso2 }, function (data) {
             $('#forecastInfo').html('');
             data.forEach(forecast => {
                 $('#forecastInfo').append(`<p>${forecast.date}: ${forecast.min_temp}°C - ${forecast.max_temp}°C</p>`);
             });
+            if (callback) callback();
         }, 'json');
     }
 
-    function displayWikipediaInfo(iso2) {
+    function displayWikipediaInfo(iso2, callback) {
         $.get('Php/wikipediaSearch.php', { query: iso2 }, function (data) {
             $('#wikiLink').attr('href', data.url).text(`View ${data.title} on Wikipedia`);
+            if (callback) callback();
         }, 'json');
     }
 
-    function displayTimezone(iso2) {
+    function displayTimezone(iso2, callback) {
         $.get('Php/Timezone.php', { iso2: iso2 }, function (data) {
             $('#timezone').text(data.timezone);
+            if (callback) callback();
         }, 'json');
     }
+});

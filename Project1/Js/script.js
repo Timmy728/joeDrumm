@@ -84,7 +84,7 @@ $(document).ready(function () {
 
     // Populate currency calculator select
     $.ajax({
-        url: "Php/getExchangeRates.php",
+        url: "Php/latestExchangeRate.php",
         type: 'POST',
         dataType: 'json',
         success: function (result) {
@@ -116,7 +116,7 @@ $(document).ready(function () {
 
     $('#currencyModal').on('show.bs.modal', function () {
         $.ajax({
-            url: "Php/getCountryInfo.php",
+            url: "Php/latestExchangeRate.php",
             type: 'POST',
             dataType: 'json',
             data: {
@@ -171,6 +171,16 @@ function calcResult() {
         numeral($('#fromAmount').val() * parseFloat($('#currencies option:selected').attr("data-rate")))
         .format("0,0.00")
     );
+}
+
+// Add the missing displayCurrency function
+function displayCurrency(iso2) {
+    $.get('Php/latestExchangeRate.php', { iso2: iso2 }, function (data) {
+        if (data && data.currencyCode) {
+            $('#currencies').val(data.currencyCode);
+            calcResult();
+        }
+    }, 'json');
 }
 
 // Include all your other existing functions here

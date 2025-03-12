@@ -166,24 +166,74 @@ $(document).ready(function () {
     });
 });
 
-function calcResult() {
-    $('#toAmount').val(
-        numeral($('#fromAmount').val() * parseFloat($('#currencies option:selected').attr("data-rate")))
-        .format("0,0.00")
-    );
-}
+function loadCurrencies() {
+    $.ajax({
+        url: "Php/latestExchangeRate.php",
+        type: 'GET',
+        dataType: 'json',
+        success: function (result) {
+            if (result.status && result.status.code === 200) {
+                const currencySelect = $('#currencies');
+                currencySelect.empty();
+                
+                result.data.forEach(function(currency) {
+                    currencySelect.append(
+                        $('<option>', {
+                            value: currency.code,
+                            text: `${currency.code} - ${currency.name}`,
+                            'data-rate': currency.rate
+                        })
+                    );
+                });
 
-// Add the missing displayCurrency function
-function displayCurrency(iso2) {
-    $.get('Php/latestExchangeRate.php', { iso2: iso2 }, function (data) {
-        if (data && data.currencyCode) {
-            $('#currencies').val(data.currencyCode);
-            calcResult();
+                            // Set the currency for the selected country if available
+                const selectedCountry = $('#countrySelect').val();
+                if (selectedCountry) {
+                    const countryCurrency = result.data.find(c => c.country === selectedCountry);
+                    if (countryCurrency) {
+                        currencySelect.val(countryCurrency.code);
+                    }
+                }
+                
+                calcResult();
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error('Error loading currencies:', error);
         }
-    }, 'json');
+    });
 }
 
-// Include all your other existing functions here
+
+function calcResult() {
+    const selectedOption = $('#currencies option:selected');
+    const rate = selectedOption.attr('data-rate');
+    if (rate) {
+        const fromAmount = parseFloat($('#fromAmount').val()) || 0;
+        const result = fromAmount * parseFloat(rate);
+        $('#toAmount').val(numeral(result).format('0,0.00'));
+    }
+}
+
+function displayCurrency(iso2) {
+    $.ajax({
+        url: 'Php/latestExchangeRate.php',
+        type: 'GET',
+        dataType: 'json',
+        data: { iso2: iso2 },
+        success: function(data) {
+            if (data && data.currencyCode) {
+                $('#currencies').val(data.currencyCode);
+                calcResult();
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error('Error fetching currency:', error);
+        }
+    });
+}
+
+
 function displayNearbyInfo(iso2) {
     $.get('Php/getCountryData.php', { iso2: iso2 }, function (countryData) {
         if (countryData && countryData[0] && countryData[0].latlng) {

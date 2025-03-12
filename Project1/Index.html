@@ -17,10 +17,11 @@
     <!-- Custom CSS -->
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-
-     <link rel="icon" type="image/png" sizes="132x132" href="/Project1/Images/Favicon.png">
+    <link rel="icon" type="image/png" sizes="132x132" href="/Project1/Images/Favicon.png">
 </head>
 <body>
+    <div id="pre-loader"></div>
+    
     <!-- Country Selection Dropdown on Map -->
     <div id="map">
         <span id="selectContainer">
@@ -68,46 +69,39 @@
             </div>
         </div>
         
-        <!-- Button 3 -->
-<div id="currencyModal" class="modal fade" tabindex="-1" data-bs-backdrop="false" data-bs-keyboard="false" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-sm modal-dialog-centered modal-dialog-scrollable">
+        <!-- Currency Modal (Button 3) -->
+        <div id="currencyModal" class="modal fade" tabindex="-1" data-bs-backdrop="false" data-bs-keyboard="false">
+            <div class="modal-dialog modal-sm modal-dialog-centered modal-dialog-scrollable">
+                <div class="modal-content shadow">
+                    <div class="modal-header bg-secondary bg-gradient text-white">
+                        <h5 class="modal-title"><i class="fa-solid fa-money-bill-transfer me-2"></i>Currency calculator</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form>
+                            <div class="form-floating mb-3">
+                                <input id="fromAmount" type="number" class="form-control" value="1" min="1" step="1">
+                                <label>From USD</label>
+                            </div>
 
-    <div class="modal-content shadow">
+                            <div class="form-floating mb-3">
+                                <select id="currencies" class="form-select">
+                                </select>
+                                <label for="exchangeRate">Convert to</label>
+                            </div>
 
-      <div class="modal-header bg-secondary bg-gradient text-white">
-        <h5 class="modal-title"><i class="fa-solid fa-money-bill-transfer me-2"></i>Currency calculator</h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-
-      <div class="modal-body">
-
-        <form>
-          <div class="form-floating mb-3">
-            <input id="fromAmount" type="number" class="form-control" value="1" min="1" step="1">
-            <label >From USD</label>
-          </div>
-
-          <div class="form-floating mb-3">
-
-            <select id="currencies" class="form-select">
-
-            </select>
-            <label for="exchangeRate">Convert to</label>
-          </div>
-
-          <div class="form-floating">
-            <input id="toAmount" type="text" class="form-control" disabled>
-            <label for="toAmount">Result</label>
-          </div>
-        </form>
-      </div>
-
-      <div class="modal-footer">
-        <button type="button" class="btn btn-outline-secondary btn-sm myBtn" data-bs-dismiss="modal">CLOSE</button>
-      </div>
-    </div>
-  </div>
-</div>
+                            <div class="form-floating">
+                                <input id="toAmount" type="text" class="form-control" disabled>
+                                <label for="toAmount">Result</label>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary btn-sm myBtn" data-bs-dismiss="modal">CLOSE</button>
+                    </div>
+                </div>
+            </div>
+        </div>
         
         <!-- Button 4 -->
         <div id="infoModal4" class="modal fade" tabindex="-1">
@@ -145,11 +139,12 @@
     </div>
 
     <!-- JS Libraries -->
-    <script src="Js/bootstrap.bundle.min.js"></script>
     <script src="Js/jquery-3.7.1.min.js"></script>
+    <script src="Js/bootstrap.bundle.min.js"></script>
     <script src="Js/leaflet.js"></script>
     <script src="Js/leaflet.markercluster.js"></script>
     <script src="Js/easy-button.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/numeral.js/2.0.6/numeral.min.js"></script>
     <script src="Js/script.js"></script>
 </body>
 </html>

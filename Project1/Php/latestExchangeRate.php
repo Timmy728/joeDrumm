@@ -27,18 +27,28 @@ $ch = curl_init();
 curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 curl_setopt($ch, CURLOPT_URL, $countryApiUrl);
-$countryResult = curl_exec($ch);
-curl_close($ch);
 
-if (!$countryResult) {
+// Execute the cURL request and fetch the response
+$countryResult = curl_exec($ch);
+
+// Check for cURL errors
+if (curl_errno($ch)) {
+    // If there's an error, output the error and stop execution
     echo json_encode([
         "status" => ["code" => 500, "message" => "Failed to fetch country data."],
-        "error" => "Failed to fetch country data."
+        "error" => "cURL Error: " . curl_error($ch)
     ]);
+    curl_close($ch);
     exit;
 }
 
+// Close the cURL session
+curl_close($ch);
+
+// Decode the JSON response from RestCountries API
 $countryData = json_decode($countryResult, true);
+
+// Check if the response contains the 'currencies' field
 if (!isset($countryData[0]['currencies'])) {
     echo json_encode([
         "status" => ["code" => 404, "message" => "No currency data found for country."],
@@ -47,20 +57,35 @@ if (!isset($countryData[0]['currencies'])) {
     exit;
 }
 
-// Get currency code (e.g., GBP for UK)
+// Get the currency code (e.g., USD for the United States)
 $currencyCode = array_key_first($countryData[0]['currencies']);
 
-// Fetch exchange rates
+// Fetch exchange rates from Open Exchange Rates API
 $ch = curl_init();
 curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 curl_setopt($ch, CURLOPT_URL, $url);
+
+// Execute the cURL request to get the exchange rate data
 $response = curl_exec($ch);
+
+// Check for cURL errors during the exchange rate request
+if (curl_errno($ch)) {
+    echo json_encode([
+        "status" => ["code" => 500, "message" => "Failed to fetch exchange rates."],
+        "error" => "cURL Error: " . curl_error($ch)
+    ]);
+    curl_close($ch);
+    exit;
+}
+
+// Close the cURL session for the exchange rate request
 curl_close($ch);
 
+// Decode the exchange rate data
 $data = json_decode($response, true);
 
-// Validate exchange rate data
+// Validate that the exchange rate for the currency is available
 if (!isset($data['rates'][$currencyCode])) {
     echo json_encode([
         "status" => ["code" => 404, "message" => "Exchange rate not available for $currencyCode."],
@@ -69,10 +94,10 @@ if (!isset($data['rates'][$currencyCode])) {
     exit;
 }
 
-// Get exchange rate (USD to local currency)
+// Get the exchange rate (USD to local currency)
 $exchangeRate = $data['rates'][$currencyCode];
 
-// Return JSON response
+// Return a JSON response with the currency code and exchange rate
 header('Content-Type: application/json');
 echo json_encode([
     "status" => ["code" => 200, "message" => "Success"],

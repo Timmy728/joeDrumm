@@ -40,19 +40,19 @@ $(document).ready(function () {
         "Satellite": satellite
     };
 
-    map.on('locationfound', function(options){
+    map.on('locationfound', function (options) {
         console.log(options);
 
         $.ajax({
             url: 'Php/CountryCode.php',
             type: 'GET',
             dataType: 'json',
-            data: {lat: options.latitude, lng: options.longitude},
+            data: { lat: options.latitude, lng: options.longitude },
             success: function (data) {
                 console.log(data);
                 $('#countrySelect').val(data.data.countryCode).change();
             },
-            error:function(err){
+            error: function (err) {
                 console.log(err);
             }
         });
@@ -72,7 +72,7 @@ $(document).ready(function () {
 
     // Currency Button
     var infoBtn = L.easyButton("fa-solid fa-money-bill-transfer", function (btn, map) {
-         loadCurrencies();
+        loadCurrencies();
         $("#currencyModal").modal("show");
     }).addTo(map);
 
@@ -85,6 +85,26 @@ $(document).ready(function () {
     }).addTo(map);
 
     loadCurrencies();
+
+    // Populate countries dropdown
+    $.ajax({
+        url: 'Php/countryName.php',
+        type: 'GET',
+        dataType: 'json',
+        success: function (data) {
+            console.log(data);
+            const dropdown = $('#countrySelect');
+            dropdown.empty();
+            dropdown.append(new Option('Select a Country', ''));
+            data.forEach(function (country) {
+                if (country.name && country.iso2) {
+                    dropdown.append(new Option(country.name, country.iso2));
+                }
+            });
+
+            map.locate();
+        }
+    });
 
     $('#countrySelect').change(function () {
         const iso2 = $(this).val(); // Get the selected country ISO2 code
@@ -108,7 +128,7 @@ $(document).ready(function () {
                         $('#currencies').empty();  // Clear existing options
 
                         // Add new options to the currency dropdown
-                        supportedCurrencies.forEach(function(currency) {
+                        supportedCurrencies.forEach(function (currency) {
                             $('#currencies').append(new Option(currency, currency));
                         });
 
@@ -124,7 +144,7 @@ $(document).ready(function () {
                         console.error("Error: " + result.error);
                     }
                 },
-                error: function(xhr, status, error) {
+                error: function (xhr, status, error) {
                     console.error("Error fetching exchange rate:", error);
                 }
             });
@@ -172,26 +192,6 @@ $(document).ready(function () {
         calcResult();
     });
 
-    // Populate countries dropdown
-    $.ajax({
-        url: 'Php/countryName.php',
-        type: 'GET',
-        dataType: 'json',
-        success: function (data) {
-            console.log(data);
-            const dropdown = $('#countrySelect');
-            dropdown.empty();
-            dropdown.append(new Option('Select a Country', ''));
-            data.forEach(function (country) {
-                if (country.name && country.iso2) {
-                    dropdown.append(new Option(country.name, country.iso2));
-                }
-            });
-
-            map.locate();
-        }
-    });
-
     // On country selection
     $('#countrySelect').change(function () {
         const iso2 = $(this).val();
@@ -213,7 +213,7 @@ function loadCurrencies() {
             currencySelect.empty();
 
             if (result && result.data && Array.isArray(result.data)) {
-                result.data.forEach(function(item) {
+                result.data.forEach(function (item) {
                     if (Array.isArray(item) && item.length >= 3) {
                         currencySelect.append(
                             $('<option>', {
@@ -245,13 +245,13 @@ function displayCurrency(iso2) {
         type: 'GET',
         dataType: 'json',
         data: { iso2: iso2 },
-        success: function(data) {
+        success: function (data) {
             if (data && data.currencyCode) {
                 $('#currencies').val(data.currencyCode);
                 calcResult();
             }
         },
-        error: function(xhr, status, error) {
+        error: function (xhr, status, error) {
             console.error('Error fetching currency:', error);
         }
     });

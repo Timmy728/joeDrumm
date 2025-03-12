@@ -69,9 +69,9 @@ $(document).ready(function () {
     $('#infoModal2').modal('show');
     }).addTo(map);
 
-    L.easyButton('fa-exchange-alt', function () {
-        $('#infoModal3').modal('show');
-    }).addTo(map);
+   var infoBtn = L.easyButton("fa-solid fa-money-bill-transfer", function (btn, map) {
+      $("#currencyModal").modal("show");
+    });
 
     L.easyButton('fa-cloud-sun', function () {
         $('#infoModal4').modal('show');
@@ -358,15 +358,108 @@ $(document).ready(function () {
         }, 'json');
     }
 
-    function displayCurrency(iso2) {
-        $.get('Php/Currency.php', { iso2: iso2 }, function (data) {
-            if (data && data.currencies && data.currencies.length > 0) {
-                let currency = data.currencies[0];
-                $('#currencyName').text(`${currency.name}`);
-                $('#currencySymbol').text(currency.symbol);
-            }
-        }, 'json');
+  layerControl = L.control.layers(basemaps).addTo(map);
+
+  infoBtn.addTo(map);
+
+
+  // populate currency calculator select
+  $.ajax({
+    url: "Php/getExchangeRates.php",
+    type: 'POST',
+    dataType: 'json',
+    success: function (result) {
+
+      if (result.status.code == 200) {
+          result.data.forEach(function(item) {
+          
+          var option = $('<option/>');
+          option.attr({ 'value': item[0] }).text(item[1]).attr("data-rate", item[2]);
+          $('#currencies').append(option);
+                   
+        })
+        
+        // fade out pre-loader
+        $('#pre-loader').addClass("fadeOut");
+      } else {
+
+        showToast("Error retrieving currency data", 4000, false);
+      } 
+
+    },
+    error: function (jqXHR, textStatus, errorThrown) {
+      showToast("currency API- server error", 4000, false);
     }
+  });   
+
+})
+
+// currency modal event handlers
+
+$('#fromAmount').on('keyup', function () {
+
+  calcResult();
+
+})
+
+$('#fromAmount').on('change', function () {
+
+  calcResult();
+
+})
+
+$('#currencies').on('change', function () {
+
+  calcResult();
+
+})
+
+$('#currencyModal').on('show.bs.modal', function () {
+  
+    $.ajax({
+    url: "Php/getCountryInfo.php",
+    type: 'POST',
+    dataType: 'json',
+    data: {
+      iso: $('#countrySelect').val()
+    },
+    success: function (result) {
+      
+      if (result.status.code == 200) {
+        
+        $('#currencies').val(result.data.currencyCode); 
+        
+        calcResult();
+        
+      } else {
+        showToast("Error retrieving currency code", 4000, false);
+      } 
+
+    },
+    error: function (jqXHR, textStatus, errorThrown) {
+      showToast("currency API- server error", 4000, false);
+    }
+  });
+
+})
+
+$('#currencyModal').on('hidden.bs.modal', function () {
+
+  $('#fromAmount').val(1);
+
+})
+
+function calcResult() {
+   
+  $('#toAmount').val(numeral($('#fromAmount').val() * parseFloat($('#currencies option:selected').attr("data-rate"))).format("0,0.00"));
+  
+}
+
+
+
+
+
+
 
     function displayExchangeRate(iso2) {
         $.get('Php/latestExchangeRate.php', { iso2: iso2 }, function (data) {

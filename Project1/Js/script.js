@@ -49,7 +49,6 @@ $(document).ready(function () {
             dataType: 'json',
             data: { lat: options.latitude, lng: options.longitude },
             success: function (data) {
-                console.log(data);
                 $('#countrySelect').val(data.data.countryCode).change();
             },
             error: function (err) {
@@ -61,7 +60,7 @@ $(document).ready(function () {
     L.control.layers(basemaps).addTo(map);
     streets.addTo(map);
 
-    // Add 5 EasyButtons
+    // Add EasyButtons
     L.easyButton('fa-flag', function () {
         $('#infoModal1').modal('show');
     }).addTo(map);
@@ -92,7 +91,6 @@ $(document).ready(function () {
         type: 'GET',
         dataType: 'json',
         success: function (data) {
-            console.log(data);
             const dropdown = $('#countrySelect');
             dropdown.empty();
             dropdown.append(new Option('Select a Country', ''));
@@ -118,7 +116,6 @@ $(document).ready(function () {
                 },
                 success: function (result) {
                     console.log(result); // Log the response to inspect the structure
-
                     if (result.status && result.status.code == 200) {
                         const currencyCode = result.currencyCode;  // Currency code (e.g., GBP)
                         const exchangeRate = result.exchangeRate;  // Exchange rate (e.g., 0.771399)

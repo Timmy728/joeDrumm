@@ -85,37 +85,46 @@ $(document).ready(function () {
 
      loadCurrencies();
 
-    // Populate currency calculator select
-    $.ajax({
-    url: "Php/latestExchangeRate.php",
-    type: 'GET',
-    dataType: 'json',
-    data: {
-        iso2: $('#countrySelect').val() // Use the selected country ISO2
-    },
-    success: function (result) {
-        console.log(result); // Log the response to inspect the structure
 
-        // Check if the status code is 200 (Success)
-        if (result.status && result.status.code == 200) {
-            // Populate the currency select dropdown with the fetched currency data
-            const currencyCode = result.currencyCode;  // Currency code (e.g., USD)
-            const exchangeRate = result.exchangeRate;  // Exchange rate (e.g., 1 for USD)
+$('#countrySelect').change(function () {
+    const iso2 = $(this).val(); // Get the selected country ISO2 code
 
-            // Optionally, update the currency dropdown
-            $('#currencies').val(currencyCode);
+    // Check if the selected value is valid
+    if (iso2) {
+        // Make the AJAX request only if a country is selected
+        $.ajax({
+            url: "Php/latestExchangeRate.php",
+            type: 'GET',
+            dataType: 'json',
+            data: {
+                iso2: iso2  // Pass the selected country ISO2 code to the PHP script
+            },
+            success: function (result) {
+                console.log(result); // Log the response to inspect the structure
 
-            // Update the currency exchange rate display
-            $('#txtCurrencyRate').text(`1 USD = ${exchangeRate} ${currencyCode}`);
+                // Check if the status code is 200 (Success)
+                if (result.status && result.status.code == 200) {
+                    const currencyCode = result.currencyCode;  // Currency code (e.g., USD)
+                    const exchangeRate = result.exchangeRate;  // Exchange rate (e.g., 1 for USD)
 
-            // If necessary, perform a conversion based on input values
-            calcResult(exchangeRate);
-        } else {
-            console.error("Error: " + result.error);
-        }
-    },
-    error: function(xhr, status, error) {
-        console.error("Error fetching exchange rate:", error);
+                    // Optionally, update the currency dropdown
+                    $('#currencies').val(currencyCode);
+
+                    // Update the currency exchange rate display
+                    $('#txtCurrencyRate').text(`1 USD = ${exchangeRate} ${currencyCode}`);
+
+                    // If necessary, perform a conversion based on input values
+                    calcResult(exchangeRate);
+                } else {
+                    console.error("Error: " + result.error);
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error("Error fetching exchange rate:", error);
+            }
+        });
+    } else {
+        console.error("No country selected. Please select a country.");
     }
 });
 

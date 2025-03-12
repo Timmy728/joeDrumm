@@ -192,6 +192,12 @@ function loadCurrencies() {
                                 'data-rate': item[2]
                             })
                         );
+                    }
+                });
+            }
+        }
+    });
+}
 
 
 function calcResult() {

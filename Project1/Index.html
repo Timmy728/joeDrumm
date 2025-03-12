@@ -69,26 +69,45 @@
         </div>
         
         <!-- Button 3 -->
-        <div id="infoModal3" class="modal fade" tabindex="-1">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content">
-                    <div class="modal-header bg-success text-white">
-                        <h5 class="modal-title">Currency & Exchange Rate</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                    </div>
-                    <div class="modal-body">
-                        <p><strong>Currency:</strong> <span id="currencyName"></span> (<span id="currencySymbol"></span>)</p>
-                        <p><strong>Exchange Rate:</strong> <span id="txtCurrencyRate"></span></p>
-                        <div>
-                            <label for="currencyAmount">Enter amount in USD:</label>
-                            <input type="number" id="currencyAmount" class="form-control" placeholder="Enter amount">
-                            <button id="convertBtn" class="btn btn-primary mt-2">Convert</button>
-                            <p id="convertedCurrency" class="mt-2"></p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+<div id="currencyModal" class="modal fade" tabindex="-1" data-bs-backdrop="false" data-bs-keyboard="false" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-sm modal-dialog-centered modal-dialog-scrollable">
+
+    <div class="modal-content shadow">
+
+      <div class="modal-header bg-secondary bg-gradient text-white">
+        <h5 class="modal-title"><i class="fa-solid fa-money-bill-transfer me-2"></i>Currency calculator</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <div class="modal-body">
+
+        <form>
+          <div class="form-floating mb-3">
+            <input id="fromAmount" type="number" class="form-control" value="1" min="1" step="1">
+            <label >From USD</label>
+          </div>
+
+          <div class="form-floating mb-3">
+
+            <select id="currencies" class="form-select">
+
+            </select>
+            <label for="exchangeRate">Convert to</label>
+          </div>
+
+          <div class="form-floating">
+            <input id="toAmount" type="text" class="form-control" disabled>
+            <label for="toAmount">Result</label>
+          </div>
+        </form>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary btn-sm myBtn" data-bs-dismiss="modal">CLOSE</button>
+      </div>
+    </div>
+  </div>
+</div>
         
         <!-- Button 4 -->
         <div id="infoModal4" class="modal fade" tabindex="-1">

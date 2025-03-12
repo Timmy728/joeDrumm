@@ -138,10 +138,6 @@ $(document).ready(function () {
                         // Update the currency exchange rate display
                         $('#txtCurrencyRate').text(`1 USD = ${exchangeRate} ${currencyCode}`);
 
-                        // Set the "From" label dynamically
-                        const fromLabel = `From ${$('#countrySelect option:selected').text()} 1 ${currencyCode}`;
-                        $('#fromLabel').text(fromLabel);  // Set the "From" label
-
                         // If necessary, perform a conversion based on input values
                         calcResult(exchangeRate);
                     } else {
@@ -184,7 +180,7 @@ $(document).ready(function () {
                 success: function (result) {
                     if (result && result.currencyCode) {
                         $('#currencies').val(result.currencyCode);
-                        calcResult(result.exchangeRate);
+                        calcResult();
                     }
                 }
             });

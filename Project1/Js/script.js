@@ -88,10 +88,7 @@ $(document).ready(function () {
 
 $('#countrySelect').change(function () {
     const iso2 = $(this).val(); // Get the selected country ISO2 code
-
-    // Check if the selected value is valid
     if (iso2) {
-        // Make the AJAX request only if a country is selected
         $.ajax({
             url: "Php/latestExchangeRate.php",
             type: 'GET',
@@ -102,13 +99,21 @@ $('#countrySelect').change(function () {
             success: function (result) {
                 console.log(result); // Log the response to inspect the structure
 
-                // Check if the status code is 200 (Success)
                 if (result.status && result.status.code == 200) {
-                    const currencyCode = result.currencyCode;  // Currency code (e.g., USD)
-                    const exchangeRate = result.exchangeRate;  // Exchange rate (e.g., 1 for USD)
+                    const currencyCode = result.currencyCode;  // Currency code (e.g., GBP)
+                    const exchangeRate = result.exchangeRate;  // Exchange rate (e.g., 0.771399)
 
-                    // Optionally, update the currency dropdown
-                    $('#currencies').val(currencyCode);
+                    const supportedCurrencies = ["USD", "EUR", "GBP", "AUD", "CAD"]; // Add supported currencies here
+
+                    $('#currencies').empty();  // Clear existing options
+
+                    // Add new options to the currency dropdown
+                    supportedCurrencies.forEach(function(currency) {
+                        $('#currencies').append(new Option(currency, currency));
+                    });
+
+                    // Set the selected currency in the dropdown
+                    $('#currencies').val(currencyCode); // Set the selected currency based on the API response
 
                     // Update the currency exchange rate display
                     $('#txtCurrencyRate').text(`1 USD = ${exchangeRate} ${currencyCode}`);
@@ -128,11 +133,10 @@ $('#countrySelect').change(function () {
     }
 });
 
-// Currency conversion function (if needed)
 function calcResult(exchangeRate) {
     const fromAmount = parseFloat($('#fromAmount').val()) || 0;
     const convertedAmount = fromAmount * exchangeRate;
-    $('#toAmount').val(numeral(convertedAmount).format('0,0.00'));  // Format the result
+    $('#toAmount').val(numeral(convertedAmount).format('0,0.00'));
 }
 
 

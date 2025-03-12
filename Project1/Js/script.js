@@ -174,7 +174,7 @@ $(document).ready(function () {
 });
 
 function loadCurrencies() {
-        $.ajax({
+    $.ajax({
         url: "Php/latestExchangeRate.php",
         type: 'GET',
         dataType: 'json',
@@ -192,24 +192,6 @@ function loadCurrencies() {
                                 'data-rate': item[2]
                             })
                         );
-
-                            // Set the currency for the selected country if available
-                const selectedCountry = $('#countrySelect').val();
-                if (selectedCountry) {
-                    const countryCurrency = result.data.find(c => c.country === selectedCountry);
-                    if (countryCurrency) {
-                        currencySelect.val(countryCurrency.code);
-                    }
-                }
-                
-                calcResult();
-            }
-        },
-        ) error: function(xhr, status, error) {
-            console.error('Error loading currencies:', error);
-        }
-    });
-}
 
 
 function calcResult() {

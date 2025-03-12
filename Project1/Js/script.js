@@ -86,23 +86,29 @@ $(document).ready(function () {
      loadCurrencies();
 
     // Populate currency calculator select
-    $.ajax({
-        url: "Php/latestExchangeRate.php",
-        type: 'POST',
-        dataType: 'json',
-        success: function (result) {
-            if (result.status.code == 200) {
-                result.data.forEach(function(item) {
-                    var option = $('<option/>');
-                    option.attr({ 'value': item[0] }).text(item[1]).attr("data-rate", item[2]);
-                    $('#currencies').append(option);
-                });
-                
-                // fade out pre-loader
-                $('#pre-loader').addClass("fadeOut");
-            }
+$.ajax({
+    url: "Php/latestExchangeRate.php",
+    type: 'POST',
+    dataType: 'json',
+    success: function (result) {
+        if (result && result.status && result.status.code == 200) {
+            result.data.forEach(function(item) {
+                var option = $('<option/>');
+                option.attr({ 'value': item[0] }).text(item[1]).attr("data-rate", item[2]);
+                $('#currencies').append(option);
+            });
+            
+            // fade out pre-loader
+            $('#pre-loader').addClass("fadeOut");
+        } else {
+            console.error("Error: Response does not contain the expected status code.");
         }
-    });
+    },
+    error: function(xhr, status, error) {
+        console.error("Error fetching exchange rate:", error);
+    }
+});
+
 
     // Currency modal event handlers
     $('#fromAmount').on('keyup', function () {

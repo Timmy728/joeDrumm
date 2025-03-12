@@ -71,6 +71,7 @@ $(document).ready(function () {
 
     // Currency Button
     var infoBtn = L.easyButton("fa-solid fa-money-bill-transfer", function (btn, map) {
+         loadCurrencies();
         $("#currencyModal").modal("show");
     }).addTo(map);
 
@@ -81,6 +82,8 @@ $(document).ready(function () {
     L.easyButton('fa-globe', function () {
         $('#infoModal5').modal('show');
     }).addTo(map);
+
+     loadCurrencies();
 
     // Populate currency calculator select
     $.ajax({
@@ -114,25 +117,29 @@ $(document).ready(function () {
         calcResult();
     });
 
-    $('#currencyModal').on('show.bs.modal', function () {
-        $.ajax({
-            url: "Php/latestExchangeRate.php",
-            type: 'POST',
-            dataType: 'json',
-            data: {
-                iso: $('#countrySelect').val()
-            },
-            success: function (result) {
-                if (result.status.code == 200) {
-                    $('#currencies').val(result.data.currencyCode);
-                    calcResult();
+   $('#currencyModal').on('show.bs.modal', function () {
+        const selectedCountry = $('#countrySelect').val();
+        if (selectedCountry) {
+            $.ajax({
+                url: "Php/latestExchangeRate.php",
+                type: 'GET',
+                dataType: 'json',
+                data: {
+                    iso2: selectedCountry
+                },
+                success: function (result) {
+                    if (result && result.currencyCode) {
+                        $('#currencies').val(result.currencyCode);
+                        calcResult();
+                 }
                 }
-            }
-        });
+            });
+        }
     });
 
     $('#currencyModal').on('hidden.bs.modal', function () {
         $('#fromAmount').val(1);
+         calcResult();
     });
 
     // Populate countries dropdown
@@ -167,24 +174,24 @@ $(document).ready(function () {
 });
 
 function loadCurrencies() {
-    $.ajax({
+        $.ajax({
         url: "Php/latestExchangeRate.php",
         type: 'GET',
         dataType: 'json',
         success: function (result) {
-            if (result.status && result.status.code === 200) {
-                const currencySelect = $('#currencies');
-                currencySelect.empty();
-                
-                result.data.forEach(function(currency) {
-                    currencySelect.append(
-                        $('<option>', {
-                            value: currency.code,
-                            text: `${currency.code} - ${currency.name}`,
-                            'data-rate': currency.rate
-                        })
-                    );
-                });
+            const currencySelect = $('#currencies');
+            currencySelect.empty();
+            
+            if (result && result.data && Array.isArray(result.data)) {
+                result.data.forEach(function(item) {
+                    if (Array.isArray(item) && item.length >= 3) {
+                        currencySelect.append(
+                            $('<option>', {
+                                value: item[0],
+                                text: item[1],
+                                'data-rate': item[2]
+                            })
+                        );
 
                             // Set the currency for the selected country if available
                 const selectedCountry = $('#countrySelect').val();

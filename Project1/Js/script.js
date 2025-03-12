@@ -86,28 +86,46 @@ $(document).ready(function () {
      loadCurrencies();
 
     // Populate currency calculator select
-$.ajax({
+    $.ajax({
     url: "Php/latestExchangeRate.php",
-    type: 'POST',
+    type: 'GET',
     dataType: 'json',
+    data: {
+        iso2: $('#countrySelect').val() // Use the selected country ISO2
+    },
     success: function (result) {
-        if (result && result.status && result.status.code == 200) {
-            result.data.forEach(function(item) {
-                var option = $('<option/>');
-                option.attr({ 'value': item[0] }).text(item[1]).attr("data-rate", item[2]);
-                $('#currencies').append(option);
-            });
-            
-            // fade out pre-loader
-            $('#pre-loader').addClass("fadeOut");
+        console.log(result); // Log the response to inspect the structure
+
+        // Check if the status code is 200 (Success)
+        if (result.status && result.status.code == 200) {
+            // Populate the currency select dropdown with the fetched currency data
+            const currencyCode = result.currencyCode;  // Currency code (e.g., USD)
+            const exchangeRate = result.exchangeRate;  // Exchange rate (e.g., 1 for USD)
+
+            // Optionally, update the currency dropdown
+            $('#currencies').val(currencyCode);
+
+            // Update the currency exchange rate display
+            $('#txtCurrencyRate').text(`1 USD = ${exchangeRate} ${currencyCode}`);
+
+            // If necessary, perform a conversion based on input values
+            calcResult(exchangeRate);
         } else {
-            console.error("Error: Response does not contain the expected status code.");
+            console.error("Error: " + result.error);
         }
     },
     error: function(xhr, status, error) {
         console.error("Error fetching exchange rate:", error);
     }
 });
+
+// Currency conversion function (if needed)
+function calcResult(exchangeRate) {
+    const fromAmount = parseFloat($('#fromAmount').val()) || 0;
+    const convertedAmount = fromAmount * exchangeRate;
+    $('#toAmount').val(numeral(convertedAmount).format('0,0.00'));  // Format the result
+}
+
 
 
     // Currency modal event handlers

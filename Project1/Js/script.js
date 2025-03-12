@@ -19,7 +19,7 @@ $(document).ready(function () {
         maxZoom: 18,
         minZoom: 2
     }).setView([20, 0], 2);
-    
+
     // Initialize marker cluster group
     earthquakeLayer = L.markerClusterGroup();
     map.addLayer(earthquakeLayer);
@@ -47,11 +47,12 @@ $(document).ready(function () {
             url: 'Php/CountryCode.php',
             type: 'GET',
             dataType: 'json',
-            data:{lat:options.latitude, lng:options.longitude},
+            data: {lat: options.latitude, lng: options.longitude},
             success: function (data) {
-               console.log(data);
-               $('#countrySelect').val(data.data.countryCode).change();
-            },error:function(err){
+                console.log(data);
+                $('#countrySelect').val(data.data.countryCode).change();
+            },
+            error:function(err){
                 console.log(err);
             }
         });
@@ -83,63 +84,54 @@ $(document).ready(function () {
         $('#infoModal5').modal('show');
     }).addTo(map);
 
-     loadCurrencies();
+    loadCurrencies();
 
+    $('#countrySelect').change(function () {
+        const iso2 = $(this).val(); // Get the selected country ISO2 code
+        if (iso2) {
+            $.ajax({
+                url: "Php/latestExchangeRate.php",
+                type: 'GET',
+                dataType: 'json',
+                data: {
+                    iso2: iso2  // Pass the selected country ISO2 code to the PHP script
+                },
+                success: function (result) {
+                    console.log(result); // Log the response to inspect the structure
 
-$('#countrySelect').change(function () {
-    const iso2 = $(this).val(); // Get the selected country ISO2 code
-    if (iso2) {
-        $.ajax({
-            url: "Php/latestExchangeRate.php",
-            type: 'GET',
-            dataType: 'json',
-            data: {
-                iso2: iso2  // Pass the selected country ISO2 code to the PHP script
-            },
-            success: function (result) {
-                console.log(result); // Log the response to inspect the structure
+                    if (result.status && result.status.code == 200) {
+                        const currencyCode = result.currencyCode;  // Currency code (e.g., GBP)
+                        const exchangeRate = result.exchangeRate;  // Exchange rate (e.g., 0.771399)
 
-                if (result.status && result.status.code == 200) {
-                    const currencyCode = result.currencyCode;  // Currency code (e.g., GBP)
-                    const exchangeRate = result.exchangeRate;  // Exchange rate (e.g., 0.771399)
+                        const supportedCurrencies = ["USD", "EUR", "GBP", "AUD", "CAD"]; // Add supported currencies here
 
-                    const supportedCurrencies = ["USD", "EUR", "GBP", "AUD", "CAD"]; // Add supported currencies here
+                        $('#currencies').empty();  // Clear existing options
 
-                    $('#currencies').empty();  // Clear existing options
+                        // Add new options to the currency dropdown
+                        supportedCurrencies.forEach(function(currency) {
+                            $('#currencies').append(new Option(currency, currency));
+                        });
 
-                    // Add new options to the currency dropdown
-                    supportedCurrencies.forEach(function(currency) {
-                        $('#currencies').append(new Option(currency, currency));
-                    });
+                        // Set the selected currency in the dropdown
+                        $('#currencies').val(currencyCode); // Set the selected currency based on the API response
 
-                    // Set the selected currency in the dropdown
-                    $('#currencies').val(currencyCode); // Set the selected currency based on the API response
+                        // Update the currency exchange rate display
+                        $('#txtCurrencyRate').text(`1 USD = ${exchangeRate} ${currencyCode}`);
 
-                    // Update the currency exchange rate display
-                    $('#txtCurrencyRate').text(`1 USD = ${exchangeRate} ${currencyCode}`);
-
-                    // If necessary, perform a conversion based on input values
-                    calcResult(exchangeRate);
-                } else {
-                    console.error("Error: " + result.error);
+                        // If necessary, perform a conversion based on input values
+                        calcResult(exchangeRate);
+                    } else {
+                        console.error("Error: " + result.error);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error("Error fetching exchange rate:", error);
                 }
-            },
-            error: function(xhr, status, error) {
-                console.error("Error fetching exchange rate:", error);
-            }
-        });
-    } else {
-        console.error("No country selected. Please select a country.");
-    }
-});
-
-function calcResult(exchangeRate) {
-    const fromAmount = parseFloat($('#fromAmount').val()) || 0;
-    const convertedAmount = fromAmount * exchangeRate;
-    $('#toAmount').val(numeral(convertedAmount).format('0,0.00'));
-}
-
-
+            });
+        } else {
+            console.error("No country selected. Please select a country.");
+        }
+    });
 
     // Currency modal event handlers
     $('#fromAmount').on('keyup', function () {
@@ -154,7 +146,8 @@ function calcResult(exchangeRate) {
         calcResult();
     });
 
-   $('#currencyModal').on('show.bs.modal', function () {
+    // When the modal is shown, set the selected currency
+    $('#currencyModal').on('show.bs.modal', function () {
         const selectedCountry = $('#countrySelect').val();
         if (selectedCountry) {
             $.ajax({
@@ -168,7 +161,7 @@ function calcResult(exchangeRate) {
                     if (result && result.currencyCode) {
                         $('#currencies').val(result.currencyCode);
                         calcResult();
-                 }
+                    }
                 }
             });
         }
@@ -176,7 +169,7 @@ function calcResult(exchangeRate) {
 
     $('#currencyModal').on('hidden.bs.modal', function () {
         $('#fromAmount').val(1);
-         calcResult();
+        calcResult();
     });
 
     // Populate countries dropdown
@@ -218,7 +211,7 @@ function loadCurrencies() {
         success: function (result) {
             const currencySelect = $('#currencies');
             currencySelect.empty();
-            
+
             if (result && result.data && Array.isArray(result.data)) {
                 result.data.forEach(function(item) {
                     if (Array.isArray(item) && item.length >= 3) {
@@ -236,8 +229,7 @@ function loadCurrencies() {
     });
 }
 
-
-function calcResult() {
+function calcResult(exchangeRate) {
     const selectedOption = $('#currencies option:selected');
     const rate = selectedOption.attr('data-rate');
     if (rate) {
@@ -264,7 +256,6 @@ function displayCurrency(iso2) {
         }
     });
 }
-
 
 function displayNearbyInfo(iso2) {
     $.get('Php/getCountryData.php', { iso2: iso2 }, function (countryData) {
@@ -420,7 +411,7 @@ function getRectBounds(countryCode) {
                 getWikiResults(data.data[0].north, data.data[0].south, data.data[0].east, data.data[0].west, countryCode);
             }
         },
-        error: function(err) {
+        error:function(err){
             console.log(err);
         }
     });

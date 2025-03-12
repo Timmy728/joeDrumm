@@ -14,7 +14,10 @@ $iso2 = strtoupper(trim($_GET['iso2'] ?? ''));
 
 // Validate input
 if (empty($iso2)) {
-    echo json_encode(["error" => "No country code provided."]);
+    echo json_encode([
+        "status" => ["code" => 400, "message" => "No country code provided."],
+        "error" => "No country code provided."
+    ]);
     exit;
 }
 
@@ -28,13 +31,19 @@ $countryResult = curl_exec($ch);
 curl_close($ch);
 
 if (!$countryResult) {
-    echo json_encode(["error" => "Failed to fetch country data."]);
+    echo json_encode([
+        "status" => ["code" => 500, "message" => "Failed to fetch country data."],
+        "error" => "Failed to fetch country data."
+    ]);
     exit;
 }
 
 $countryData = json_decode($countryResult, true);
 if (!isset($countryData[0]['currencies'])) {
-    echo json_encode(["error" => "No currency data found for country."]);
+    echo json_encode([
+        "status" => ["code" => 404, "message" => "No currency data found for country."],
+        "error" => "No currency data found for country."
+    ]);
     exit;
 }
 
@@ -53,7 +62,10 @@ $data = json_decode($response, true);
 
 // Validate exchange rate data
 if (!isset($data['rates'][$currencyCode])) {
-    echo json_encode(["error" => "Exchange rate not available for $currencyCode."]);
+    echo json_encode([
+        "status" => ["code" => 404, "message" => "Exchange rate not available for $currencyCode."],
+        "error" => "Exchange rate not available for $currencyCode."
+    ]);
     exit;
 }
 
@@ -63,6 +75,7 @@ $exchangeRate = $data['rates'][$currencyCode];
 // Return JSON response
 header('Content-Type: application/json');
 echo json_encode([
+    "status" => ["code" => 200, "message" => "Success"],
     "currencyCode" => $currencyCode,
     "exchangeRate" => $exchangeRate
 ]);

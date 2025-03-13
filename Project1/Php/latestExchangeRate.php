@@ -10,55 +10,7 @@ $app_id = '39e1723bbec3413181d6bbe3c3d1d3c8';
 $url = "https://openexchangerates.org/api/latest.json?app_id=$app_id";
 
 // Get country code (ISO2) from request
-$iso2 = strtoupper(trim($_GET['iso2'] ?? ''));
-
-// Validate input
-if (empty($iso2)) {
-    echo json_encode([
-        "status" => ["code" => 400, "message" => "No country code provided."],
-        "error" => "No country code provided."
-    ]);
-    exit;
-}
-
-// Get country data from RestCountries API
-$countryApiUrl = "https://restcountries.com/v3.1/alpha/$iso2";
-$ch = curl_init();
-curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-curl_setopt($ch, CURLOPT_URL, $countryApiUrl);
-
-// Execute the cURL request and fetch the response
-$countryResult = curl_exec($ch);
-
-// Check for cURL errors
-if (curl_errno($ch)) {
-    // If there's an error, output the error and stop execution
-    echo json_encode([
-        "status" => ["code" => 500, "message" => "Failed to fetch country data."],
-        "error" => "cURL Error: " . curl_error($ch)
-    ]);
-    curl_close($ch);
-    exit;
-}
-
-// Close the cURL session
-curl_close($ch);
-
-// Decode the JSON response from RestCountries API
-$countryData = json_decode($countryResult, true);
-
-// Check if the response contains the 'currencies' field
-if (!isset($countryData[0]['currencies'])) {
-    echo json_encode([
-        "status" => ["code" => 404, "message" => "No currency data found for country."],
-        "error" => "No currency data found for country."
-    ]);
-    exit;
-}
-
-// Get the currency code (e.g., USD for the United States)
-$currencyCode = array_key_first($countryData[0]['currencies']);
+$iso2 = isset($_GET['iso2']) ? strtoupper(trim($_GET['iso2'])) : '';
 
 // Fetch exchange rates from Open Exchange Rates API
 $ch = curl_init();
@@ -85,23 +37,86 @@ curl_close($ch);
 // Decode the exchange rate data
 $data = json_decode($response, true);
 
-// Validate that the exchange rate for the currency is available
-if (!isset($data['rates'][$currencyCode])) {
+if (!isset($data['rates'])) {
     echo json_encode([
-        "status" => ["code" => 404, "message" => "Exchange rate not available for $currencyCode."],
-        "error" => "Exchange rate not available for $currencyCode."
+        "status" => ["code" => 500, "message" => "Failed to get exchange rates."],
+        "error" => "No rates data available."
     ]);
     exit;
 }
 
-// Get the exchange rate (USD to local currency)
-$exchangeRate = $data['rates'][$currencyCode];
+// Common currency codes and their names
+$commonCurrencies = [
+    'USD' => 'US Dollar',
+    'EUR' => 'Euro',
+    'GBP' => 'British Pound',
+    'JPY' => 'Japanese Yen',
+    'AUD' => 'Australian Dollar',
+    'CAD' => 'Canadian Dollar',
+    'CHF' => 'Swiss Franc',
+    'CNY' => 'Chinese Yuan',
+    'NZD' => 'New Zealand Dollar',
+    'SGD' => 'Singapore Dollar'
+];
 
-// Return a JSON response with the currency code and exchange rate
-header('Content-Type: application/json');
-echo json_encode([
-    "status" => ["code" => 200, "message" => "Success"],
-    "currencyCode" => $currencyCode,
-    "exchangeRate" => $exchangeRate
-]);
+// If a specific country is requested
+if (!empty($iso2)) {
+    // Get country data from RestCountries API
+    $countryApiUrl = "https://restcountries.com/v3.1/alpha/$iso2";
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_URL, $countryApiUrl);
+    
+    $countryResult = curl_exec($ch);
+    
+    if (curl_errno($ch)) {
+        echo json_encode([
+            "status" => ["code" => 500, "message" => "Failed to fetch country data."],
+            "error" => "cURL Error: " . curl_error($ch)
+        ]);
+        curl_close($ch);
+        exit;
+    }
+    
+    curl_close($ch);
+    
+    $countryData = json_decode($countryResult, true);
+    
+    if (isset($countryData[0]['currencies'])) {
+        $currencyCode = array_key_first($countryData[0]['currencies']);
+        $exchangeRate = $data['rates'][$currencyCode] ?? null;
+        
+        // Return specific country data along with all available currencies
+        echo json_encode([
+            "status" => ["code" => 200, "message" => "Success"],
+            "currencyCode" => $currencyCode,
+            "exchangeRate" => $exchangeRate,
+            "data" => array_map(function($code, $name) use ($data) {
+                return [
+                    $code,
+                    $name,
+                    $data['rates'][$code] ?? null
+                ];
+            }, array_keys($commonCurrencies), $commonCurrencies)
+        ]);
+    } else {
+        echo json_encode([
+            "status" => ["code" => 404, "message" => "No currency data found for country."],
+            "error" => "No currency data found for country."
+        ]);
+    }
+} else {
+    // Return just the list of available currencies
+    echo json_encode([
+        "status" => ["code" => 200, "message" => "Success"],
+        "data" => array_map(function($code, $name) use ($data) {
+            return [
+                $code,
+                $name,
+                $data['rates'][$code] ?? null
+            ];
+        }, array_keys($commonCurrencies), $commonCurrencies)
+    ]);
+}
 ?>

@@ -243,23 +243,86 @@ function calcResult(exchangeRate) {
     }
 }
 
-function displayCurrency(iso2) {
-    $.ajax({
-        url: 'Php/latestExchangeRate.php',
-        type: 'GET',
-        dataType: 'json',
-        data: { iso2: iso2 },
-        success: function (data) {
-            if (data && data.currencyCode) {
-                $('#currencies').val(data.currencyCode);
-                calcResult();
-            }
-        },
-        error: function (xhr, status, error) {
-            console.error('Error fetching currency:', error);
+function displayWeather(iso2) {
+    // Show loading state
+    $('#pre-load').removeClass('fadeOut');
+    
+    $.get('Php/capitalCities.php', { iso2: iso2 }, function (capitalData) {
+        if (capitalData && capitalData.capital) {
+            $.get('Php/getCapitalCoordinates.php', {
+                capital: capitalData.capital,
+                country: iso2
+            }, function (coordData) {
+                if (coordData.status.code === 200) {
+                    const lat = coordData.lat;
+                    const lon = coordData.lon;
+
+                    // Get current weather
+                    $.get('Php/getWeather.php', { lat: lat, lon: lon }, function (weatherResult) {
+                        if (weatherResult.status && weatherResult.status.code === 200) {
+                            const weatherData = weatherResult.data;
+                            
+                            // Update current weather in modal
+                            $('#weatherModalLabel').html(`${weatherData.city}, ${weatherData.country}`);
+                            $('#todayConditions').html(weatherData.description);
+                            $('#todayIcon').attr('src', weatherData.icon).attr('alt', weatherData.description);
+                            $('#todayMaxTemp').html(weatherData.temperature);
+                            
+                            // Get forecast data
+                            $.get('Php/getWeatherForecast.php', { location: iso2 }, function(forecastResult) {
+                                if (forecastResult.status && forecastResult.status.code === 200) {
+                                    const forecast = forecastResult.data.forecast;
+                                    
+                                    // Update forecast days
+                                    if (forecast && forecast.length > 1) {
+                                        // Day 1
+                                        $('#day1Date').text(Date.parse(forecast[1].date).toString('ddd dS'));
+                                        $('#day1Icon').attr('src', forecast[1].conditionIcon)
+                                                    .attr('alt', forecast[1].conditionText);
+                                        $('#day1MinTemp').text(forecast[1].minC);
+                                        $('#day1MaxTemp').text(forecast[1].maxC);
+                                        
+                                        // Day 2
+                                        if (forecast.length > 2) {
+                                            $('#day2Date').text(Date.parse(forecast[2].date).toString('ddd dS'));
+                                            $('#day2Icon').attr('src', forecast[2].conditionIcon)
+                                                        .attr('alt', forecast[2].conditionText);
+                                            $('#day2MinTemp').text(forecast[2].minC);
+                                            $('#day2MaxTemp').text(forecast[2].maxC);
+                                        }
+                                    }
+                                    
+                                    // Update last updated timestamp
+                                    $('#lastUpdated').text(Date.parse(forecastResult.data.lastUpdated).toString('HH:mm, dS MMM'));
+                                }
+                                
+                                // Hide loading state and show modal
+                                setTimeout(function() {
+                                    $('#pre-load').addClass('fadeOut');
+                                }, 500);
+                                
+                                $('#infoModal4').modal('show');
+                            });
+                        } else {
+                            console.error('Weather data fetch failed:', weatherResult.error);
+                            $('#pre-load').addClass('fadeOut');
+                        }
+                    });
+                } else {
+                    console.error('Coordinates fetch failed:', coordData.error);
+                    $('#pre-load').addClass('fadeOut');
+                }
+            }, 'json');
+        } else {
+            console.error('Capital city data fetch failed');
+            $('#pre-load').addClass('fadeOut');
         }
-    });
+    }, 'json');
 }
+
+
+
+
 
 function displayNearbyInfo(iso2) {
     $.get('Php/getCountryData.php', { iso2: iso2 }, function (countryData) {

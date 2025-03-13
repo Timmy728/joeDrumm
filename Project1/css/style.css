@@ -75,19 +75,18 @@ h1 {
 }
 
 /* Currency Button Styles */
-.currency-button {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 30px;
-  height: 30px;
-  background: white;
-  border-radius: 4px;
+.leaflet-bar a {
+    background-color: white !important;
+    color: #333 !important;
+    width: 30px !important;
+    height: 30px !important;
+    line-height: 30px !important;
+    text-align: center !important;
 }
 
-.currency-button i {
-  color: #333;
-  font-size: 16px !important;
+.leaflet-bar a i {
+    line-height: 30px !important;
+    font-size: 16px !important;
 }
 
 /* Leaflet Easy Button Override */

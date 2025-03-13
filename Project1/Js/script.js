@@ -206,58 +206,65 @@ function calcResult() {
 
 function displayWeather(iso2) {
     // Show loading state
-    $('#pre-load').removeClass('fadeOut');
+    $('#pre-load').removeClass('fadeOut').show();
     
-    $.get('Php/getWeatherForecast.php', { location: iso2 }, function(forecastResult) {
-        if (forecastResult.status && forecastResult.status.code === 200) {
-            const forecast = forecastResult.data.forecast;
-            
-            // Update forecast days
-            if (forecast && forecast.length > 0) {
-                // Today
-                $('#todayConditions').text(forecast[0].conditionText);
-                $('#todayIcon').attr('src', forecast[0].conditionIcon)
-                             .attr('alt', forecast[0].conditionText);
-                $('#todayMaxTemp').text(forecast[0].maxC);
-                $('#todayMinTemp').text(forecast[0].minC);
+    $.ajax({
+        url: 'Php/getWeatherForecast.php',
+        type: 'GET',
+        dataType: 'json',
+        data: { location: iso2 },
+        success: function(forecastResult) {
+            if (forecastResult.status && forecastResult.status.code === 200) {
+                const forecast = forecastResult.data.forecast;
                 
-                // Day 1
-                if (forecast.length > 1) {
-                    $('#day1Date').text(Date.parse(forecast[1].date).toString('ddd dS'));
-                    $('#day1Icon').attr('src', forecast[1].conditionIcon)
-                                .attr('alt', forecast[1].conditionText);
-                    $('#day1MinTemp').text(forecast[1].minC);
-                    $('#day1MaxTemp').text(forecast[1].maxC);
+                // Update forecast days
+                if (forecast && forecast.length > 0) {
+                    // Today
+                    $('#todayConditions').text(forecast[0].conditionText);
+                    $('#todayIcon').attr('src', forecast[0].conditionIcon)
+                                 .attr('alt', forecast[0].conditionText);
+                    $('#todayMaxTemp').text(forecast[0].maxC);
+                    $('#todayMinTemp').text(forecast[0].minC);
+                    
+                    // Day 1
+                    if (forecast.length > 1) {
+                        $('#day1Date').text(Date.parse(forecast[1].date).toString('ddd dS'));
+                        $('#day1Icon').attr('src', forecast[1].conditionIcon)
+                                    .attr('alt', forecast[1].conditionText);
+                        $('#day1MinTemp').text(forecast[1].minC);
+                        $('#day1MaxTemp').text(forecast[1].maxC);
+                    }
+                    
+                    // Day 2
+                    if (forecast.length > 2) {
+                        $('#day2Date').text(Date.parse(forecast[2].date).toString('ddd dS'));
+                        $('#day2Icon').attr('src', forecast[2].conditionIcon)
+                                    .attr('alt', forecast[2].conditionText);
+                        $('#day2MinTemp').text(forecast[2].minC);
+                        $('#day2MaxTemp').text(forecast[2].maxC);
+                    }
                 }
                 
-                // Day 2
-                if (forecast.length > 2) {
-                    $('#day2Date').text(Date.parse(forecast[2].date).toString('ddd dS'));
-                    $('#day2Icon').attr('src', forecast[2].conditionIcon)
-                                .attr('alt', forecast[2].conditionText);
-                    $('#day2MinTemp').text(forecast[2].minC);
-                    $('#day2MaxTemp').text(forecast[2].maxC);
-                }
+                // Update modal title with location
+                $('#weatherModalLabel').text(`${forecastResult.data.location}, ${forecastResult.data.country}`);
+                
+                // Update last updated timestamp
+                $('#lastUpdated').text(Date.parse(forecastResult.data.lastUpdated).toString('HH:mm, dS MMM'));
+                
+                // Hide loading state and show modal
+                $('#pre-load').addClass('fadeOut').hide();
+                $('#weatherModal').modal('show');
+            } else {
+                console.error('Weather data fetch failed:', forecastResult.error);
+                $('#pre-load').addClass('fadeOut').hide();
+                alert('Failed to fetch weather data. Please try again.');
             }
-            
-            // Update modal title with location
-            $('#weatherModalLabel').text(`${forecastResult.data.location}, ${forecastResult.data.country}`);
-            
-            // Update last updated timestamp
-            $('#lastUpdated').text(Date.parse(forecastResult.data.lastUpdated).toString('HH:mm, dS MMM'));
-            
-            // Hide loading state and show modal
-            $('#pre-load').addClass('fadeOut');
-            $('#weatherModal').modal('show');
-        } else {
-            console.error('Weather data fetch failed:', forecastResult.error);
-            $('#pre-load').addClass('fadeOut');
+        },
+        error: function(jqXHR, textStatus, errorThrown) {
+            console.error('AJAX error:', textStatus, errorThrown);
+            $('#pre-load').addClass('fadeOut').hide();
             alert('Failed to fetch weather data. Please try again.');
         }
-    }).fail(function(jqXHR, textStatus, errorThrown) {
-        console.error('AJAX error:', textStatus, errorThrown);
-        $('#pre-load').addClass('fadeOut');
-        alert('Failed to fetch weather data. Please try again.');
     });
 }
 

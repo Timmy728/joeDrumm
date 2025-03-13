@@ -92,11 +92,12 @@ $(document).ready(function () {
                 const iso2 = $('#countrySelect').val();
                 if (iso2) {
                     displayWeather(iso2);
+                } else {
+                    alert('Please select a country first');
                 }
             }
         }]
     }).addTo(map);
-    
 
     L.easyButton('fa-globe', function () {
         $('#infoModal5').modal('show');
@@ -123,58 +124,8 @@ $(document).ready(function () {
         }
     });
 
-    $('#countrySelect').change(function () {
-        const iso2 = $(this).val(); // Get the selected country ISO2 code
-        if (iso2) {
-            $.ajax({
-                url: "Php/latestExchangeRate.php",
-                type: 'GET',
-                dataType: 'json',
-                data: {
-                    iso2: iso2  // Pass the selected country ISO2 code to the PHP script
-                },
-                success: function (result) {
-                    console.log(result); // Log the response to inspect the structure
-                    if (result.status && result.status.code == 200) {
-                        const currencyCode = result.currencyCode;  // Currency code (e.g., GBP)
-                        const exchangeRate = result.exchangeRate;  // Exchange rate (e.g., 0.771399)
-
-                        const supportedCurrencies = ["USD", "EUR", "GBP", "AUD", "CAD"]; // Add supported currencies here
-
-                        $('#currencies').empty();  // Clear existing options
-
-                        // Add new options to the currency dropdown
-                        supportedCurrencies.forEach(function (currency) {
-                            $('#currencies').append(new Option(currency, currency));
-                        });
-
-                        // Set the selected currency in the dropdown
-                        $('#currencies').val(currencyCode); // Set the selected currency based on the API response
-
-                        // Update the currency exchange rate display
-                        $('#txtCurrencyRate').text(`1 USD = ${exchangeRate} ${currencyCode}`);
-
-                        // If necessary, perform a conversion based on input values
-                        calcResult(exchangeRate);
-                    } else {
-                        console.error("Error: " + result.error);
-                    }
-                },
-                error: function (xhr, status, error) {
-                    console.error("Error fetching exchange rate:", error);
-                }
-            });
-        } else {
-            console.error("No country selected. Please select a country.");
-        }
-    });
-
     // Currency modal event handlers
-    $('#fromAmount').on('keyup', function () {
-        calcResult();
-    });
-
-    $('#fromAmount').on('change', function () {
+    $('#fromAmount').on('keyup change', function () {
         calcResult();
     });
 
@@ -182,7 +133,7 @@ $(document).ready(function () {
         calcResult();
     });
 
-    // When the modal is shown, set the selected currency
+    // Modal handlers
     $('#currencyModal').on('show.bs.modal', function () {
         const selectedCountry = $('#countrySelect').val();
         if (selectedCountry) {
@@ -190,9 +141,7 @@ $(document).ready(function () {
                 url: "Php/latestExchangeRate.php",
                 type: 'GET',
                 dataType: 'json',
-                data: {
-                    iso2: selectedCountry
-                },
+                data: { iso2: selectedCountry },
                 success: function (result) {
                     if (result && result.currencyCode) {
                         $('#currencies').val(result.currencyCode);
@@ -245,7 +194,7 @@ function loadCurrencies() {
     });
 }
 
-function calcResult(exchangeRate) {
+function calcResult() {
     const selectedOption = $('#currencies option:selected');
     const rate = selectedOption.attr('data-rate');
     if (rate) {
@@ -259,82 +208,58 @@ function displayWeather(iso2) {
     // Show loading state
     $('#pre-load').removeClass('fadeOut');
     
-    $.get('Php/capitalCities.php', { iso2: iso2 }, function (capitalData) {
-        if (capitalData && capitalData.capital) {
-            $.get('Php/getCapitalCoordinates.php', {
-                capital: capitalData.capital,
-                country: iso2
-            }, function (coordData) {
-                if (coordData.status.code === 200) {
-                    const lat = coordData.lat;
-                    const lon = coordData.lon;
-
-                    // Get current weather
-                    $.get('Php/getWeather.php', { lat: lat, lon: lon }, function (weatherResult) {
-                        if (weatherResult.status && weatherResult.status.code === 200) {
-                            const weatherData = weatherResult.data;
-                            
-                            // Update current weather in modal
-                            $('#weatherModalLabel').html(`${weatherData.city}, ${weatherData.country}`);
-                            $('#todayConditions').html(weatherData.description);
-                            $('#todayIcon').attr('src', weatherData.icon).attr('alt', weatherData.description);
-                            $('#todayMaxTemp').html(weatherData.temperature);
-                            
-                            // Get forecast data
-                            $.get('Php/getWeatherForecast.php', { location: iso2 }, function(forecastResult) {
-                                if (forecastResult.status && forecastResult.status.code === 200) {
-                                    const forecast = forecastResult.data.forecast;
-                                    
-                                    // Update forecast days
-                                    if (forecast && forecast.length > 1) {
-                                        // Day 1
-                                        $('#day1Date').text(Date.parse(forecast[1].date).toString('ddd dS'));
-                                        $('#day1Icon').attr('src', forecast[1].conditionIcon)
-                                                    .attr('alt', forecast[1].conditionText);
-                                        $('#day1MinTemp').text(forecast[1].minC);
-                                        $('#day1MaxTemp').text(forecast[1].maxC);
-                                        
-                                        // Day 2
-                                        if (forecast.length > 2) {
-                                            $('#day2Date').text(Date.parse(forecast[2].date).toString('ddd dS'));
-                                            $('#day2Icon').attr('src', forecast[2].conditionIcon)
-                                                        .attr('alt', forecast[2].conditionText);
-                                            $('#day2MinTemp').text(forecast[2].minC);
-                                            $('#day2MaxTemp').text(forecast[2].maxC);
-                                        }
-                                    }
-                                    
-                                    // Update last updated timestamp
-                                    $('#lastUpdated').text(Date.parse(forecastResult.data.lastUpdated).toString('HH:mm, dS MMM'));
-                                }
-                                
-                                // Hide loading state and show modal
-                                setTimeout(function() {
-                                    $('#pre-load').addClass('fadeOut');
-                                }, 500);
-                                
-                                $('#infoModal4').modal('show');
-                            });
-                        } else {
-                            console.error('Weather data fetch failed:', weatherResult.error);
-                            $('#pre-load').addClass('fadeOut');
-                        }
-                    });
-                } else {
-                    console.error('Coordinates fetch failed:', coordData.error);
-                    $('#pre-load').addClass('fadeOut');
+    $.get('Php/getWeatherForecast.php', { location: iso2 }, function(forecastResult) {
+        if (forecastResult.status && forecastResult.status.code === 200) {
+            const forecast = forecastResult.data.forecast;
+            
+            // Update forecast days
+            if (forecast && forecast.length > 0) {
+                // Today
+                $('#todayConditions').text(forecast[0].conditionText);
+                $('#todayIcon').attr('src', forecast[0].conditionIcon)
+                             .attr('alt', forecast[0].conditionText);
+                $('#todayMaxTemp').text(forecast[0].maxC);
+                $('#todayMinTemp').text(forecast[0].minC);
+                
+                // Day 1
+                if (forecast.length > 1) {
+                    $('#day1Date').text(Date.parse(forecast[1].date).toString('ddd dS'));
+                    $('#day1Icon').attr('src', forecast[1].conditionIcon)
+                                .attr('alt', forecast[1].conditionText);
+                    $('#day1MinTemp').text(forecast[1].minC);
+                    $('#day1MaxTemp').text(forecast[1].maxC);
                 }
-            }, 'json');
-        } else {
-            console.error('Capital city data fetch failed');
+                
+                // Day 2
+                if (forecast.length > 2) {
+                    $('#day2Date').text(Date.parse(forecast[2].date).toString('ddd dS'));
+                    $('#day2Icon').attr('src', forecast[2].conditionIcon)
+                                .attr('alt', forecast[2].conditionText);
+                    $('#day2MinTemp').text(forecast[2].minC);
+                    $('#day2MaxTemp').text(forecast[2].maxC);
+                }
+            }
+            
+            // Update modal title with location
+            $('#weatherModalLabel').text(`${forecastResult.data.location}, ${forecastResult.data.country}`);
+            
+            // Update last updated timestamp
+            $('#lastUpdated').text(Date.parse(forecastResult.data.lastUpdated).toString('HH:mm, dS MMM'));
+            
+            // Hide loading state and show modal
             $('#pre-load').addClass('fadeOut');
+            $('#weatherModal').modal('show');
+        } else {
+            console.error('Weather data fetch failed:', forecastResult.error);
+            $('#pre-load').addClass('fadeOut');
+            alert('Failed to fetch weather data. Please try again.');
         }
-    }, 'json');
+    }).fail(function(jqXHR, textStatus, errorThrown) {
+        console.error('AJAX error:', textStatus, errorThrown);
+        $('#pre-load').addClass('fadeOut');
+        alert('Failed to fetch weather data. Please try again.');
+    });
 }
-
-
-
-
 
 function displayNearbyInfo(iso2) {
     $.get('Php/getCountryData.php', { iso2: iso2 }, function (countryData) {
@@ -382,98 +307,9 @@ function fetchAllCountryData(iso2) {
     displayPopulation(iso2);
     displayCurrency(iso2);
     displayExchangeRate(iso2);
-    displayWeather(iso2);
-    displayWeatherForecast(iso2);
     displayWikipediaInfo(iso2);
     displayTimezone(iso2);
     updateCountryBorders(iso2);
-}
-
-function getWikiResults(north, south, east, west, iso2) {
-    $.ajax({
-        url: 'Php/wikipediaBoundingBox.php',
-        type: 'GET',
-        dataType: 'json',
-        data: {north:north, south:south, east:east, west:west},
-        success: function (data) {
-            console.log("Wikipedia Data:", data);
-            $('#wikiArticles').html('');
-            
-            if (data.data && data.data.length > 0) {
-                let filteredArticles = data.data.filter(article => {
-                    return article.countryCode === iso2;
-                });
-
-                if (filteredArticles.length > 0) {
-                    filteredArticles.forEach(article => {
-                        $('#wikiArticles').append(`
-                            <li>${article.summary}<br/>
-                            <a href='https://${article.wikipediaUrl}' target='_blank'>Click to see more...</a>
-                            </li>
-                        `);
-                    });
-                } else {
-                    $('#wikiArticles').append("<li>No Wikipedia articles found for this country.</li>");
-                }
-            } else {
-                $('#wikiArticles').append("<li>No Wikipedia data available.</li>");
-            }
-        },
-        error: function (err) {
-            console.log(err);
-            $('#wikiArticles').append("<li>Error loading Wikipedia articles.</li>");
-        }
-    });
-}
-
-function placeEarthQuakeMarkers(north, south, east, west) {
-    console.log("📡 Fetching Earthquake Data...");
-
-    $.ajax({
-        url: 'Php/earthQuakes.php',
-        type: 'GET',
-        dataType: 'json',
-        data: { north: north, south: south, east: east, west: west },
-        success: function (data) {
-            console.log("✅ Earthquake Data Received:", data);
-
-            if (!data.data || data.data.length === 0) {
-                console.warn("⚠️ No earthquake data found.");
-                return;
-            }
-
-            var redIcon = L.icon({
-                iconUrl: 'Images/Fire-Icon.png',
-                iconSize: [32, 32],
-                iconAnchor: [16, 32],
-                popupAnchor: [0, -32]
-            });
-
-            data.data.forEach(quake => {
-                let lat = parseFloat(quake.lat);
-                let lng = parseFloat(quake.lng);
-
-                if (!isNaN(lat) && !isNaN(lng)) {
-                    console.log("📍 Adding Marker:", lat, lng);
-
-                    let marker = L.marker([lat, lng], { icon: redIcon })
-                        .bindPopup(`
-                            <strong>📍 Magnitude:</strong> ${quake.magnitude}<br>
-                            <strong>📏 Depth:</strong> ${quake.depth} km<br>
-                            <strong>⏰ Time:</strong> ${quake.datetime}<br>
-                            <strong>🌍 Location:</strong> ${lat}, ${lng}
-                        `);
-                    
-                    earthquakeLayer.addLayer(marker);
-                } else {
-                    console.warn("⚠️ Invalid earthquake coordinates:", quake);
-                }
-            });
-        },
-        error: function (xhr, status, error) {
-            console.error("❌ Error fetching earthquake data:", status, error);
-        }
-    });
 }
 
 function getRectBounds(countryCode) {
@@ -492,28 +328,6 @@ function getRectBounds(countryCode) {
         },
         error:function(err){
             console.log(err);
-        }
-    });
-}
-
-function updateCountryBorders(iso2) {
-    if (bordersLayer) {
-        map.removeLayer(bordersLayer);
-    }
-    
-    $.getJSON('Php/getCountryBorders.php', { iso2: iso2 }, function (country) {
-        if (country && !country.error) {
-            bordersLayer = L.geoJSON(country, {
-                style: {
-                    color: 'blue',
-                    weight: 2,
-                    fillColor: 'orange',
-                    fillOpacity: 0.3
-                }
-            }).addTo(map);
-            map.fitBounds(bordersLayer.getBounds());
-        } else {
-            console.error("Error loading country borders:", country ? country.error : "Unknown error");
         }
     });
 }
@@ -573,39 +387,6 @@ function displayExchangeRate(iso2) {
     }, 'json');
 }
 
-function displayWeather(iso2) {
-    $.get('Php/getCountryData.php', { iso2: iso2 }, function (data) {
-        if (data && data[0] && data[0].latlng) {
-            const [lat, lon] = data[0].latlng;
-
-            $.get('Php/getWeather.php', { lat: lat, lon: lon }, function (weatherData) {
-                if (weatherData && weatherData.temperature && weatherData.description) {
-                    $('#tempToday').text(`${weatherData.temperature}°C`);
-                    $('#conditionsToday').text(weatherData.description);
-                    $('#weatherImg').html(`<img src="${weatherData.icon}" alt="Weather Icon">`);
-                } else {
-                    $('#tempToday').text('No weather data available');
-                    $('#conditionsToday').text('No description available');
-                    $('#weatherImg').empty();
-                }
-            }, 'json');
-        } else {
-            $('#tempToday').text('Coordinates not found');
-            $('#conditionsToday').text('No description available');
-            $('#weatherImg').empty();
-        }
-    }, 'json');
-}
-
-function displayWeatherForecast(iso2) {
-    $.get('Php/getWeatherForecast.php', { location: iso2 }, function (data) {
-        $('#forecastInfo').html('');
-        data.forEach(forecast => {
-            $('#forecastInfo').append(`<p>${forecast.date}: ${forecast.min_temp}°C - ${forecast.max_temp}°C</p>`);
-        });
-    }, 'json');
-}
-
 function displayWikipediaInfo(iso2) {
     $.get('Php/wikipediaSearch.php', { query: iso2 }, function (data) {
         $('#wikiLink').attr('href', data.url).text(`View ${data.title} on Wikipedia`);
@@ -616,4 +397,122 @@ function displayTimezone(iso2) {
     $.get('Php/Timezone.php', { iso2: iso2 }, function (data) {
         $('#timezone').text(data.timezone);
     }, 'json');
+}
+
+function displayCurrency(iso2) {
+    $.get('Php/latestExchangeRate.php', { iso2: iso2 }, function (data) {
+        if (data && data.currencyCode) {
+            $('#currencies').val(data.currencyCode);
+            calcResult();
+        }
+    }, 'json');
+}
+
+function updateCountryBorders(iso2) {
+    if (bordersLayer) {
+        map.removeLayer(bordersLayer);
+    }
+    
+    $.getJSON('Php/getCountryBorders.php', { iso2: iso2 }, function (country) {
+        if (country && !country.error) {
+            bordersLayer = L.geoJSON(country, {
+                style: {
+                    color: 'blue',
+                    weight: 2,
+                    fillColor: 'orange',
+                    fillOpacity: 0.3
+                }
+            }).addTo(map);
+            map.fitBounds(bordersLayer.getBounds());
+        } else {
+            console.error("Error loading country borders:", country ? country.error : "Unknown error");
+        }
+    });
+}
+
+function placeEarthQuakeMarkers(north, south, east, west) {
+    console.log("📡 Fetching Earthquake Data...");
+
+    $.ajax({
+        url: 'Php/earthQuakes.php',
+        type: 'GET',
+        dataType: 'json',
+        data: { north: north, south: south, east: east, west: west },
+        success: function (data) {
+            console.log("✅ Earthquake Data Received:", data);
+
+            if (!data.data || data.data.length === 0) {
+                console.warn("⚠️ No earthquake data found.");
+                return;
+            }
+
+            var redIcon = L.icon({
+                iconUrl: 'Images/Fire-Icon.png',
+                iconSize: [32, 32],
+                iconAnchor: [16, 32],
+                popupAnchor: [0, -32]
+            });
+
+            data.data.forEach(quake => {
+                let lat = parseFloat(quake.lat);
+                let lng = parseFloat(quake.lng);
+
+                if (!isNaN(lat) && !isNaN(lng)) {
+                    console.log("📍 Adding Marker:", lat, lng);
+
+                    let marker = L.marker([lat, lng], { icon: redIcon })
+                        .bindPopup(`
+                            <strong>📍 Magnitude:</strong> ${quake.magnitude}<br>
+                            <strong>📏 Depth:</strong> ${quake.depth} km<br>
+                            <strong>⏰ Time:</strong> ${quake.datetime}<br>
+                            <strong>🌍 Location:</strong> ${lat}, ${lng}
+                        `);
+                    
+                    earthquakeLayer.addLayer(marker);
+                } else {
+                    console.warn("⚠️ Invalid earthquake coordinates:", quake);
+                }
+            });
+        },
+        error: function (xhr, status, error) {
+            console.error("❌ Error fetching earthquake data:", status, error);
+        }
+    });
+}
+
+function getWikiResults(north, south, east, west, iso2) {
+    $.ajax({
+        url: 'Php/wikipediaBoundingBox.php',
+        type: 'GET',
+        dataType: 'json',
+        data: {north:north, south:south, east:east, west:west},
+        success: function (data) {
+            console.log("Wikipedia Data:", data);
+            $('#wikiArticles').html('');
+            
+            if (data.data && data.data.length > 0) {
+                let filteredArticles = data.data.filter(article => {
+                    return article.countryCode === iso2;
+                });
+
+                if (filteredArticles.length > 0) {
+                    filteredArticles.forEach(article => {
+                        $('#wikiArticles').append(`
+                            <li>${article.summary}<br/>
+                            <a href='https://${article.wikipediaUrl}' target='_blank'>Click to see more...</a>
+                            </li>
+                        `);
+                    });
+                } else {
+                    $('#wikiArticles').append("<li>No Wikipedia articles found for this country.</li>");
+                }
+            } else {
+                $('#wikiArticles').append("<li>No Wikipedia data available.</li>");
+            }
+        },
+        error: function (err) {
+            console.log(err);
+            $('#wikiArticles').append("<li>Error loading Wikipedia articles.</li>");
+        }
+    });
 }

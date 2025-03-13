@@ -243,6 +243,15 @@ function displayWeather(iso2) {
                         $('#day2MinTemp').text(forecast[2].minC);
                         $('#day2MaxTemp').text(forecast[2].maxC);
                     }
+
+                    // Day 3
+                    if (forecast.length > 3) {
+                        $('#day3Date').text(Date.parse(forecast[3].date).toString('ddd dS'));
+                        $('#day3Icon').attr('src', forecast[3].conditionIcon)
+                                    .attr('alt', forecast[3].conditionText);
+                        $('#day3MinTemp').text(forecast[3].minC);
+                        $('#day3MaxTemp').text(forecast[3].maxC);
+                    }
                 }
                 
                 // Update modal title with location
@@ -267,6 +276,7 @@ function displayWeather(iso2) {
         }
     });
 }
+
 
 function displayNearbyInfo(iso2) {
     $.get('Php/getCountryData.php', { iso2: iso2 }, function (countryData) {

@@ -69,10 +69,10 @@ $(document).ready(function () {
         $('#infoModal2').modal('show');
     }).addTo(map);
 
-    // Currency Button
-    var infoBtn = L.easyButton('<i class="fa-solid fa-money-bill-transfer"></i>', function () {
-        loadCurrencies();
-        $("#currencyModal").modal("show");
+     // Currency Button 
+    L.easyButton('<span class="currency-button"><i class="fa-solid fa-money-bill-transfer"></i></span>', function () {
+    loadCurrencies();
+    $("#currencyModal").modal("show");
     }).addTo(map);
 
     L.easyButton('fa-cloud-sun', function () {

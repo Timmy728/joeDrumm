@@ -82,9 +82,21 @@ $(document).ready(function () {
         }]
     }).addTo(map);
 
-    L.easyButton('fa-cloud-sun', function () {
-        $('#infoModal4').modal('show');
+    // Weather Button
+    L.easyButton({
+        states: [{
+            stateName: 'show-weather',
+            icon: '<i class="fas fa-cloud-sun" style="font-size: 16px; color: #333;"></i>',
+            title: 'Show Weather Information',
+            onClick: function() {
+                const iso2 = $('#countrySelect').val();
+                if (iso2) {
+                    displayWeather(iso2);
+                }
+            }
+        }]
     }).addTo(map);
+    
 
     L.easyButton('fa-globe', function () {
         $('#infoModal5').modal('show');

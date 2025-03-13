@@ -69,7 +69,7 @@
             </div>
         </div>
         
-        <!-- Currency Modal (Button 3) -->
+          <!-- Currency Modal (Button 3) -->
         <div id="currencyModal" class="modal fade" tabindex="-1" data-bs-backdrop="false" data-bs-keyboard="false">
             <div class="modal-dialog modal-sm modal-dialog-centered modal-dialog-scrollable">
                 <div class="modal-content shadow">
@@ -81,18 +81,30 @@
                         <form>
                             <div class="form-floating mb-3">
                                 <input id="fromAmount" type="number" class="form-control" value="1" min="1" step="1">
-                                <label>From USD</label>
+                                <label><i class="fas fa-dollar-sign"></i> From USD</label>
                             </div>
 
                             <div class="form-floating mb-3">
                                 <select id="currencies" class="form-select">
+                                    <option value="EUR">€ EUR - Euro</option>
+                                    <option value="GBP">£ GBP - British Pound</option>
+                                    <option value="JPY">¥ JPY - Japanese Yen</option>
+                                    <option value="AUD">A$ AUD - Australian Dollar</option>
+                                    <option value="CAD">C$ CAD - Canadian Dollar</option>
+                                    <option value="CHF">Fr CHF - Swiss Franc</option>
+                                    <option value="CNY">¥ CNY - Chinese Yuan</option>
+                                    <option value="INR">₹ INR - Indian Rupee</option>
                                 </select>
                                 <label for="exchangeRate">Convert to</label>
                             </div>
 
                             <div class="form-floating">
                                 <input id="toAmount" type="text" class="form-control" disabled>
-                                <label for="toAmount">Result</label>
+                                <label for="toAmount" id="resultLabel">Result</label>
+                            </div>
+
+                            <div class="exchange-rate-display mt-3 text-center">
+                                <small class="text-muted" id="txtCurrencyRate"></small>
                             </div>
                         </form>
                     </div>

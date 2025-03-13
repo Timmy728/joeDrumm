@@ -74,6 +74,29 @@ h1 {
     animation: animate-preloader 1s linear infinite;
 }
 
+/* Currency Button Styles */
+.currency-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  background: white;
+  border-radius: 4px;
+}
+
+.currency-button i {
+  color: #333;
+  font-size: 16px !important;
+}
+
+/* Leaflet Easy Button Override */
+.leaflet-bar button {
+  width: 30px !important;
+  height: 30px !important;
+  line-height: 30px !important;
+}
+
 @-webkit-keyframes animate-preloader {
     0% {
     -webkit-transform: rotate(0deg);

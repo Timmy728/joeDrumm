@@ -45,22 +45,20 @@ if (!isset($data['rates'])) {
     exit;
 }
 
-// Common currency codes and their names
-$commonCurrencies = [
-    'USD' => 'US Dollar',
-    'EUR' => 'Euro',
-    'GBP' => 'British Pound',
-    'JPY' => 'Japanese Yen',
-    'AUD' => 'Australian Dollar',
-    'CAD' => 'Canadian Dollar',
-    'CHF' => 'Swiss Franc',
-    'CNY' => 'Chinese Yuan',
-    'NZD' => 'New Zealand Dollar',
-    'SGD' => 'Singapore Dollar',
-    'BRL' => 'Brazilian Real',
-    'AED' => 'UAE Dirham',
-    'ARS' => 'Argentine Peso,
-    'THB' => 'Thai Baht'
+// Currency codes and their details exactly matching the HTML select options
+$currencies = [
+    'EUR' => ['name' => 'Euro', 'symbol' => '€'],
+    'GBP' => ['name' => 'British Pound', 'symbol' => '£'],
+    'JPY' => ['name' => 'Japanese Yen', 'symbol' => '¥'],
+    'AUD' => ['name' => 'Australian Dollar', 'symbol' => 'A$'],
+    'CAD' => ['name' => 'Canadian Dollar', 'symbol' => 'C$'],
+    'CHF' => ['name' => 'Swiss Franc', 'symbol' => 'Fr'],
+    'CNY' => ['name' => 'Chinese Yuan', 'symbol' => '¥'],
+    'INR' => ['name' => 'Indian Rupee', 'symbol' => '₹'],
+    'BRL' => ['name' => 'Brazilian Real', 'symbol' => 'R$'],
+    'AED' => ['name' => 'UAE Dirham', 'symbol' => 'د.إ'],
+    'ARS' => ['name' => 'Argentine Peso', 'symbol' => '$'],
+    'THB' => ['name' => 'Thai Baht', 'symbol' => '฿']
 ];
 
 // If a specific country is requested
@@ -96,13 +94,14 @@ if (!empty($iso2)) {
             "status" => ["code" => 200, "message" => "Success"],
             "currencyCode" => $currencyCode,
             "exchangeRate" => $exchangeRate,
-            "data" => array_map(function($code, $name) use ($data) {
+            "data" => array_map(function($code, $info) use ($data) {
                 return [
                     $code,
-                    $name,
-                    $data['rates'][$code] ?? null
+                    $info['name'],
+                    $data['rates'][$code] ?? null,
+                    $info['symbol']
                 ];
-            }, array_keys($commonCurrencies), $commonCurrencies)
+            }, array_keys($currencies), $currencies)
         ]);
     } else {
         echo json_encode([
@@ -114,13 +113,14 @@ if (!empty($iso2)) {
     // Return just the list of available currencies
     echo json_encode([
         "status" => ["code" => 200, "message" => "Success"],
-        "data" => array_map(function($code, $name) use ($data) {
+        "data" => array_map(function($code, $info) use ($data) {
             return [
                 $code,
-                $name,
-                $data['rates'][$code] ?? null
+                $info['name'],
+                $data['rates'][$code] ?? null,
+                $info['symbol']
             ];
-        }, array_keys($commonCurrencies), $commonCurrencies)
+        }, array_keys($currencies), $currencies)
     ]);
 }
 ?>

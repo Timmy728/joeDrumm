@@ -70,7 +70,7 @@ $(document).ready(function () {
     }).addTo(map);
 
     // Currency Button
-    var infoBtn = L.easyButton("fa-solid fa-money-bill-transfer", function (btn, map) {
+    var infoBtn = L.easyButton('<i class="fa-solid fa-money-bill-transfer"></i>', function () {
         loadCurrencies();
         $("#currencyModal").modal("show");
     }).addTo(map);

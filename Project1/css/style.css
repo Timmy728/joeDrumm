@@ -83,28 +83,6 @@ h1 {
   animation: animate-preloader 1s linear infinite;
 }
 
-/* Currency Button Styles */
-.leaflet-bar a {
-    background-color: white !important;
-    color: #333 !important;
-    width: 30px !important;
-    height: 30px !important;
-    line-height: 30px !important;
-    text-align: center !important;
-}
-
-.leaflet-bar a i {
-    line-height: 30px !important;
-    font-size: 16px !important;
-}
-
-/* Leaflet Easy Button Override */
-.leaflet-bar button {
-  width: 30px !important;
-  height: 30px !important;
-  line-height: 30px !important;
-}
-
 @keyframes animate-preloader {
   0% {
     transform: rotate(0deg);
@@ -266,6 +244,28 @@ h1 {
 
 #weatherModal .tempMetric {
   font-size: 0.8em;
+}
+
+/* Currency Button Styles */
+.leaflet-bar a {
+  background-color: white !important;
+  color: #333 !important;
+  width: 30px !important;
+  height: 30px !important;
+  line-height: 30px !important;
+  text-align: center !important;
+}
+
+.leaflet-bar a i {
+  line-height: 30px !important;
+  font-size: 16px !important;
+}
+
+/* Leaflet Easy Button Override */
+.leaflet-bar button {
+  width: 30px !important;
+  height: 30px !important;
+  line-height: 30px !important;
 }
 
 /* Responsive Design */

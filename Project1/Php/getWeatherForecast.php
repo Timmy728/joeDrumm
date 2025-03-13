@@ -40,27 +40,33 @@ if (!isset($countryInfo[0]['capital'][0])) {
 
 $capital = $countryInfo[0]['capital'][0];
 
-// Get coordinates for the capital city
-$geoUrl = "https://geocoding-api.open-meteo.com/v1/search?name=" . urlencode($capital) . "&count=1&format=json";
-$ch = curl_init();
-curl_setopt($ch, CURLOPT_URL, $geoUrl);
-curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-$geoResponse = curl_exec($ch);
-curl_close($ch);
+// Special handling for USA's capital
+if ($location === 'US') {
+    $lat = 38.8951; // Washington DC coordinates
+    $lon = -77.0364;
+} else {
+    // Get coordinates for other capital cities
+    $geoUrl = "https://geocoding-api.open-meteo.com/v1/search?name=" . urlencode($capital) . "&count=1&format=json";
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $geoUrl);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+    $geoResponse = curl_exec($ch);
+    curl_close($ch);
 
-$geoData = json_decode($geoResponse, true);
+    $geoData = json_decode($geoResponse, true);
 
-if (!isset($geoData['results'][0])) {
-    echo json_encode([
-        'status' => ['code' => 404, 'message' => 'Not Found'],
-        'error' => 'Could not find coordinates for capital city'
-    ]);
-    exit;
+    if (!isset($geoData['results'][0])) {
+        echo json_encode([
+            'status' => ['code' => 404, 'message' => 'Not Found'],
+            'error' => 'Could not find coordinates for capital city'
+        ]);
+        exit;
+    }
+
+    $lat = $geoData['results'][0]['latitude'];
+    $lon = $geoData['results'][0]['longitude'];
 }
-
-$lat = $geoData['results'][0]['latitude'];
-$lon = $geoData['results'][0]['longitude'];
 
 // Get Weather Forecast
 $apiKey = '40239c7b19a7290e280d24cc348eb7f6'; // OpenWeather API key
@@ -100,9 +106,9 @@ foreach ($weatherData['list'] as $reading) {
     }
 }
 
-// Format the forecast data
+// Format the forecast data - now including 4 days (today + 3 forecast days)
 $forecast = [];
-foreach (array_slice(array_keys($dailyData), 0, 3) as $date) {
+foreach (array_slice(array_keys($dailyData), 0, 4) as $date) {
     $forecast[] = array_merge(
         ['date' => $date],
         [

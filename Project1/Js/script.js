@@ -69,10 +69,17 @@ $(document).ready(function () {
         $('#infoModal2').modal('show');
     }).addTo(map);
 
-     // Currency Button 
-    L.easyButton('<span class="currency-button"><i class="fa-solid fa-money-bill-transfer"></i></span>', function () {
-    loadCurrencies();
-    $("#currencyModal").modal("show");
+    // Currency Button
+    L.easyButton({
+        states: [{
+            stateName: 'show-currency',
+            icon: '<i class="fas fa-dollar-sign" style="font-size: 16px; color: #333;"></i>',
+            title: 'Show Currency Converter',
+            onClick: function() {
+                loadCurrencies();
+                $("#currencyModal").modal("show");
+            }
+        }]
     }).addTo(map);
 
     L.easyButton('fa-cloud-sun', function () {

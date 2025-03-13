@@ -56,7 +56,11 @@ $commonCurrencies = [
     'CHF' => 'Swiss Franc',
     'CNY' => 'Chinese Yuan',
     'NZD' => 'New Zealand Dollar',
-    'SGD' => 'Singapore Dollar'
+    'SGD' => 'Singapore Dollar',
+    'BRL' => 'Brazilian Real',
+    'AED' => 'UAE Dirham',
+    'ARS' => 'Argentine Peso,
+    'THB' => 'Thai Baht'
 ];
 
 // If a specific country is requested

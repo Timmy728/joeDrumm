@@ -31,9 +31,9 @@
         </span>
     </div>
 
-    <!-- Modals for 5 Different Easy Buttons -->
-    <!-- Button 1 -->
+    <!-- Modals Container -->
     <div id="modals-container">
+        <!-- Country Info Modal -->
         <div id="infoModal1" class="modal fade" tabindex="-1">
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
@@ -51,7 +51,7 @@
             </div>
         </div>
 
-        <!-- Modal for Nearby Information (Button 2) -->
+        <!-- Nearby Info Modal -->
         <div id="infoModal2" class="modal fade" tabindex="-1">
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
@@ -69,7 +69,7 @@
             </div>
         </div>
         
-          <!-- Currency Modal (Button 3) -->
+        <!-- Currency Modal -->
         <div id="currencyModal" class="modal fade" tabindex="-1" data-bs-backdrop="false" data-bs-keyboard="false">
             <div class="modal-dialog modal-sm modal-dialog-centered modal-dialog-scrollable">
                 <div class="modal-content shadow">
@@ -86,21 +86,9 @@
 
                             <div class="form-floating mb-3">
                                 <select id="currencies" class="form-select">
-                                    <option value="EUR">€ EUR - Euro</option>
-                                    <option value="GBP">£ GBP - British Pound</option>
-                                    <option value="JPY">¥ JPY - Japanese Yen</option>
-                                    <option value="AUD">A$ AUD - Australian Dollar</option>
-                                    <option value="CAD">C$ CAD - Canadian Dollar</option>
-                                    <option value="CHF">Fr CHF - Swiss Franc</option>
-                                    <option value="CNY">¥ CNY - Chinese Yuan</option>
-                                    <option value="INR">₹ INR - Indian Rupee</option>
-                                    <option value="BRL">R$ BRL - Brazilian Real</option>
-                                    <option value="AED">د.إ'] AED - UAE Dirham</option>
-                                    <option value="ARS">$ ARS - Argentine Peso</option>
-                                    <option value="THB">฿ THB - Thai Baht</option>
-                                    
+                                    <!-- Options will be populated dynamically -->
                                 </select>
-                                <label for="exchangeRate">Convert to</label>
+                                <label for="currencies">Convert to</label>
                             </div>
 
                             <div class="form-floating">
@@ -119,27 +107,77 @@
                 </div>
             </div>
         </div>
-        
-        <!-- Button 4 -->
-        <div id="infoModal4" class="modal fade" tabindex="-1">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content">
-                    <div class="modal-header bg-success text-white">
-                        <h5 class="modal-title">Current Weather</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+
+        <!-- Weather Modal -->
+        <div id="weatherModal" class="modal fade" tabindex="-1" data-bs-backdrop="false" data-bs-keyboard="false">
+            <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+                <div class="modal-content shadow">
+                    <div class="modal-header bg-primary bg-gradient text-white">
+                        <h5 class="modal-title" id="weatherModalLabel">Weather Information</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body">
-                        <p><strong>Temperature:</strong> <span id="tempToday"></span></p>
-                        <p><strong>Conditions:</strong> <span id="conditionsToday"></span></p>
-                        <p id="weatherImg"></p>
-                        <h4 class="modal-title">10-Day Weather Forecast</h4>
-                        <div id="forecastInfo"></div>
+                        <div id="pre-load"></div>
+                        <div class="row">
+                            <div class="col border mt-1 ms-3 me-3 mb-2">
+                                <p class="fw-bold fs-6 mt-1">TODAY</p>
+                                <div class="row">
+                                    <div class="col text-center">
+                                        <p id="todayConditions" class="fw-bold fs-6 mt-3"></p>
+                                    </div>
+                                    <div class="col text-center">
+                                        <img id="todayIcon" class="img-fluid mt-0" src="" alt="" title="">
+                                    </div>
+                                    <div class="col text-center">
+                                        <p class="fw-bold fs-4 mb-0"><span id="todayMaxTemp"></span><sup>o</sup><span class="tempMetric">c</span></p>
+                                        <p class="fs-5 mt-0 text-secondary"><span id="todayMinTemp"></span><sup>o</sup><span class="tempMetric">c</span></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col border mt-2 ms-3 me-3 mb-0">
+                                <div class="row">
+                                    <div class="col text-center">
+                                        <p id="day1Date" class="fw-bold fs-6 mt-3"></p>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col text-center">
+                                        <img id="day1Icon" src="" alt="" title="">
+                                    </div>
+                                    <div class="col text-center">
+                                        <p class="fw-bold fs-4 mb-0"><span id="day1MaxTemp"></span><sup>o</sup>c</p>
+                                        <p class="fs-5 mt-0 text-secondary"><span id="day1MinTemp"></span><sup>o</sup>c</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col border mt-2 ms-1 me-3 mb-0">
+                                <div class="row">
+                                    <div class="col text-center">
+                                        <p id="day2Date" class="fw-bold fs-6 mt-3"></p>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col text-center">
+                                        <img id="day2Icon" src="" alt="" title="">
+                                    </div>
+                                    <div class="col text-center">
+                                        <p class="fw-bold fs-4 mb-0"><span id="day2MaxTemp"></span><sup>o</sup>c</p>
+                                        <p class="fs-5 mt-0 text-secondary"><span id="day2MinTemp"></span><sup>o</sup>c</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <p class="fs-6 fw-light">Last updated <span id="lastUpdated"></span></p>
                     </div>
                 </div>
             </div>
         </div>
-        
-        <!-- Button 5 -->
+
+        <!-- Wikipedia Modal -->
         <div id="infoModal5" class="modal fade" tabindex="-1">
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
@@ -162,6 +200,7 @@
     <script src="Js/leaflet.markercluster.js"></script>
     <script src="Js/easy-button.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/numeral.js/2.0.6/numeral.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/datejs/1.0/date.min.js"></script>
     <script src="Js/script.js"></script>
 </body>
 </html>

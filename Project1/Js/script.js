@@ -59,7 +59,7 @@ $(document).ready(function () {
         $('#infoModal1').modal('show');
     }).addTo(map);
 
-    L.easyButton('fa-map-marker-alt', function () {
+    L.easyButton('fa-newspaper', function () {
         $('#infoModal2').modal('show');
     }).addTo(map);
 

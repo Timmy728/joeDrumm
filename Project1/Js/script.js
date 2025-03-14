@@ -286,30 +286,11 @@ function displayWeather(iso2) {
         }
     });
 }
-
-function displayNearbyInfo(iso2) {
-    const country = geoJsonData.features.find(f => f.properties.iso_a2 === iso2);
-    if (country && country.properties) {
-        const bounds = L.geoJSON(country).getBounds();
-        const center = bounds.getCenter();
+    /// ---News Function ---
+    $(document).ready(function() {
+    $(`infoModal2`).modal("show");
+    })
         
-        $.get('Php/findNearbyStreets.php', { lat: center.lat, lon: center.lng }, function (streetData) {
-            $('#nearbyStreets').text(streetData.length > 0 ? streetData.map(street => street.name).join(", ") : "No streets found.");
-        }, 'json');
-
-        $.get('Php/findNearbyPlaceName.php', { lat: center.lat, lon: center.lng }, function (placeData) {
-            $('#nearbyPlaces').text(placeData.length > 0 ? placeData.map(place => place.name).join(", ") : "No places found.");
-        }, 'json');
-
-        $.get('Php/astergdem.php', { lat: center.lat, lon: center.lng }, function (elevationData) {
-            $('#elevation').text(elevationData.elevation ? `${elevationData.elevation}m` : "No elevation data.");
-        }, 'json');
-
-        $.get('Php/geoCodeAddress.php', { lat: center.lat, lon: center.lng }, function (addressData) {
-            $('#geoAddress').text(addressData.street ? `${addressData.street}, ${addressData.adminName1}` : "No address found.");
-        }, 'json');
-    }
-}
 
 function clearPreviousCountryData() {
     earthquakeLayer.clearLayers();

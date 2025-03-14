@@ -145,7 +145,6 @@ $(document).ready(function () {
         if (iso2) {
             clearPreviousCountryData();
             fetchAllCountryData(iso2);
-            displayNearbyInfo(iso2);
         }
     });
 });

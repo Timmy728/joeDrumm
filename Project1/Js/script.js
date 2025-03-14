@@ -12,6 +12,7 @@ let earthquakeLayer;
 let capitalMarker = null;
 let earthquakeMarkers = [];
 let layerControl;
+let geoJsonData = null;
 
 $(document).ready(function () {
     // Initialize the map with maxZoom specified
@@ -41,20 +42,13 @@ $(document).ready(function () {
     };
 
     map.on('locationfound', function (options) {
-        console.log(options);
-
-        $.ajax({
-            url: 'Php/CountryCode.php',
-            type: 'GET',
-            dataType: 'json',
-            data: { lat: options.latitude, lng: options.longitude },
-            success: function (data) {
-                $('#countrySelect').val(data.data.countryCode).change();
-            },
-            error: function (err) {
-                console.log(err);
+        if (geoJsonData) {
+            const point = [options.latitude, options.longitude];
+            const country = findCountryByPoint(point);
+            if (country) {
+                $('#countrySelect').val(country.properties.iso_a2).change();
             }
-        });
+        }
     });
 
     L.control.layers(basemaps).addTo(map);
@@ -105,23 +99,11 @@ $(document).ready(function () {
 
     loadCurrencies();
 
-    // Populate countries dropdown
-    $.ajax({
-        url: 'Php/countryName.php',
-        type: 'GET',
-        dataType: 'json',
-        success: function (data) {
-            const dropdown = $('#countrySelect');
-            dropdown.empty();
-            dropdown.append(new Option('Select a Country', ''));
-            data.forEach(function (country) {
-                if (country.name && country.iso2) {
-                    dropdown.append(new Option(country.name, country.iso2));
-                }
-            });
-
-            map.locate();
-        }
+    // Load GeoJSON data and populate countries dropdown
+    $.getJSON('countryBorders.geo.json', function(data) {
+        geoJsonData = data;
+        populateCountrySelect(data);
+        map.locate();
     });
 
     // Currency modal event handlers
@@ -167,6 +149,34 @@ $(document).ready(function () {
         }
     });
 });
+
+function populateCountrySelect(data) {
+    const dropdown = $('#countrySelect');
+    dropdown.empty();
+    dropdown.append(new Option('Select a Country', ''));
+    
+    // Sort features by country name
+    const sortedFeatures = data.features.sort((a, b) => 
+        a.properties.name.localeCompare(b.properties.name)
+    );
+
+    sortedFeatures.forEach(feature => {
+        const countryName = feature.properties.name;
+        const iso2 = feature.properties.iso_a2;
+        if (countryName && iso2) {
+            dropdown.append(new Option(countryName, iso2));
+        }
+    });
+}
+
+function findCountryByPoint(point) {
+    if (!geoJsonData) return null;
+    
+    return geoJsonData.features.find(feature => {
+        const polygon = L.geoJSON(feature.geometry);
+        return polygon.getBounds().contains(L.latLng(point));
+    });
+}
 
 function loadCurrencies() {
     $.ajax({
@@ -277,30 +287,28 @@ function displayWeather(iso2) {
     });
 }
 
-
 function displayNearbyInfo(iso2) {
-    $.get('Php/getCountryData.php', { iso2: iso2 }, function (countryData) {
-        if (countryData && countryData[0] && countryData[0].latlng) {
-            let lat = countryData[0].latlng[0];
-            let lon = countryData[0].latlng[1];
+    const country = geoJsonData.features.find(f => f.properties.iso_a2 === iso2);
+    if (country && country.properties) {
+        const bounds = L.geoJSON(country).getBounds();
+        const center = bounds.getCenter();
+        
+        $.get('Php/findNearbyStreets.php', { lat: center.lat, lon: center.lng }, function (streetData) {
+            $('#nearbyStreets').text(streetData.length > 0 ? streetData.map(street => street.name).join(", ") : "No streets found.");
+        }, 'json');
 
-            $.get('Php/findNearbyStreets.php', { lat, lon }, function (streetData) {
-                $('#nearbyStreets').text(streetData.length > 0 ? streetData.map(street => street.name).join(", ") : "No streets found.");
-            }, 'json');
+        $.get('Php/findNearbyPlaceName.php', { lat: center.lat, lon: center.lng }, function (placeData) {
+            $('#nearbyPlaces').text(placeData.length > 0 ? placeData.map(place => place.name).join(", ") : "No places found.");
+        }, 'json');
 
-            $.get('Php/findNearbyPlaceName.php', { lat, lon }, function (placeData) {
-                $('#nearbyPlaces').text(placeData.length > 0 ? placeData.map(place => place.name).join(", ") : "No places found.");
-            }, 'json');
+        $.get('Php/astergdem.php', { lat: center.lat, lon: center.lng }, function (elevationData) {
+            $('#elevation').text(elevationData.elevation ? `${elevationData.elevation}m` : "No elevation data.");
+        }, 'json');
 
-            $.get('Php/astergdem.php', { lat, lon }, function (elevationData) {
-                $('#elevation').text(elevationData.elevation ? `${elevationData.elevation}m` : "No elevation data.");
-            }, 'json');
-
-            $.get('Php/geoCodeAddress.php', { lat, lon }, function (addressData) {
-                $('#geoAddress').text(addressData.street ? `${addressData.street}, ${addressData.adminName1}` : "No address found.");
-            }, 'json');
-        }
-    }, 'json');
+        $.get('Php/geoCodeAddress.php', { lat: center.lat, lon: center.lng }, function (addressData) {
+            $('#geoAddress').text(addressData.street ? `${addressData.street}, ${addressData.adminName1}` : "No address found.");
+        }, 'json');
+    }
 }
 
 function clearPreviousCountryData() {
@@ -317,7 +325,23 @@ function clearPreviousCountryData() {
 }
 
 function fetchAllCountryData(iso2) {
-    getRectBounds(iso2);
+    const country = geoJsonData.features.find(f => f.properties.iso_a2 === iso2);
+    if (country) {
+        const bounds = L.geoJSON(country).getBounds();
+        placeEarthQuakeMarkers(
+            bounds.getNorth(),
+            bounds.getSouth(),
+            bounds.getEast(),
+            bounds.getWest()
+        );
+        getWikiResults(
+            bounds.getNorth(),
+            bounds.getSouth(),
+            bounds.getEast(),
+            bounds.getWest(),
+            iso2
+        );
+    }
     displayCountryInfo(iso2);
     displayCapitalCity(iso2);
     displayCapitalOnMap(iso2);
@@ -329,31 +353,12 @@ function fetchAllCountryData(iso2) {
     updateCountryBorders(iso2);
 }
 
-function getRectBounds(countryCode) {
-    console.log(countryCode);
-    $.ajax({
-        url: 'Php/countryInfo.php',
-        type: 'GET',
-        dataType: 'json',
-        data: {country:countryCode},
-        success: function (data) {
-            console.log(data);
-            if (data.data && data.data[0]) {
-                placeEarthQuakeMarkers(data.data[0].north, data.data[0].south, data.data[0].east, data.data[0].west);
-                getWikiResults(data.data[0].north, data.data[0].south, data.data[0].east, data.data[0].west, countryCode);
-            }
-        },
-        error:function(err){
-            console.log(err);
-        }
-    });
-}
-
 function displayCountryInfo(iso2) {
-    $.get('Php/countryName.php', { iso2: iso2 }, function (data) {
-        $('#countryNames').text(data.name);
+    const country = geoJsonData.features.find(f => f.properties.iso_a2 === iso2);
+    if (country) {
+        $('#countryNames').text(country.properties.name);
         $('#countryFlag').attr('src', `https://flagcdn.com/w80/${iso2.toLowerCase()}.png`).show();
-    }, 'json');
+    }
 }
 
 function displayCapitalCity(iso2) {
@@ -363,26 +368,25 @@ function displayCapitalCity(iso2) {
 }
 
 function displayCapitalOnMap(iso2) {
-    $.get('Php/capitalCities.php', { iso2: iso2 }, function (data) {
-        if (data.capital) {
-            $.get('Php/getCountryData.php', { iso2: iso2 }, function (countryData) {
-                if (countryData && countryData[0] && countryData[0].latlng) {
-                    let lat = countryData[0].latlng[0];
-                    let lon = countryData[0].latlng[1];
+    const country = geoJsonData.features.find(f => f.properties.iso_a2 === iso2);
+    if (country) {
+        $.get('Php/capitalCities.php', { iso2: iso2 }, function (data) {
+            if (data.capital) {
+                const bounds = L.geoJSON(country).getBounds();
+                const center = bounds.getCenter();
 
-                    var cityIcon = L.icon({
-                        iconUrl: 'Images/CityBuildings.png',
-                        iconSize: [32, 32],
-                        iconAnchor: [16, 32]
-                    });
+                var cityIcon = L.icon({
+                    iconUrl: 'Images/CityBuildings.png',
+                    iconSize: [32, 32],
+                    iconAnchor: [16, 32]
+                });
 
-                    capitalMarker = L.marker([lat, lon], { icon: cityIcon })
-                        .addTo(map)
-                        .bindPopup(`<strong>Capital:</strong> ${data.capital}`);
-                }
-            }, 'json');
-        }
-    }, 'json');
+                capitalMarker = L.marker([center.lat, center.lng], { icon: cityIcon })
+                    .addTo(map)
+                    .bindPopup(`<strong>Capital:</strong> ${data.capital}`);
+            }
+        }, 'json');
+    }
 }
 
 function displayPopulation(iso2) {
@@ -430,21 +434,18 @@ function updateCountryBorders(iso2) {
         map.removeLayer(bordersLayer);
     }
     
-    $.getJSON('Php/getCountryBorders.php', { iso2: iso2 }, function (country) {
-        if (country && !country.error) {
-            bordersLayer = L.geoJSON(country, {
-                style: {
-                    color: 'blue',
-                    weight: 2,
-                    fillColor: 'orange',
-                    fillOpacity: 0.3
-                }
-            }).addTo(map);
-            map.fitBounds(bordersLayer.getBounds());
-        } else {
-            console.error("Error loading country borders:", country ? country.error : "Unknown error");
-        }
-    });
+    const country = geoJsonData.features.find(f => f.properties.iso_a2 === iso2);
+    if (country) {
+        bordersLayer = L.geoJSON(country, {
+            style: {
+                color: 'blue',
+                weight: 2,
+                fillColor: 'orange',
+                fillOpacity: 0.3
+            }
+        }).addTo(map);
+        map.fitBounds(bordersLayer.getBounds());
+    }
 }
 
 function placeEarthQuakeMarkers(north, south, east, west) {

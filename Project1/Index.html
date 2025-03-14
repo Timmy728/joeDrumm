@@ -51,19 +51,91 @@
             </div>
         </div>
 
-        <!-- Nearby Info Modal -->
-        <div id="infoModal2" class="modal fade" tabindex="-1">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content">
-                    <div class="modal-header bg-success text-white">
-                        <h5 class="modal-title">Nearby Information</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+               <!-- News Modal -->
+        <div id="infoModal2" class="modal fade" tabindex="-1" data-bs-backdrop="false" data-bs-keyboard="false">
+            <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+                <div class="modal-content shadow">
+                    <div class="modal-header bg-danger bg-gradient text-white">
+                        <h5 class="modal-title">BREAKING NEWS</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        <p><strong>Nearby Streets:</strong> <span id="nearbyStreets"></span></p>
-                        <p><strong>Nearby Places:</strong> <span id="nearbyPlaces"></span></p>
-                        <p><strong>Elevation:</strong> <span id="elevation"></span></p>
-                        <p><strong>Geocoded Address:</strong> <span id="geoAddress"></span></p>
+                        <!-- first item -->          
+                        <table class="table table-borderless">
+                            <tr>
+                                <td rowspan="2" width="50%">
+                                    <img class="img-fluid rounded" src="https://ichef.bbci.co.uk/news/240/cpsprodpb/14498/production/_130069038_gettyimages-519726116.jpg" alt="" title="">
+                                </td>
+                                <td>
+                                    <a href="https://www.bbc.co.uk/news/entertainment-arts-65881813" class="fw-bold fs-6 text-black" target="_blank">Sir Paul McCartney says AI has enabled a 'final' Beatles song</a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="align-bottom pb-0">
+                                    <p class="fw-light fs-6 mb-1">BBC News</p>
+                                </td>            
+                            </tr>
+                        </table>
+                        
+                        <hr>
+                        
+                        <!-- second item -->
+                        <table class="table table-borderless mb-0">       
+                            <tr>
+                                <td rowspan="2" width="50%">
+                                    <img class="img-fluid rounded" src="https://ichef.bbci.co.uk/news/240/cpsprodpb/669D/production/_130096262_img_5432.jpg" alt="" title="">
+                                </td>
+                                <td>
+                                    <a href="https://www.bbc.co.uk/news/uk-scotland-glasgow-west-65894201" class="fw-bold fs-6 text-black" target="_blank">Parents 'devastated' as blunder leaves village 1,000 school places short</a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="align-bottom pb-0">
+                                    <p class="fw-light fs-6 mb-1">BBC News</p>
+                                </td>            
+                            </tr>
+                        </table> 
+                        
+                        <hr>
+                        
+                        <!-- third item -->
+                        <table class="table table-borderless mb-0">       
+                            <tr>
+                                <td rowspan="2" width="50%">
+                                    <img class="img-fluid rounded" src="https://ichef.bbci.co.uk/news/240/cpsprodpb/1084B/production/_130095676_p0fv8hdd.jpg" alt="" title="">
+                                </td>
+                                <td>
+                                    <a href="https://www.bbc.co.uk/news/av/world-australia-65912350" class="fw-bold fs-6 text-black" target="_blank">Watch: Tourist fights off feisty kangaroo in Australia</a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="align-bottom pb-0">
+                                    <p class="fw-light fs-6 mb-1">BBC News</p>
+                                </td>            
+                            </tr>
+                        </table>         
+
+                        <hr>
+                        
+                        <!-- fourth item -->
+                        <table class="table table-borderless mb-0">       
+                            <tr>
+                                <td rowspan="2" width="50%">
+                                    <img class="img-fluid rounded" src="https://ichef.bbci.co.uk/news/240/cpsprodpb/419D/production/_130079761_whatsubject.jpg" alt="" title="">
+                                </td>
+                                <td>
+                                    <a href="https://www.bbc.co.uk/news/business-65861096" class="fw-bold fs-6 text-black" target="_blank">Is the US trying to kill crypto?</a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="align-bottom pb-0">
+                                    <p class="fw-light fs-6 mb-1">BBC News</p>
+                                </td>            
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Close</button>
                     </div>
                 </div>
             </div>

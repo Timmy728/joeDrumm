@@ -100,7 +100,7 @@ $(document).ready(function () {
     loadCurrencies();
 
     // Load GeoJSON data and populate countries dropdown
-    $.getJSON('countryBorders.geo.json', function(data) {
+    $.getJSON('https://joedrumm.co.uk/Project1/Data/countryBorders.geo.json', function(data) {
         geoJsonData = data;
         populateCountrySelect(data);
         map.locate();

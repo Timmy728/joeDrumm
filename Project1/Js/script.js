@@ -302,10 +302,6 @@ function displayWeather(iso2) {
     });
 }
 
-// --- News Function ---
-$(document).ready(function() {
-    $('#infoModal2').modal("show");
-});
 
 function clearPreviousCountryData() {
     earthquakeLayer.clearLayers();

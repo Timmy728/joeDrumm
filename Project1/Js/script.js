@@ -1,4 +1,5 @@
 $(window).on('load', function () {
+    // Add preloader fade out when the page is loaded
     if ($('#preloader').length) {
         $('#preloader').delay(1000).fadeOut('slow', function () {
             $(this).remove();
@@ -103,7 +104,7 @@ $(document).ready(function () {
     $.getJSON('https://joedrumm.co.uk/Project1/Data/countryBorders.geo.json', function(data) {
         geoJsonData = data;
         populateCountrySelect(data);
-        map.locate();
+        map.locate(); // Trigger user's location or first country to focus
     });
 
     // Currency modal event handlers
@@ -149,6 +150,7 @@ $(document).ready(function () {
     });
 });
 
+// Add preloader removal logic here to hide once the first country is loaded
 function populateCountrySelect(data) {
     const dropdown = $('#countrySelect');
     dropdown.empty();
@@ -166,6 +168,13 @@ function populateCountrySelect(data) {
             dropdown.append(new Option(countryName, iso2));
         }
     });
+
+    // Hide preloader after first country is loaded
+    if ($('#preloader').length) {
+        $('#preloader').fadeOut('slow', function () {
+            $(this).remove();
+        });
+    }
 }
 
 function findCountryByPoint(point) {

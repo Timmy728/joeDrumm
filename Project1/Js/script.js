@@ -41,52 +41,105 @@ $(document).ready(function () {
         "Satellite": satellite
     };
 
-    var airports = L.markerClusterGroup({
-        polygonOptions: {
-            fillColor: "#fff",
-            color: "#000",
-            weight: 2,
-            opacity: 1,
-            fillOpacity: 0.5
+    map.on('locationfound', function (options) {
+        if (geoJsonData) {
+            const point = [options.latitude, options.longitude];
+            const country = findCountryByPoint(point);
+            if (country) {
+                $('#countrySelect').val(country.properties.iso_a2).change();
+            }
         }
     });
 
-    var cities = L.markerClusterGroup({
-        polygonOptions: {
-            fillColor: "#fff",
-            color: "#000",
-            weight: 2,
-            opacity: 1,
-            fillOpacity: 0.5
+    L.control.layers(basemaps).addTo(map);
+    streets.addTo(map);
+
+    // Add EasyButtons
+    L.easyButton('fa-flag', function () {
+        $('#infoModal1').modal('show');
+    }).addTo(map);
+
+    L.easyButton('fa-newspaper', function () {
+        $('#infoModal2').modal('show');
+    }).addTo(map);
+
+    // Currency Button
+    L.easyButton({
+        states: [{
+            stateName: 'show-currency',
+            icon: '<i class="fas fa-dollar-sign" style="font-size: 16px; color: #333;"></i>',
+            title: 'Show Currency Converter',
+            onClick: function() {
+                loadCurrencies();
+                $("#currencyModal").modal("show");
+            }
+        }]
+    }).addTo(map);
+
+    // Weather Button
+    L.easyButton({
+        states: [{
+            stateName: 'show-weather',
+            icon: '<i class="fas fa-cloud-sun" style="font-size: 16px; color: #333;"></i>',
+            title: 'Show Weather Information',
+            onClick: function() {
+                const iso2 = $('#countrySelect').val();
+                if (iso2) {
+                    displayWeather(iso2);
+                } else {
+                    alert('Please select a country first');
+                }
+            }
+        }]
+    }).addTo(map);
+
+    L.easyButton('fa-globe', function () {
+        $('#infoModal5').modal('show');
+    }).addTo(map);
+
+    loadCurrencies();
+
+    // Load GeoJSON data and populate countries dropdown
+    $.getJSON('https://joedrumm.co.uk/Project1/Data/countryBorders.geo.json', function(data) {
+        geoJsonData = data;
+        populateCountrySelect(data);
+        map.locate();
+    });
+
+    // Currency modal event handlers
+    $('#fromAmount').on('keyup change', function () {
+        calcResult();
+    });
+
+    $('#currencies').on('change', function () {
+        calcResult();
+    });
+
+    // Modal handlers
+    $('#currencyModal').on('show.bs.modal', function () {
+        const selectedCountry = $('#countrySelect').val();
+        if (selectedCountry) {
+            $.ajax({
+                url: "Php/latestExchangeRate.php",
+                type: 'GET',
+                dataType: 'json',
+                data: { iso2: selectedCountry },
+                success: function (result) {
+                    if (result && result.currencyCode) {
+                        $('#currencies').val(result.currencyCode);
+                        calcResult();
+                    }
+                }
+            });
         }
     });
 
-    var overlays = {
-        "Airports": airports,
-        "Cities": cities
-    };
-
-    var airportIcon = L.ExtraMarkers.icon({
-        prefix: "fa",
-        icon: "fa-plane",
-        iconColor: "black",
-        markerColor: "white",
-        shape: "square"
+    $('#currencyModal').on('hidden.bs.modal', function () {
+        $('#fromAmount').val(1);
+        calcResult();
     });
 
-    var cityIcon = L.ExtraMarkers.icon({
-        prefix: "fa",
-        icon: "fa-city",
-        markerColor: "green",
-        shape: "square"
-    });
-
-    // Add markers and layers to the map control
-    L.control.layers(basemaps, { "Airports": airports, "Cities": cities }).addTo(map);
-    getAirports();
-    getCities();
-
-    // Event handler for country selection
+    // On country selection
     $('#countrySelect').change(function () {
         const iso2 = $(this).val();
         if (iso2) {
@@ -94,189 +147,6 @@ $(document).ready(function () {
             fetchAllCountryData(iso2);
         }
     });
-});
-
-// Fetch airports data and add them to the airports marker group
-function getAirports() {
-    $.ajax({
-        url: "https://resources.itcareerswitch.co.uk/leaflet/getAirports.php",
-        type: "POST",
-        dataType: "json",
-        data: {
-            iso: "GB"
-        },
-        success: function (result) {
-            if (result.status.code == 200) {
-                result.data.forEach(function (item) {
-                    L.marker([item.lat, item.lng], { icon: airportIcon })
-                        .bindTooltip(item.name, { direction: "top", sticky: true })
-                        .addTo(airports);
-                });
-            } else {
-                showToast("Error retrieving airport data", 4000, false);
-            }
-        },
-        error: function (jqXHR, textStatus, errorThrown) {
-            showToast("Airports - server error", 4000, false);
-        }
-    });
-}
-
-// Fetch city data and add them to the cities marker group
-function getCities() {
-    $.ajax({
-        url: "https://resources.itcareerswitch.co.uk/leaflet/getCities.php",
-        type: "POST",
-        dataType: "json",
-        data: {
-            iso: "GB"
-        },
-        success: function (result) {
-            if (result.status.code == 200) {
-                result.data.forEach(function (item) {
-                    L.marker([item.lat, item.lng], { icon: cityIcon })
-                        .bindTooltip(
-                            "<div class='col text-center'><strong>" +
-                            item.name +
-                            "</strong><br><i>(" +
-                            numeral(item.population).format("0,0") +
-                            ")</i></div>",
-                            { direction: "top", sticky: true }
-                        )
-                        .addTo(cities);
-                });
-            } else {
-                showToast("Error retrieving city data", 4000, false);
-            }
-        },
-        error: function (jqXHR, textStatus, errorThrown) {
-            showToast("Cities - server error", 4000, false);
-        }
-    });
-}
-
-// Toast notification function
-function showToast(message, duration, close) {
-    Toastify({
-        text: message,
-        duration: duration,
-        newWindow: true,
-        close: close,
-        gravity: "top", // `top` or `bottom`
-        position: "center", // `left`, `center` or `right`
-        stopOnFocus: true, // Prevents dismissing of toast on hover
-        style: {
-            background: "#870101"
-        },
-        onClick: function () {} // Callback after click
-    }).showToast();
-}
-
-map.on('locationfound', function (options) {
-    if (geoJsonData) {
-        const point = [options.latitude, options.longitude];
-        const country = findCountryByPoint(point);
-        if (country) {
-            $('#countrySelect').val(country.properties.iso_a2).change();
-        }
-    }
-});
-
-L.control.layers(basemaps).addTo(map);
-streets.addTo(map);
-
-// Add EasyButtons
-L.easyButton('fa-flag', function () {
-    $('#infoModal1').modal('show');
-}).addTo(map);
-
-L.easyButton('fa-newspaper', function () {
-    $('#infoModal2').modal('show');
-}).addTo(map);
-
-// Currency Button
-L.easyButton({
-    states: [{
-        stateName: 'show-currency',
-        icon: '<i class="fas fa-dollar-sign" style="font-size: 16px; color: #333;"></i>',
-        title: 'Show Currency Converter',
-        onClick: function() {
-            loadCurrencies();
-            $("#currencyModal").modal("show");
-        }
-    }]
-}).addTo(map);
-
-// Weather Button
-L.easyButton({
-    states: [{
-        stateName: 'show-weather',
-        icon: '<i class="fas fa-cloud-sun" style="font-size: 16px; color: #333;"></i>',
-        title: 'Show Weather Information',
-        onClick: function() {
-            const iso2 = $('#countrySelect').val();
-            if (iso2) {
-                displayWeather(iso2);
-            } else {
-                alert('Please select a country first');
-            }
-        }
-    }]
-}).addTo(map);
-
-L.easyButton('fa-globe', function () {
-    $('#infoModal5').modal('show');
-}).addTo(map);
-
-loadCurrencies();
-
-// Load GeoJSON data and populate countries dropdown
-$.getJSON('https://joedrumm.co.uk/Project1/Data/countryBorders.geo.json', function(data) {
-    geoJsonData = data;
-    populateCountrySelect(data);
-    map.locate();
-});
-
-// Currency modal event handlers
-$('#fromAmount').on('keyup change', function () {
-    calcResult();
-});
-
-$('#currencies').on('change', function () {
-    calcResult();
-});
-
-// Modal handlers
-$('#currencyModal').on('show.bs.modal', function () {
-    const selectedCountry = $('#countrySelect').val();
-    if (selectedCountry) {
-        $.ajax({
-            url: "Php/latestExchangeRate.php",
-            type: 'GET',
-            dataType: 'json',
-            data: { iso2: selectedCountry },
-            success: function (result) {
-                if (result && result.currencyCode) {
-                    $('#currencies').val(result.currencyCode);
-                    calcResult();
-                }
-            }
-        });
-    }
-});
-
-$('#currencyModal').on('hidden.bs.modal', function () {
-    $('#fromAmount').val(1);
-    calcResult();
-});
-
-// On country selection
-$('#countrySelect').change(function () {
-    const iso2 = $(this).val();
-    if (iso2) {
-        clearPreviousCountryData();
-        fetchAllCountryData(iso2);
-    }
 });
 
 function populateCountrySelect(data) {
@@ -431,6 +301,7 @@ function displayWeather(iso2) {
         }
     });
 }
+
 
 function clearPreviousCountryData() {
     earthquakeLayer.clearLayers();

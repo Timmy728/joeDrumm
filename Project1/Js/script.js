@@ -1,6 +1,3 @@
-// Import formatters
-import { formatDate, formatDateTime, formatNumber, formatDecimal, formatCurrency } from './utils/formatters';
-
 $(window).on('load', function () {
     if ($('#preloader').length) {
         $('#preloader').delay(1000).fadeOut('slow', function () {
@@ -212,7 +209,7 @@ function calcResult() {
     if (rate) {
         const fromAmount = parseFloat($('#fromAmount').val()) || 0;
         const result = fromAmount * parseFloat(rate);
-        $('#toAmount').val(formatCurrency(result));
+        $('#toAmount').val(window.formatCurrency(result));
     }
 }
 
@@ -235,34 +232,34 @@ function displayWeather(iso2) {
                     $('#todayConditions').text(forecast[0].conditionText);
                     $('#todayIcon').attr('src', forecast[0].conditionIcon)
                                  .attr('alt', forecast[0].conditionText);
-                    $('#todayMaxTemp').text(formatDecimal(forecast[0].maxC));
-                    $('#todayMinTemp').text(formatDecimal(forecast[0].minC));
+                    $('#todayMaxTemp').text(window.formatDecimal(forecast[0].maxC));
+                    $('#todayMinTemp').text(window.formatDecimal(forecast[0].minC));
                     
                     // Day 1
                     if (forecast.length > 1) {
-                        $('#day1Date').text(formatDate(forecast[1].date));
+                        $('#day1Date').text(window.formatDate(forecast[1].date));
                         $('#day1Icon').attr('src', forecast[1].conditionIcon)
                                     .attr('alt', forecast[1].conditionText);
-                        $('#day1MinTemp').text(formatDecimal(forecast[1].minC));
-                        $('#day1MaxTemp').text(formatDecimal(forecast[1].maxC));
+                        $('#day1MinTemp').text(window.formatDecimal(forecast[1].minC));
+                        $('#day1MaxTemp').text(window.formatDecimal(forecast[1].maxC));
                     }
                     
                     // Day 2
                     if (forecast.length > 2) {
-                        $('#day2Date').text(formatDate(forecast[2].date));
+                        $('#day2Date').text(window.formatDate(forecast[2].date));
                         $('#day2Icon').attr('src', forecast[2].conditionIcon)
                                     .attr('alt', forecast[2].conditionText);
-                        $('#day2MinTemp').text(formatDecimal(forecast[2].minC));
-                        $('#day2MaxTemp').text(formatDecimal(forecast[2].maxC));
+                        $('#day2MinTemp').text(window.formatDecimal(forecast[2].minC));
+                        $('#day2MaxTemp').text(window.formatDecimal(forecast[2].maxC));
                     }
 
                     // Day 3
                     if (forecast.length > 3) {
-                        $('#day3Date').text(formatDate(forecast[3].date));
+                        $('#day3Date').text(window.formatDate(forecast[3].date));
                         $('#day3Icon').attr('src', forecast[3].conditionIcon)
                                     .attr('alt', forecast[3].conditionText);
-                        $('#day3MinTemp').text(formatDecimal(forecast[3].minC));
-                        $('#day3MaxTemp').text(formatDecimal(forecast[3].maxC));
+                        $('#day3MinTemp').text(window.formatDecimal(forecast[3].minC));
+                        $('#day3MaxTemp').text(window.formatDecimal(forecast[3].maxC));
                     }
                 }
                 
@@ -270,7 +267,7 @@ function displayWeather(iso2) {
                 $('#weatherModalLabel').text(`${forecastResult.data.location}, ${forecastResult.data.country}`);
                 
                 // Update last updated timestamp
-                $('#lastUpdated').text(formatDateTime(forecastResult.data.lastUpdated));
+                $('#lastUpdated').text(window.formatDateTime(forecastResult.data.lastUpdated));
                 
                 // Hide loading state and show modal
                 $('#pre-load').addClass('fadeOut').hide();
@@ -369,18 +366,18 @@ function displayCapitalOnMap(iso2) {
 
 function displayPopulation(iso2) {
     $.get('Php/Population.php', { countryCode: iso2 }, function (data) {
-        $('#population').text(formatNumber(data.population));
+        $('#population').text(window.formatNumber(data.population));
     }, 'json');
 }
 
 function displayExchangeRate(iso2) {
     $.get('Php/latestExchangeRate.php', { iso2: iso2 }, function (data) {
-        $('#txtCurrencyRate').text(`1 USD = ${formatDecimal(data.exchangeRate)} ${data.currencyCode}`);
+        $('#txtCurrencyRate').text(`1 USD = ${window.formatDecimal(data.exchangeRate)} ${data.currencyCode}`);
         $('#convertBtn').off('click').on('click', function () {
             const amount = parseFloat($('#currencyAmount').val());
             if (!isNaN(amount)) {
                 const convertedAmount = amount * data.exchangeRate;
-                $('#convertedCurrency').text(`${formatCurrency(amount)} USD = ${formatCurrency(convertedAmount)} ${data.currencyCode}`);
+                $('#convertedCurrency').text(`${window.formatCurrency(amount)} USD = ${window.formatCurrency(convertedAmount)} ${data.currencyCode}`);
             }
         });
     }, 'json');
@@ -458,10 +455,10 @@ function placeEarthQuakeMarkers(north, south, east, west) {
 
                     let marker = L.marker([lat, lng], { icon: redIcon })
                         .bindPopup(`
-                            <strong>📍 Magnitude:</strong> ${formatDecimal(quake.magnitude)}<br>
-                            <strong>📏 Depth:</strong> ${formatDecimal(quake.depth)} km<br>
-                            <strong>⏰ Time:</strong> ${formatDateTime(quake.datetime)}<br>
-                            <strong>🌍 Location:</strong> ${formatDecimal(lat, 4)}, ${formatDecimal(lng, 4)}
+                            <strong>📍 Magnitude:</strong> ${window.formatDecimal(quake.magnitude)}<br>
+                            <strong>📏 Depth:</strong> ${window.formatDecimal(quake.depth)} km<br>
+                            <strong>⏰ Time:</strong> ${window.formatDateTime(quake.datetime)}<br>
+                            <strong>🌍 Location:</strong> ${window.formatDecimal(lat, 4)}, ${window.formatDecimal(lng, 4)}
                         `);
                     
                     earthquakeLayer.addLayer(marker);

@@ -41,6 +41,130 @@ $(document).ready(function () {
         "Satellite": satellite
     };
 
+    var airports = L.markerClusterGroup({
+    polygonOptions: {
+        fillColor: "#fff",
+        color: "#000",
+        weight: 2,
+        opacity: 1,
+        fillOpacity: 0.5
+    }
+});
+
+var cities = L.markerClusterGroup({
+    polygonOptions: {
+        fillColor: "#fff",
+        color: "#000",
+        weight: 2,
+        opacity: 1,
+        fillOpacity: 0.5
+    }
+});
+
+var overlays = {
+    "Airports": airports,
+    "Cities": cities
+};
+
+var airportIcon = L.ExtraMarkers.icon({
+    prefix: "fa",
+    icon: "fa-plane",
+    iconColor: "black",
+    markerColor: "white",
+    shape: "square"
+});
+
+var cityIcon = L.ExtraMarkers.icon({
+    prefix: "fa",
+    icon: "fa-city",
+    markerColor: "green",
+    shape: "square"
+});
+
+    // Add markers and layers to the map control
+    L.control.layers(basemaps, { "Airports": airports, "Cities": cities }).addTo(map);
+    getAirports();
+    getCities();
+});
+
+// Fetch airports data and add them to the airports marker group
+function getAirports() {
+    $.ajax({
+        url: "https://resources.itcareerswitch.co.uk/leaflet/getAirports.php",
+        type: "POST",
+        dataType: "json",
+        data: {
+            iso: "GB"
+        },
+        success: function (result) {
+            if (result.status.code == 200) {
+                result.data.forEach(function (item) {
+                    L.marker([item.lat, item.lng], { icon: airportIcon })
+                        .bindTooltip(item.name, { direction: "top", sticky: true })
+                        .addTo(airports);
+                });
+            } else {
+                showToast("Error retrieving airport data", 4000, false);
+            }
+        },
+        error: function (jqXHR, textStatus, errorThrown) {
+            showToast("Airports - server error", 4000, false);
+        }
+    });
+}
+
+// Fetch city data and add them to the cities marker group
+function getCities() {
+    $.ajax({
+        url: "https://resources.itcareerswitch.co.uk/leaflet/getCities.php",
+        type: "POST",
+        dataType: "json",
+        data: {
+            iso: "GB"
+        },
+        success: function (result) {
+            if (result.status.code == 200) {
+                result.data.forEach(function (item) {
+                    L.marker([item.lat, item.lng], { icon: cityIcon })
+                        .bindTooltip(
+                            "<div class='col text-center'><strong>" +
+                            item.name +
+                            "</strong><br><i>(" +
+                            numeral(item.population).format("0,0") +
+                            ")</i></div>",
+                            { direction: "top", sticky: true }
+                        )
+                        .addTo(cities);
+                });
+            } else {
+                showToast("Error retrieving city data", 4000, false);
+            }
+        },
+        error: function (jqXHR, textStatus, errorThrown) {
+            showToast("Cities - server error", 4000, false);
+        }
+    });
+}
+
+// Toast notification function
+function showToast(message, duration, close) {
+    Toastify({
+        text: message,
+        duration: duration,
+        newWindow: true,
+        close: close,
+        gravity: "top", // `top` or `bottom`
+        position: "center", // `left`, `center` or `right`
+        stopOnFocus: true, // Prevents dismissing of toast on hover
+        style: {
+            background: "#870101"
+        },
+        onClick: function () {} // Callback after click
+    }).showToast();
+}
+
+
+
     map.on('locationfound', function (options) {
         if (geoJsonData) {
             const point = [options.latitude, options.longitude];

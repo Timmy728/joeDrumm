@@ -14,17 +14,13 @@
     <link rel="stylesheet" href="css/MarkerCluster.Default.css">
     <!-- EasyButton CSS -->
     <link rel="stylesheet" href="css/easy-button.css">
-    <!-- Font Awesome (External CSS) -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <!-- Custom CSS (This must be last) -->
+    <!-- Custom CSS -->
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="icon" type="image/png" sizes="132x132" href="/Project1/Images/Favicon.png">
 </head>
 <body>
-       <!-- Preloader -->
-        <div id="preloader">
-        <div class="spinner"></div> <!-- Spinner to show while loading -->
-        </div>
+    <div id="pre-loader"></div>
     
     <!-- Country Selection Dropdown on Map -->
     <div id="map">
@@ -46,16 +42,16 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body">
-                        <p><strong>🌍Country:</strong> <span id="countryNames"></span> <img id="countryFlag" src="" alt="" width="30" style="display:none;"></p>
-                        <p><strong>🏙️Capital City:</strong> <span id="capitalCity"></span></p>
-                        <p><strong>👥Population:</strong> <span id="population"></span></p>
-                        <p><strong>🕒Timezone:</strong> <span id="timezone"></span></p>
+                        <p><strong>Country:</strong> <span id="countryNames"></span> <img id="countryFlag" src="" alt="" width="30" style="display:none;"></p>
+                        <p><strong>Capital City:</strong> <span id="capitalCity"></span></p>
+                        <p><strong>Population:</strong> <span id="population"></span></p>
+                        <p><strong>Timezone:</strong> <span id="timezone"></span></p>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- News Modal -->
+               <!-- News Modal -->
         <div id="infoModal2" class="modal fade" tabindex="-1" data-bs-backdrop="false" data-bs-keyboard="false">
             <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
                 <div class="modal-content shadow">
@@ -236,7 +232,7 @@
                                 </div>
                                 <div class="row">
                                     <div class="col text-center">
-                                        <img id="day2Icon" src="" alt="" title=""/>
+                                        <img id="day2Icon" src="" alt="" title="">
                                     </div>
                                     <div class="col text-center">
                                         <p class="fw-bold fs-4 mb-0"><span id="day2MaxTemp"></span><sup>o</sup>c</p>

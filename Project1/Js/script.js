@@ -1,5 +1,4 @@
 $(window).on('load', function () {
-    // Add preloader fade out when the page is loaded
     if ($('#preloader').length) {
         $('#preloader').delay(1000).fadeOut('slow', function () {
             $(this).remove();
@@ -16,54 +15,11 @@ let layerControl;
 let geoJsonData = null;
 
 $(document).ready(function () {
-    // First load GeoJSON data
-    $.getJSON('https://joedrumm.co.uk/Project1/Data/countryBorders.geo.json', function(data) {
-        geoJsonData = data;
-        populateCountrySelect(data);
-        
-        // After loading GeoJSON, get user location
-        if ("geolocation" in navigator) {
-            navigator.geolocation.getCurrentPosition(
-                function(position) {
-                    // Success callback
-                    const point = [position.coords.latitude, position.coords.longitude];
-                    const country = findCountryByPoint(point);
-                    if (country) {
-                        $('#countrySelect').val(country.properties.iso_a2).change();
-                        // Center map on UK coordinates
-                        map.setView([54.5, -2], 6); // UK centered coordinates
-                    }
-                },
-                function(error) {
-                    // Error callback - Default to UK
-                    console.warn("Geolocation error:", error.message);
-                    $('#countrySelect').val('GB').change();
-                    map.setView([54.5, -2], 6); // UK centered coordinates
-                },
-                {
-                    enableHighAccuracy: true,
-                    timeout: 5000,
-                    maximumAge: 0
-                }
-            );
-        } else {
-            // Geolocation not supported - Default to UK
-            console.warn("Geolocation is not supported by this browser");
-            $('#countrySelect').val('GB').change();
-            map.setView([54.5, -2], 6); // UK centered coordinates
-        }
-
-        // Initialize the map with UK coordinates
-        initializeMap([54.5, -2]);
-    });
-});
-
-function initializeMap(initialCoords) {
     // Initialize the map with maxZoom specified
     map = L.map('map', {
         maxZoom: 18,
         minZoom: 2
-    }).setView(initialCoords, 6); // Set higher zoom level for better initial view
+    }).setView([20, 0], 2);
 
     // Initialize marker cluster group
     earthquakeLayer = L.markerClusterGroup();
@@ -84,6 +40,16 @@ function initializeMap(initialCoords) {
         "Streets": streets,
         "Satellite": satellite
     };
+
+    map.on('locationfound', function (options) {
+        if (geoJsonData) {
+            const point = [options.latitude, options.longitude];
+            const country = findCountryByPoint(point);
+            if (country) {
+                $('#countrySelect').val(country.properties.iso_a2).change();
+            }
+        }
+    });
 
     L.control.layers(basemaps).addTo(map);
     streets.addTo(map);
@@ -130,42 +96,84 @@ function initializeMap(initialCoords) {
     L.easyButton('fa-globe', function () {
         $('#infoModal5').modal('show');
     }).addTo(map);
+
+    loadCurrencies();
+
+    // Load GeoJSON data and populate countries dropdown
+    $.getJSON('https://joedrumm.co.uk/Project1/Data/countryBorders.geo.json', function(data) {
+        geoJsonData = data;
+        populateCountrySelect(data);
+        map.locate();
+    });
+
+    // Currency modal event handlers
+    $('#fromAmount').on('keyup change', function () {
+        calcResult();
+    });
+
+    $('#currencies').on('change', function () {
+        calcResult();
+    });
+
+    // Modal handlers
+    $('#currencyModal').on('show.bs.modal', function () {
+        const selectedCountry = $('#countrySelect').val();
+        if (selectedCountry) {
+            $.ajax({
+                url: "Php/latestExchangeRate.php",
+                type: 'GET',
+                dataType: 'json',
+                data: { iso2: selectedCountry },
+                success: function (result) {
+                    if (result && result.currencyCode) {
+                        $('#currencies').val(result.currencyCode);
+                        calcResult();
+                    }
+                }
+            });
+        }
+    });
+
+    $('#currencyModal').on('hidden.bs.modal', function () {
+        $('#fromAmount').val(1);
+        calcResult();
+    });
+
+    // On country selection
+    $('#countrySelect').change(function () {
+        const iso2 = $(this).val();
+        if (iso2) {
+            clearPreviousCountryData();
+            fetchAllCountryData(iso2);
+        }
+    });
+});
+
+function populateCountrySelect(data) {
+    const dropdown = $('#countrySelect');
+    dropdown.empty();
+    dropdown.append(new Option('Select a Country', ''));
+    
+    // Sort features by country name
+    const sortedFeatures = data.features.sort((a, b) => 
+        a.properties.name.localeCompare(b.properties.name)
+    );
+
+    sortedFeatures.forEach(feature => {
+        const countryName = feature.properties.name;
+        const iso2 = feature.properties.iso_a2;
+        if (countryName && iso2) {
+            dropdown.append(new Option(countryName, iso2));
+        }
+    });
 }
 
 function findCountryByPoint(point) {
     if (!geoJsonData) return null;
     
-    // More robust point-in-polygon check
     return geoJsonData.features.find(feature => {
-        try {
-            const polygon = L.geoJSON(feature);
-            const latLng = L.latLng(point[0], point[1]);
-            
-            // Check if point is within polygon bounds first (faster)
-            if (!polygon.getBounds().contains(latLng)) {
-                return false;
-            }
-            
-            // For more accurate results, use proper point-in-polygon check
-            let inside = false;
-            polygon.eachLayer(layer => {
-                if (layer instanceof L.Polygon) {
-                    const polygonLatLngs = layer.getLatLngs()[0];
-                    for (let i = 0, j = polygonLatLngs.length - 1; i < polygonLatLngs.length; j = i++) {
-                        const xi = polygonLatLngs[i].lng, yi = polygonLatLngs[i].lat;
-                        const xj = polygonLatLngs[j].lng, yj = polygonLatLngs[j].lat;
-                        
-                        const intersect = ((yi > point[1]) !== (yj > point[1])) &&
-                            (point[0] < (xj - xi) * (point[1] - yi) / (yj - yi) + xi);
-                        if (intersect) inside = !inside;
-                    }
-                }
-            });
-            return inside;
-        } catch (e) {
-            console.error('Error checking point in polygon:', e);
-            return false;
-        }
+        const polygon = L.geoJSON(feature.geometry);
+        return polygon.getBounds().contains(L.latLng(point));
     });
 }
 
@@ -293,6 +301,7 @@ function displayWeather(iso2) {
         }
     });
 }
+
 
 function clearPreviousCountryData() {
     earthquakeLayer.clearLayers();
@@ -516,34 +525,4 @@ function getWikiResults(north, south, east, west, iso2) {
             $('#wikiArticles').append("<li>Error loading Wikipedia articles.</li>");
         }
     });
-}
-
-// Add populateCountrySelect function
-function populateCountrySelect(data) {
-    const dropdown = $('#countrySelect');
-    dropdown.empty();
-    dropdown.append(new Option('Select a Country', ''));
-    
-    // Sort features by country name
-    const sortedFeatures = data.features.sort((a, b) => 
-        a.properties.name.localeCompare(b.properties.name)
-    );
-
-    sortedFeatures.forEach(feature => {
-        const countryName = feature.properties.name;
-        const iso2 = feature.properties.iso_a2;
-        if (countryName && iso2) {
-            dropdown.append(new Option(countryName, iso2));
-        }
-    });
-
-    // Set default to UK and trigger change
-    dropdown.val('GB').trigger('change');
-
-    // Hide preloader after first country is loaded
-    if ($('#preloader').length) {
-        $('#preloader').fadeOut('slow', function () {
-            $(this).remove();
-        });
-    }
 }

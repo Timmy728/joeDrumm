@@ -19,7 +19,7 @@ $(document).ready(function () {
     map = L.map('map', {
         maxZoom: 18,
         minZoom: 2
-    }).setView([20, 0], 2); // Default global view, change if needed
+    }).setView([20, 0], 2);
 
     // Initialize marker cluster group
     earthquakeLayer = L.markerClusterGroup();
@@ -42,6 +42,7 @@ $(document).ready(function () {
     };
 
     map.on('locationfound', function (options) {
+        console.log("Location found:", options); // Log the location data
         if (geoJsonData) {
             const point = [options.latitude, options.longitude];
             const country = findCountryByPoint(point);
@@ -53,7 +54,7 @@ $(document).ready(function () {
 
     map.on('locationerror', function (e) {
         console.warn("Location detection failed. Using fallback location.");
-        map.setView([51.5074, -0.1278], 5); // Default to UK (London coordinates) in case of error
+        map.setView([51.5074, -0.1278], 5); // Default to London (UK coordinates) if geolocation fails
     });
 
     L.control.layers(basemaps).addTo(map);
@@ -74,7 +75,7 @@ $(document).ready(function () {
             stateName: 'show-currency',
             icon: '<i class="fas fa-dollar-sign" style="font-size: 16px; color: #333;"></i>',
             title: 'Show Currency Converter',
-            onClick: function () {
+            onClick: function() {
                 loadCurrencies();
                 $("#currencyModal").modal("show");
             }
@@ -87,7 +88,7 @@ $(document).ready(function () {
             stateName: 'show-weather',
             icon: '<i class="fas fa-cloud-sun" style="font-size: 16px; color: #333;"></i>',
             title: 'Show Weather Information',
-            onClick: function () {
+            onClick: function() {
                 const iso2 = $('#countrySelect').val();
                 if (iso2) {
                     displayWeather(iso2);
@@ -105,7 +106,7 @@ $(document).ready(function () {
     loadCurrencies();
 
     // Load GeoJSON data and populate countries dropdown
-    $.getJSON('https://joedrumm.co.uk/Project1/Data/countryBorders.geo.json', function (data) {
+    $.getJSON('https://joedrumm.co.uk/Project1/Data/countryBorders.geo.json', function(data) {
         geoJsonData = data;
         populateCountrySelect(data);
         map.locate();
@@ -158,9 +159,9 @@ function populateCountrySelect(data) {
     const dropdown = $('#countrySelect');
     dropdown.empty();
     dropdown.append(new Option('Select a Country', ''));
-
+    
     // Sort features by country name
-    const sortedFeatures = data.features.sort((a, b) =>
+    const sortedFeatures = data.features.sort((a, b) => 
         a.properties.name.localeCompare(b.properties.name)
     );
 
@@ -175,7 +176,7 @@ function populateCountrySelect(data) {
 
 function findCountryByPoint(point) {
     if (!geoJsonData) return null;
-
+    
     return geoJsonData.features.find(feature => {
         const polygon = L.geoJSON(feature.geometry);
         return polygon.getBounds().contains(L.latLng(point));
@@ -237,39 +238,39 @@ function formatCurrency(number) {
 function displayWeather(iso2) {
     // Show loading state
     $('#pre-load').removeClass('fadeOut').show();
-
+    
     $.ajax({
         url: 'Php/getWeatherForecast.php',
         type: 'GET',
         dataType: 'json',
         data: { location: iso2 },
-        success: function (forecastResult) {
+        success: function(forecastResult) {
             if (forecastResult.status && forecastResult.status.code === 200) {
                 const forecast = forecastResult.data.forecast;
-
+                
                 // Update forecast days
                 if (forecast && forecast.length > 0) {
                     // Today
                     $('#todayConditions').text(forecast[0].conditionText);
                     $('#todayIcon').attr('src', forecast[0].conditionIcon)
-                        .attr('alt', forecast[0].conditionText);
+                                 .attr('alt', forecast[0].conditionText);
                     $('#todayMaxTemp').text(formatNumber(forecast[0].maxC));
                     $('#todayMinTemp').text(formatNumber(forecast[0].minC));
-
+                    
                     // Day 1
                     if (forecast.length > 1) {
                         $('#day1Date').text(formatDate(forecast[1].date));
                         $('#day1Icon').attr('src', forecast[1].conditionIcon)
-                            .attr('alt', forecast[1].conditionText);
+                                    .attr('alt', forecast[1].conditionText);
                         $('#day1MinTemp').text(formatNumber(forecast[1].minC));
                         $('#day1MaxTemp').text(formatNumber(forecast[1].maxC));
                     }
-
+                    
                     // Day 2
                     if (forecast.length > 2) {
                         $('#day2Date').text(formatDate(forecast[2].date));
                         $('#day2Icon').attr('src', forecast[2].conditionIcon)
-                            .attr('alt', forecast[2].conditionText);
+                                    .attr('alt', forecast[2].conditionText);
                         $('#day2MinTemp').text(formatNumber(forecast[2].minC));
                         $('#day2MaxTemp').text(formatNumber(forecast[2].maxC));
                     }
@@ -278,18 +279,18 @@ function displayWeather(iso2) {
                     if (forecast.length > 3) {
                         $('#day3Date').text(formatDate(forecast[3].date));
                         $('#day3Icon').attr('src', forecast[3].conditionIcon)
-                            .attr('alt', forecast[3].conditionText);
+                                    .attr('alt', forecast[3].conditionText);
                         $('#day3MinTemp').text(formatNumber(forecast[3].minC));
                         $('#day3MaxTemp').text(formatNumber(forecast[3].maxC));
                     }
                 }
-
+                
                 // Update modal title with location
                 $('#weatherModalLabel').text(`${forecastResult.data.location}, ${forecastResult.data.country}`);
-
+                
                 // Update last updated timestamp
                 $('#lastUpdated').text(formatTime(forecastResult.data.lastUpdated));
-
+                
                 // Hide loading state and show modal
                 $('#pre-load').addClass('fadeOut').hide();
                 $('#weatherModal').modal('show');
@@ -299,13 +300,14 @@ function displayWeather(iso2) {
                 alert('Failed to fetch weather data. Please try again.');
             }
         },
-        error: function (jqXHR, textStatus, errorThrown) {
+        error: function(jqXHR, textStatus, errorThrown) {
             console.error('AJAX error:', textStatus, errorThrown);
             $('#pre-load').addClass('fadeOut').hide();
             alert('Failed to fetch weather data. Please try again.');
         }
     });
 }
+
 
 function clearPreviousCountryData() {
     earthquakeLayer.clearLayers();
@@ -429,7 +431,7 @@ function updateCountryBorders(iso2) {
     if (bordersLayer) {
         map.removeLayer(bordersLayer);
     }
-
+    
     const country = geoJsonData.features.find(f => f.properties.iso_a2 === iso2);
     if (country) {
         bordersLayer = L.geoJSON(country, {
@@ -481,7 +483,7 @@ function placeEarthQuakeMarkers(north, south, east, west) {
                             <strong>⏰ Time:</strong> ${formatTime(quake.datetime)}<br>
                             <strong>🌍 Location:</strong> ${lat}, ${lng}
                         `);
-
+                    
                     earthquakeLayer.addLayer(marker);
                 } else {
                     console.warn("⚠️ Invalid earthquake coordinates:", quake);
@@ -499,11 +501,11 @@ function getWikiResults(north, south, east, west, iso2) {
         url: 'Php/wikipediaBoundingBox.php',
         type: 'GET',
         dataType: 'json',
-        data: { north: north, south: south, east: east, west: west },
+        data: {north:north, south:south, east:east, west:west},
         success: function (data) {
             console.log("Wikipedia Data:", data);
             $('#wikiArticles').html('');
-
+            
             if (data.data && data.data.length > 0) {
                 let filteredArticles = data.data.filter(article => {
                     return article.countryCode === iso2;

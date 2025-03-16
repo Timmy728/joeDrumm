@@ -15,96 +15,109 @@ let layerControl;
 let geoJsonData = null;
 
 $(document).ready(function () {
-    // Initialize the map with maxZoom specified
-    map = L.map('map', {
-        maxZoom: 18,
-        minZoom: 2
-    }).setView([20, 0], 2);
-
-    // Initialize marker cluster group
-    earthquakeLayer = L.markerClusterGroup();
-    map.addLayer(earthquakeLayer);
-
-    // Add tile layers
-    var streets = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}", {
-        attribution: "Tiles &copy; Esri",
-        maxZoom: 18
-    });
-
-    var satellite = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", {
-        attribution: "Tiles &copy; Esri",
-        maxZoom: 18
-    });
-
-    var basemaps = {
-        "Streets": streets,
-        "Satellite": satellite
-    };
-
-    map.on('locationfound', function (options) {
-        if (geoJsonData) {
-            const point = [options.latitude, options.longitude];
-            const country = findCountryByPoint(point);
-            if (country) {
-                $('#countrySelect').val(country.properties.iso_a2).change();
-            }
-        }
-    });
-
-    L.control.layers(basemaps).addTo(map);
-    streets.addTo(map);
-
-    // Add EasyButtons
-    L.easyButton('fa-flag', function () {
-        $('#infoModal1').modal('show');
-    }).addTo(map);
-
-    L.easyButton('fa-newspaper', function () {
-        $('#infoModal2').modal('show');
-    }).addTo(map);
-
-    // Currency Button
-    L.easyButton({
-        states: [{
-            stateName: 'show-currency',
-            icon: '<i class="fas fa-dollar-sign" style="font-size: 16px; color: #333;"></i>',
-            title: 'Show Currency Converter',
-            onClick: function() {
-                loadCurrencies();
-                $("#currencyModal").modal("show");
-            }
-        }]
-    }).addTo(map);
-
-    // Weather Button
-    L.easyButton({
-        states: [{
-            stateName: 'show-weather',
-            icon: '<i class="fas fa-cloud-sun" style="font-size: 16px; color: #333;"></i>',
-            title: 'Show Weather Information',
-            onClick: function() {
-                const iso2 = $('#countrySelect').val();
-                if (iso2) {
-                    displayWeather(iso2);
-                } else {
-                    alert('Please select a country first');
-                }
-            }
-        }]
-    }).addTo(map);
-
-    L.easyButton('fa-globe', function () {
-        $('#infoModal5').modal('show');
-    }).addTo(map);
-
-    loadCurrencies();
-
-    // Load GeoJSON data and populate countries dropdown
+    // First load GeoJSON data
     $.getJSON('https://joedrumm.co.uk/Project1/Data/countryBorders.geo.json', function(data) {
         geoJsonData = data;
         populateCountrySelect(data);
-        map.locate();
+        
+        // Initialize the map with UK coordinates
+        map = L.map('map', {
+            maxZoom: 18,
+            minZoom: 2
+        }).setView([54.5, -2], 6); // UK centered coordinates
+
+        // Initialize marker cluster group
+        earthquakeLayer = L.markerClusterGroup();
+        map.addLayer(earthquakeLayer);
+
+        // Add tile layers
+        var streets = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}", {
+            attribution: "Tiles &copy; Esri",
+            maxZoom: 18
+        });
+
+        var satellite = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", {
+            attribution: "Tiles &copy; Esri",
+            maxZoom: 18
+        });
+
+        var basemaps = {
+            "Streets": streets,
+            "Satellite": satellite
+        };
+
+        L.control.layers(basemaps).addTo(map);
+        streets.addTo(map);
+
+        // Add EasyButtons
+        L.easyButton('fa-flag', function () {
+            $('#infoModal1').modal('show');
+        }).addTo(map);
+
+        L.easyButton('fa-newspaper', function () {
+            $('#infoModal2').modal('show');
+        }).addTo(map);
+
+        // Currency Button
+        L.easyButton({
+            states: [{
+                stateName: 'show-currency',
+                icon: '<i class="fas fa-dollar-sign" style="font-size: 16px; color: #333;"></i>',
+                title: 'Show Currency Converter',
+                onClick: function() {
+                    loadCurrencies();
+                    $("#currencyModal").modal("show");
+                }
+            }]
+        }).addTo(map);
+
+        // Weather Button
+        L.easyButton({
+            states: [{
+                stateName: 'show-weather',
+                icon: '<i class="fas fa-cloud-sun" style="font-size: 16px; color: #333;"></i>',
+                title: 'Show Weather Information',
+                onClick: function() {
+                    const iso2 = $('#countrySelect').val();
+                    if (iso2) {
+                        displayWeather(iso2);
+                    } else {
+                        alert('Please select a country first');
+                    }
+                }
+            }]
+        }).addTo(map);
+
+        L.easyButton('fa-globe', function () {
+            $('#infoModal5').modal('show');
+        }).addTo(map);
+
+        // Set default to UK and trigger change
+        $('#countrySelect').val('GB').trigger('change');
+
+        // After setting UK, try to get actual location
+        if ("geolocation" in navigator) {
+            navigator.geolocation.getCurrentPosition(
+                function(position) {
+                    const point = [position.coords.latitude, position.coords.longitude];
+                    const country = findCountryByPoint(point);
+                    if (country && country.properties.iso_a2 !== 'GB') {
+                        $('#countrySelect').val(country.properties.iso_a2).change();
+                    }
+                },
+                function(error) {
+                    console.warn("Geolocation error:", error.message);
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 5000,
+                    maximumAge: 0
+                }
+            );
+        }
     });
+
+    loadCurrencies();
 
     // Currency modal event handlers
     $('#fromAmount').on('keyup change', function () {
@@ -166,14 +179,27 @@ function populateCountrySelect(data) {
             dropdown.append(new Option(countryName, iso2));
         }
     });
+
+    // Hide preloader after first country is loaded
+    if ($('#preloader').length) {
+        $('#preloader').fadeOut('slow', function () {
+            $(this).remove();
+        });
+    }
 }
 
 function findCountryByPoint(point) {
     if (!geoJsonData) return null;
     
     return geoJsonData.features.find(feature => {
-        const polygon = L.geoJSON(feature.geometry);
-        return polygon.getBounds().contains(L.latLng(point));
+        try {
+            const polygon = L.geoJSON(feature.geometry);
+            const latLng = L.latLng(point[0], point[1]);
+            return polygon.getBounds().contains(latLng);
+        } catch (e) {
+            console.error('Error checking point in polygon:', e);
+            return false;
+        }
     });
 }
 
@@ -214,23 +240,22 @@ function calcResult() {
 }
 
 function formatDate(dateString) {
-    return Date.parse(dateString).toString('ddd, dS MMM yyyy');  // Example format: "Tue, 15th Mar 2025"
+    return Date.parse(dateString).toString('ddd, dS MMM yyyy');
 }
 
 function formatTime(dateString) {
-    return Date.parse(dateString).toString('HH:mm, dS MMM yyyy');  // Example format: "14:30, 15th Mar 2025"
+    return Date.parse(dateString).toString('HH:mm, dS MMM yyyy');
 }
 
 function formatNumber(number) {
-    return numeral(number).format('0,0');  // Example format: "1,000" or "1,000,000"
+    return numeral(number).format('0,0');
 }
 
 function formatCurrency(number) {
-    return numeral(number).format('$0,0.00');  // Example format: "$1,000.00"
+    return numeral(number).format('$0,0.00');
 }
 
 function displayWeather(iso2) {
-    // Show loading state
     $('#pre-load').removeClass('fadeOut').show();
     
     $.ajax({
@@ -242,7 +267,6 @@ function displayWeather(iso2) {
             if (forecastResult.status && forecastResult.status.code === 200) {
                 const forecast = forecastResult.data.forecast;
                 
-                // Update forecast days
                 if (forecast && forecast.length > 0) {
                     // Today
                     $('#todayConditions').text(forecast[0].conditionText);
@@ -279,13 +303,9 @@ function displayWeather(iso2) {
                     }
                 }
                 
-                // Update modal title with location
                 $('#weatherModalLabel').text(`${forecastResult.data.location}, ${forecastResult.data.country}`);
-                
-                // Update last updated timestamp
                 $('#lastUpdated').text(formatTime(forecastResult.data.lastUpdated));
                 
-                // Hide loading state and show modal
                 $('#pre-load').addClass('fadeOut').hide();
                 $('#weatherModal').modal('show');
             } else {
@@ -301,7 +321,6 @@ function displayWeather(iso2) {
         }
     });
 }
-
 
 function clearPreviousCountryData() {
     earthquakeLayer.clearLayers();

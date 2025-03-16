@@ -95,26 +95,28 @@ $(document).ready(function () {
         // Set default to UK and trigger change
         $('#countrySelect').val('GB').trigger('change');
 
-        // After setting UK, try to get actual location
-        if ("geolocation" in navigator) {
-            navigator.geolocation.getCurrentPosition(
-                function(position) {
-                    const point = [position.coords.latitude, position.coords.longitude];
-                    const country = findCountryByPoint(point);
-                    if (country && country.properties.iso_a2 !== 'GB') {
-                        $('#countrySelect').val(country.properties.iso_a2).trigger('change');
-                    }
-                },
-                function(error) {
-                    console.warn("Geolocation error:", error.message);
-                },
-                {
-                    enableHighAccuracy: true,
-                    timeout: 5000,
-                    maximumAge: 0
+        // Set up location detection
+        map.on('locationfound', function(e) {
+            if (geoJsonData) {
+                const point = [e.latlng.lat, e.latlng.lng];
+                const country = findCountryByPoint(point);
+                if (country) {
+                    $('#countrySelect').val(country.properties.iso_a2).trigger('change');
                 }
-            );
-        }
+            }
+        });
+
+        map.on('locationerror', function(e) {
+            console.warn("Location error:", e.message);
+        });
+
+        // Start location detection
+        map.locate({
+            setView: false,
+            maxZoom: 16,
+            timeout: 5000,
+            enableHighAccuracy: true
+        });
     });
 
     loadCurrencies();
@@ -156,7 +158,7 @@ $(document).ready(function () {
     $('#countrySelect').change(function () {
         const iso2 = $(this).val();
         if (iso2) {
-            clearPreviousCountryData(); // Clear all previous markers and data
+            clearPreviousCountryData();
             fetchAllCountryData(iso2);
         }
     });

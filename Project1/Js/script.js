@@ -286,7 +286,7 @@ function displayWeather(iso2) {
                 }
                 
                 // Update modal title with location
-                $('#weatherModalLabel').text(`${forecastResult.data.location}, ${forecastResult.data.country}`);
+                $('#weatherModalLabel').text(${forecastResult.data.location}, ${forecastResult.data.country});
                 
                 // Update last updated timestamp
                 $('#lastUpdated').text(formatTime(forecastResult.data.lastUpdated));
@@ -355,7 +355,7 @@ function displayCountryInfo(iso2) {
     const country = geoJsonData.features.find(f => f.properties.iso_a2 === iso2);
     if (country) {
         $('#countryNames').text(country.properties.name);
-        $('#countryFlag').attr('src', `https://flagcdn.com/w80/${iso2.toLowerCase()}.png`).show();
+        $('#countryFlag').attr('src', https://flagcdn.com/w80/${iso2.toLowerCase()}.png).show();
     }
 }
 
@@ -381,7 +381,7 @@ function displayCapitalOnMap(iso2) {
 
                 capitalMarker = L.marker([center.lat, center.lng], { icon: cityIcon })
                     .addTo(map)
-                    .bindPopup(`<strong>Capital:</strong> ${data.capital}`);
+                    .bindPopup(<strong>Capital:</strong> ${data.capital});
             }
         }, 'json');
     }
@@ -395,12 +395,12 @@ function displayPopulation(iso2) {
 
 function displayExchangeRate(iso2) {
     $.get('Php/latestExchangeRate.php', { iso2: iso2 }, function (data) {
-        $('#txtCurrencyRate').text(`1 USD = ${formatCurrency(data.exchangeRate)} ${data.currencyCode}`);
+        $('#txtCurrencyRate').text(1 USD = ${formatCurrency(data.exchangeRate)} ${data.currencyCode});
         $('#convertBtn').off('click').on('click', function () {
             const amount = parseFloat($('#currencyAmount').val());
             if (!isNaN(amount)) {
                 const convertedAmount = (amount * data.exchangeRate).toFixed(2);
-                $('#convertedCurrency').text(`${formatCurrency(amount)} USD = ${formatCurrency(convertedAmount)} ${data.currencyCode}`);
+                $('#convertedCurrency').text(${formatCurrency(amount)} USD = ${formatCurrency(convertedAmount)} ${data.currencyCode});
             }
         });
     }, 'json');
@@ -408,7 +408,7 @@ function displayExchangeRate(iso2) {
 
 function displayWikipediaInfo(iso2) {
     $.get('Php/wikipediaSearch.php', { query: iso2 }, function (data) {
-        $('#wikiLink').attr('href', data.url).text(`View ${data.title} on Wikipedia`);
+        $('#wikiLink').attr('href', data.url).text(View ${data.title} on Wikipedia);
     }, 'json');
 }
 
@@ -444,4 +444,91 @@ function updateCountryBorders(iso2) {
         }).addTo(map);
         map.fitBounds(bordersLayer.getBounds());
     }
+}
+
+function placeEarthQuakeMarkers(north, south, east, west) {
+    console.log("📡 Fetching Earthquake Data...");
+
+    $.ajax({
+        url: 'Php/earthQuakes.php',
+        type: 'GET',
+        dataType: 'json',
+        data: { north: north, south: south, east: east, west: west },
+        success: function (data) {
+            console.log("✅ Earthquake Data Received:", data);
+
+            if (!data.data || data.data.length === 0) {
+                console.warn("⚠️ No earthquake data found.");
+                return;
+            }
+
+            var redIcon = L.icon({
+                iconUrl: 'Images/Fire-Icon.png',
+                iconSize: [32, 32],
+                iconAnchor: [16, 32],
+                popupAnchor: [0, -32]
+            });
+
+            data.data.forEach(quake => {
+                let lat = parseFloat(quake.lat);
+                let lng = parseFloat(quake.lng);
+
+                if (!isNaN(lat) && !isNaN(lng)) {
+                    console.log("📍 Adding Marker:", lat, lng);
+
+                    let marker = L.marker([lat, lng], { icon: redIcon })
+                        .bindPopup(
+                            <strong>📍 Magnitude:</strong> ${formatNumber(quake.magnitude)}<br>
+                            <strong>📏 Depth:</strong> ${formatNumber(quake.depth)} km<br>
+                            <strong>⏰ Time:</strong> ${formatTime(quake.datetime)}<br>
+                            <strong>🌍 Location:</strong> ${lat}, ${lng}
+                        );
+                    
+                    earthquakeLayer.addLayer(marker);
+                } else {
+                    console.warn("⚠️ Invalid earthquake coordinates:", quake);
+                }
+            });
+        },
+        error: function (xhr, status, error) {
+            console.error("❌ Error fetching earthquake data:", status, error);
+        }
+    });
+}
+
+function getWikiResults(north, south, east, west, iso2) {
+    $.ajax({
+        url: 'Php/wikipediaBoundingBox.php',
+        type: 'GET',
+        dataType: 'json',
+        data: {north:north, south:south, east:east, west:west},
+        success: function (data) {
+            console.log("Wikipedia Data:", data);
+            $('#wikiArticles').html('');
+            
+            if (data.data && data.data.length > 0) {
+                let filteredArticles = data.data.filter(article => {
+                    return article.countryCode === iso2;
+                });
+
+                if (filteredArticles.length > 0) {
+                    filteredArticles.forEach(article => {
+                        $('#wikiArticles').append(
+                            <li>${article.summary}<br/>
+                            <a href='https://${article.wikipediaUrl}' target='_blank'>Click to see more...</a>
+                            </li>
+                        );
+                    });
+                } else {
+                    $('#wikiArticles').append("<li>No Wikipedia articles found for this country.</li>");
+                }
+            } else {
+                $('#wikiArticles').append("<li>No Wikipedia data available.</li>");
+            }
+        },
+        error: function (err) {
+            console.log(err);
+            $('#wikiArticles').append("<li>Error loading Wikipedia articles.</li>");
+        }
+    });
 }

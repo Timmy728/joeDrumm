@@ -414,18 +414,16 @@ function displayTimezone(iso2) {
 
 function displayCurrency(iso2) {
     $.get('Php/latestExchangeRate.php', { iso2: iso2 }, function (data) {
-        console.log(data); // Add this to inspect the response from the PHP API
-        
+        // Check if the data and currencyCode are available
         if (data && data.currencyCode) {
-            $('#currencies').val(data.currencyCode);
-            $('#currencyCode').text(data.currencyCode); // Update modal with currency code
-            calcResult();
+            // Dynamically populate the currency in the modal
+            $('#currencyCode').text(data.currencyCode);  // Update the currency code in modal
         } else {
+            // If no currency code is found, display a fallback message
             $('#currencyCode').text('Currency data not available');
         }
     }, 'json');
 }
-
 
 function updateCountryBorders(iso2) {
     if (bordersLayer) {

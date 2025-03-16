@@ -42,7 +42,6 @@ $(document).ready(function () {
     };
 
     map.on('locationfound', function (options) {
-        console.log("Location found:", options); // Log the location data
         if (geoJsonData) {
             const point = [options.latitude, options.longitude];
             const country = findCountryByPoint(point);
@@ -50,11 +49,6 @@ $(document).ready(function () {
                 $('#countrySelect').val(country.properties.iso_a2).change();
             }
         }
-    });
-
-    map.on('locationerror', function (e) {
-        console.warn("Location detection failed. Using fallback location.");
-        map.setView([51.5074, -0.1278], 5); // Default to London (UK coordinates) if geolocation fails
     });
 
     L.control.layers(basemaps).addTo(map);
@@ -286,7 +280,7 @@ function displayWeather(iso2) {
                 }
                 
                 // Update modal title with location
-                $('#weatherModalLabel').text(${forecastResult.data.location}, ${forecastResult.data.country});
+                $('#weatherModalLabel').text(`${forecastResult.data.location}, ${forecastResult.data.country}`);
                 
                 // Update last updated timestamp
                 $('#lastUpdated').text(formatTime(forecastResult.data.lastUpdated));
@@ -355,7 +349,7 @@ function displayCountryInfo(iso2) {
     const country = geoJsonData.features.find(f => f.properties.iso_a2 === iso2);
     if (country) {
         $('#countryNames').text(country.properties.name);
-        $('#countryFlag').attr('src', https://flagcdn.com/w80/${iso2.toLowerCase()}.png).show();
+        $('#countryFlag').attr('src', `https://flagcdn.com/w80/${iso2.toLowerCase()}.png`).show();
     }
 }
 
@@ -381,7 +375,7 @@ function displayCapitalOnMap(iso2) {
 
                 capitalMarker = L.marker([center.lat, center.lng], { icon: cityIcon })
                     .addTo(map)
-                    .bindPopup(<strong>Capital:</strong> ${data.capital});
+                    .bindPopup(`<strong>Capital:</strong> ${data.capital}`);
             }
         }, 'json');
     }
@@ -395,12 +389,12 @@ function displayPopulation(iso2) {
 
 function displayExchangeRate(iso2) {
     $.get('Php/latestExchangeRate.php', { iso2: iso2 }, function (data) {
-        $('#txtCurrencyRate').text(1 USD = ${formatCurrency(data.exchangeRate)} ${data.currencyCode});
+        $('#txtCurrencyRate').text(`1 USD = ${formatCurrency(data.exchangeRate)} ${data.currencyCode}`);
         $('#convertBtn').off('click').on('click', function () {
             const amount = parseFloat($('#currencyAmount').val());
             if (!isNaN(amount)) {
                 const convertedAmount = (amount * data.exchangeRate).toFixed(2);
-                $('#convertedCurrency').text(${formatCurrency(amount)} USD = ${formatCurrency(convertedAmount)} ${data.currencyCode});
+                $('#convertedCurrency').text(`${formatCurrency(amount)} USD = ${formatCurrency(convertedAmount)} ${data.currencyCode}`);
             }
         });
     }, 'json');
@@ -408,7 +402,7 @@ function displayExchangeRate(iso2) {
 
 function displayWikipediaInfo(iso2) {
     $.get('Php/wikipediaSearch.php', { query: iso2 }, function (data) {
-        $('#wikiLink').attr('href', data.url).text(View ${data.title} on Wikipedia);
+        $('#wikiLink').attr('href', data.url).text(`View ${data.title} on Wikipedia`);
     }, 'json');
 }
 
@@ -477,12 +471,12 @@ function placeEarthQuakeMarkers(north, south, east, west) {
                     console.log("📍 Adding Marker:", lat, lng);
 
                     let marker = L.marker([lat, lng], { icon: redIcon })
-                        .bindPopup(
+                        .bindPopup(`
                             <strong>📍 Magnitude:</strong> ${formatNumber(quake.magnitude)}<br>
                             <strong>📏 Depth:</strong> ${formatNumber(quake.depth)} km<br>
                             <strong>⏰ Time:</strong> ${formatTime(quake.datetime)}<br>
                             <strong>🌍 Location:</strong> ${lat}, ${lng}
-                        );
+                        `);
                     
                     earthquakeLayer.addLayer(marker);
                 } else {
@@ -513,11 +507,11 @@ function getWikiResults(north, south, east, west, iso2) {
 
                 if (filteredArticles.length > 0) {
                     filteredArticles.forEach(article => {
-                        $('#wikiArticles').append(
+                        $('#wikiArticles').append(`
                             <li>${article.summary}<br/>
                             <a href='https://${article.wikipediaUrl}' target='_blank'>Click to see more...</a>
                             </li>
-                        );
+                        `);
                     });
                 } else {
                     $('#wikiArticles').append("<li>No Wikipedia articles found for this country.</li>");

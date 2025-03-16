@@ -102,7 +102,7 @@ $(document).ready(function () {
                     const point = [position.coords.latitude, position.coords.longitude];
                     const country = findCountryByPoint(point);
                     if (country && country.properties.iso_a2 !== 'GB') {
-                        $('#countrySelect').val(country.properties.iso_a2).change();
+                        $('#countrySelect').val(country.properties.iso_a2).trigger('change');
                     }
                 },
                 function(error) {
@@ -156,7 +156,7 @@ $(document).ready(function () {
     $('#countrySelect').change(function () {
         const iso2 = $(this).val();
         if (iso2) {
-            clearPreviousCountryData();
+            clearPreviousCountryData(); // Clear all previous markers and data
             fetchAllCountryData(iso2);
         }
     });
@@ -323,16 +323,30 @@ function displayWeather(iso2) {
 }
 
 function clearPreviousCountryData() {
+    // Clear earthquake markers
     earthquakeLayer.clearLayers();
+    
+    // Clear capital marker
     if (capitalMarker) {
         map.removeLayer(capitalMarker);
         capitalMarker = null;
     }
+    
+    // Clear country borders
     if (bordersLayer) {
         map.removeLayer(bordersLayer);
         bordersLayer = null;
     }
+    
+    // Clear wiki articles
     $('#wikiArticles').html('');
+    
+    // Reset other UI elements
+    $('#countryNames').text('');
+    $('#capitalCity').text('');
+    $('#population').text('');
+    $('#timezone').text('');
+    $('#countryFlag').hide();
 }
 
 function fetchAllCountryData(iso2) {
@@ -352,6 +366,9 @@ function fetchAllCountryData(iso2) {
             bounds.getWest(),
             iso2
         );
+        
+        // Update map view to selected country
+        map.fitBounds(bounds);
     }
     displayCountryInfo(iso2);
     displayCapitalCity(iso2);

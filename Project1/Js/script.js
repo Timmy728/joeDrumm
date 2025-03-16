@@ -92,9 +92,6 @@ $(document).ready(function () {
             $('#infoModal5').modal('show');
         }).addTo(map);
 
-        // Set default to UK and trigger change
-        $('#countrySelect').val('GB').trigger('change');
-
         // Set up location detection
         map.on('locationfound', function(e) {
             if (geoJsonData) {

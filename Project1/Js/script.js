@@ -414,9 +414,15 @@ function displayTimezone(iso2) {
 
 function displayCurrency(iso2) {
     $.get('Php/latestExchangeRate.php', { iso2: iso2 }, function (data) {
+        // If the currency data is available
         if (data && data.currencyCode) {
             $('#currencies').val(data.currencyCode);
-            calcResult();
+            $('#currencyCode').text(data.currencyCode); // Or you can display a symbol if available: data.currencySymbol
+
+            calcResult(); // Call this to update the conversion result
+        } else {
+            // Handle case if no currency data is available
+            $('#currencyCode').text('Currency data not available');
         }
     }, 'json');
 }

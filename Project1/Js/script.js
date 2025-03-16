@@ -214,23 +214,22 @@ function calcResult() {
 }
 
 function formatDate(dateString) {
-    return Date.parse(dateString).toString('ddd, dS MMM yyyy');  // Example format: "Tue, 15th Mar 2025"
+    return Date.parse(dateString).toString('ddd, dS MMM yyyy');
 }
 
 function formatTime(dateString) {
-    return Date.parse(dateString).toString('HH:mm, dS MMM yyyy');  // Example format: "14:30, 15th Mar 2025"
+    return Date.parse(dateString).toString('HH:mm, dS MMM yyyy');
 }
 
 function formatNumber(number) {
-    return numeral(number).format('0,0');  // Example format: "1,000" or "1,000,000"
+    return numeral(number).format('0,0');
 }
 
 function formatCurrency(number) {
-    return numeral(number).format('$0,0.00');  // Example format: "$1,000.00"
+    return numeral(number).format('$0,0.00');
 }
 
 function displayWeather(iso2) {
-    // Show loading state
     $('#pre-load').removeClass('fadeOut').show();
     
     $.ajax({
@@ -242,7 +241,6 @@ function displayWeather(iso2) {
             if (forecastResult.status && forecastResult.status.code === 200) {
                 const forecast = forecastResult.data.forecast;
                 
-                // Update forecast days
                 if (forecast && forecast.length > 0) {
                     // Today
                     $('#todayConditions').text(forecast[0].conditionText);
@@ -279,13 +277,9 @@ function displayWeather(iso2) {
                     }
                 }
                 
-                // Update modal title with location
                 $('#weatherModalLabel').text(`${forecastResult.data.location}, ${forecastResult.data.country}`);
-                
-                // Update last updated timestamp
                 $('#lastUpdated').text(formatTime(forecastResult.data.lastUpdated));
                 
-                // Hide loading state and show modal
                 $('#pre-load').addClass('fadeOut').hide();
                 $('#weatherModal').modal('show');
             } else {
@@ -301,7 +295,6 @@ function displayWeather(iso2) {
         }
     });
 }
-
 
 function clearPreviousCountryData() {
     earthquakeLayer.clearLayers();

@@ -47,6 +47,7 @@ if (!isset($data['rates'])) {
 
 // Currency codes and their details exactly matching the HTML select options
 $currencies = [
+    'USD' => ['name' => 'US Dollar', 'symbol' => '$'], // Added USD here
     'EUR' => ['name' => 'Euro', 'symbol' => '€'],
     'GBP' => ['name' => 'British Pound', 'symbol' => '£'],
     'JPY' => ['name' => 'Japanese Yen', 'symbol' => '¥'],

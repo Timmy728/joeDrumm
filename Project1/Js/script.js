@@ -45,7 +45,7 @@ $(document).ready(function () {
         "Earthquakes": earthquakeLayer  // Include earthquakeLayer in the layers control
     };
 
-    L.control.layers(basemaps, overlays).addTo(map);  // Layers control with basemaps and overlays
+    layerControl = L.control.layers(basemaps, overlays).addTo(map);  // Layers control with basemaps and overlays
     streets.addTo(map);  // Add streets layer as default
 
     // Populate earthquake markers in the earthquakeLayer
@@ -71,7 +71,7 @@ $(document).ready(function () {
         });
     });
 
-    // Add EasyButtons
+    // Add EasyButtons with proper modal triggering
     L.easyButton('fa-flag', function () {
         $('#infoModal1').modal('show');
     }).addTo(map);
@@ -184,7 +184,18 @@ $(document).ready(function () {
             displayTimezone(iso2); 
         }
     });
+
+    // Ensure EasyButton modals are above the map
+    setZIndexForEasyButtons();
 });
+
+// Ensure EasyButtons are properly visible above the map
+function setZIndexForEasyButtons() {
+    const buttons = document.querySelectorAll('.leaflet-easy-button');
+    buttons.forEach(function(button) {
+        button.style.zIndex = '9999';  // Ensure buttons are on top of map layers
+    });
+}
 
 function loadCurrencies() {
     $.ajax({

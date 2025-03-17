@@ -41,7 +41,7 @@ $(document).ready(function () {
         "Satellite": satellite
     };
 
-    map.on('locationfound', function(options) {
+    map.on('locationfound', function (options) {
         if (geoJsonData) {
             const point = [options.latitude, options.longitude];
             const country = findCountryByPoint(point);
@@ -406,7 +406,7 @@ function displayWikipediaInfo(iso2) {
 }
 
 function displayTimezone(iso2) {
-    $.get('Php/Timezone.php', { countryCode: iso2 }, function (data) {
+    $.get('Php/Timezone.php', { iso2: iso2 }, function (data) {
         $('#timezone').text(data.timezone);
     }, 'json');
 }

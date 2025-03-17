@@ -308,24 +308,7 @@ function clearPreviousCountryData() {
     $('#wikiArticles').html('');
 }
 
-function fetchAllCountryData(iso2) {
-    const country = geoJsonData.features.find(f => f.properties.iso_a2 === iso2);
-    if (country) {
-        const bounds = L.geoJSON(country).getBounds();
-        placeEarthQuakeMarkers(
-            bounds.getNorth(),
-            bounds.getSouth(),
-            bounds.getEast(),
-            bounds.getWest()
-        );
-        getWikiResults(
-            bounds.getNorth(),
-            bounds.getSouth(),
-            bounds.getEast(),
-            bounds.getWest(),
-            iso2
-        );
-    }
+    function fetchAllCountryData(iso2) {
     displayCountryInfo(iso2);
     displayCapitalCity(iso2);
     displayCapitalOnMap(iso2);
@@ -335,7 +318,7 @@ function fetchAllCountryData(iso2) {
     displayWikipediaInfo(iso2);
     displayTimezone(iso2);
     updateCountryBorders(iso2);
-}
+    }
 
 function displayCountryInfo(iso2) {
     const country = geoJsonData.features.find(f => f.properties.iso_a2 === iso2);

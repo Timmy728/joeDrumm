@@ -21,8 +21,8 @@ $(document).ready(function () {
     }).setView([20, 0], 2);
 
     // Initialize marker cluster group
-    earthquakeLayer = L.markerClusterGroup(); // Create marker cluster group
-    map.addLayer(earthquakeLayer); // Add earthquakeLayer to the map by default
+    earthquakeLayer = L.markerClusterGroup();
+    map.addLayer(earthquakeLayer);
 
     // Add tile layers
     var streets = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}", {
@@ -39,17 +39,6 @@ $(document).ready(function () {
         "Streets": streets,
         "Satellite": satellite
     };
-
-    // Add layers control with marker cluster as overlay
-    var overlays = {
-        "Earthquakes": earthquakeLayer  // Include earthquakeLayer in the layers control
-    };
-
-    layerControl = L.control.layers(basemaps, overlays).addTo(map);  // Layers control with basemaps and overlays
-    streets.addTo(map);  // Add streets layer as default
-
-    // Populate earthquake markers in the earthquakeLayer
-    placeEarthQuakeMarkers(north, south, east, west);
 
     map.on('locationfound', function(options){
         console.log(options);
@@ -71,7 +60,10 @@ $(document).ready(function () {
         });
     });
 
-    // Add EasyButtons with proper modal triggering
+    L.control.layers(basemaps).addTo(map);
+    streets.addTo(map);
+
+    // Add EasyButtons
     L.easyButton('fa-flag', function () {
         $('#infoModal1').modal('show');
     }).addTo(map);
@@ -184,18 +176,7 @@ $(document).ready(function () {
             displayTimezone(iso2); 
         }
     });
-
-    // Ensure EasyButton modals are above the map
-    setZIndexForEasyButtons();
 });
-
-// Ensure EasyButtons are properly visible above the map
-function setZIndexForEasyButtons() {
-    const buttons = document.querySelectorAll('.leaflet-easy-button');
-    buttons.forEach(function(button) {
-        button.style.zIndex = '9999';  // Ensure buttons are on top of map layers
-    });
-}
 
 function loadCurrencies() {
     $.ajax({
@@ -558,7 +539,9 @@ function placeEarthQuakeMarkers(north, south, east, west) {
                             <strong>🌍 Location:</strong> ${lat}, ${lng}
                         `);
                     
-                    earthquakeLayer.addLayer(marker);  // Add marker to the cluster group
+                    earthquakeLayer.addLayer(marker);
+                } else {
+                    console.warn("⚠️ Invalid earthquake coordinates:", quake);
                 }
             });
         },

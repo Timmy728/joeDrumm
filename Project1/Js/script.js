@@ -21,8 +21,8 @@ $(document).ready(function () {
     }).setView([20, 0], 2);
 
     // Initialize marker cluster group
-    earthquakeLayer = L.markerClusterGroup();
-    map.addLayer(earthquakeLayer);
+    earthquakeLayer = L.markerClusterGroup(); // Create marker cluster group
+    map.addLayer(earthquakeLayer); // Add earthquakeLayer to the map by default
 
     // Add tile layers
     var streets = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}", {
@@ -39,6 +39,17 @@ $(document).ready(function () {
         "Streets": streets,
         "Satellite": satellite
     };
+
+    // Add layers control with marker cluster as overlay
+    var overlays = {
+        "Earthquakes": earthquakeLayer  // Include earthquakeLayer in the layers control
+    };
+
+    L.control.layers(basemaps, overlays).addTo(map);  // Layers control with basemaps and overlays
+    streets.addTo(map);  // Add streets layer as default
+
+    // Populate earthquake markers in the earthquakeLayer
+    placeEarthQuakeMarkers(north, south, east, west);
 
     map.on('locationfound', function(options){
         console.log(options);
@@ -59,9 +70,6 @@ $(document).ready(function () {
             }
         });
     });
-
-    L.control.layers(basemaps).addTo(map);
-    streets.addTo(map);
 
     // Add EasyButtons
     L.easyButton('fa-flag', function () {
@@ -539,9 +547,7 @@ function placeEarthQuakeMarkers(north, south, east, west) {
                             <strong>🌍 Location:</strong> ${lat}, ${lng}
                         `);
                     
-                    earthquakeLayer.addLayer(marker);
-                } else {
-                    console.warn("⚠️ Invalid earthquake coordinates:", quake);
+                    earthquakeLayer.addLayer(marker);  // Add marker to the cluster group
                 }
             });
         },

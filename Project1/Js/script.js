@@ -439,7 +439,9 @@ function displayTimezone(iso2) {
         data: { iso2: iso2 },
         success: function(data) {
             if (data && data.timezone) {
-                $('#timezone').text(data.timezone);
+                // Replace escaped slashes (\/) with regular slashes (/)
+                const timezone = data.timezone.replace(/\\\//g, '/');
+                $('#timezone').text(timezone);  // Display the corrected timezone
             } else {
                 $('#timezone').text('Not available');
             }

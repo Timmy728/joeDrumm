@@ -22,7 +22,7 @@ $(document).ready(function () {
 
     // Initialize marker cluster group
     earthquakeLayer = L.markerClusterGroup();
-    map.addLayer(earthquakeLayer);
+    map.addLayer(earthquakeLayer); // Add earthquakeLayer to the map by default
 
     // Add tile layers
     var streets = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}", {
@@ -39,6 +39,18 @@ $(document).ready(function () {
         "Streets": streets,
         "Satellite": satellite
     };
+
+    // Add layers control
+    var overlays = {
+        "Earthquakes": earthquakeLayer  // This is the overlay that will be toggleable in the Layers Control
+    };
+
+    L.control.layers(basemaps, overlays).addTo(map); // Layers control with both basemaps and overlays
+    streets.addTo(map);  // Add streets layer as default
+
+    // Populate earthquake markers in the earthquakeLayer
+    placeEarthQuakeMarkers(north, south, east, west);
+    
 
     map.on('locationfound', function(options){
         console.log(options);

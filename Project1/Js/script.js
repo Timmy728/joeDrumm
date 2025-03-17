@@ -126,7 +126,7 @@ $(document).ready(function () {
 
             map.locate({
                 setView: true,
-                maxZoom: 8
+                maxZoom: 5  // Reduced zoom level
             });
         },
         error: function(err) {
@@ -407,8 +407,14 @@ function displayWikipediaInfo(iso2) {
 
 function displayTimezone(iso2) {
     $.get('Php/Timezone.php', { iso2: iso2 }, function (data) {
-        $('#timezone').text(data.timezone);
-    }, 'json');
+        if (data && data.timezone) {
+            $('#timezone').text(data.timezone);
+        } else {
+            $('#timezone').text('Not available');
+        }
+    }, 'json').fail(function() {
+        $('#timezone').text('Not available');
+    });
 }
 
 function updateCountryBorders(iso2) {
@@ -429,7 +435,21 @@ function updateCountryBorders(iso2) {
                     fillOpacity: 0.3
                 }
             }).addTo(map);
-            map.fitBounds(bordersLayer.getBounds());
+            
+            // Set appropriate zoom level based on country size
+            const bounds = bordersLayer.getBounds();
+            const latSpan = Math.abs(bounds.getNorth() - bounds.getSouth());
+            const lngSpan = Math.abs(bounds.getEast() - bounds.getWest());
+            const maxSpan = Math.max(latSpan, lngSpan);
+            
+            let zoomLevel = 4;
+            if (maxSpan > 50) zoomLevel = 3;
+            if (maxSpan > 100) zoomLevel = 2;
+            
+            map.fitBounds(bounds, {
+                maxZoom: zoomLevel,
+                padding: [50, 50]
+            });
         }
     });
 }

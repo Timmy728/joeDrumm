@@ -47,7 +47,6 @@ $(document).ready(function () {
             const country = findCountryByPoint(point);
             if (country) {
                 $('#countrySelect').val(country.properties.iso_a2).change();
-                updateMapForCountry(country.properties.iso_a2);
             }
         }
     });
@@ -146,7 +145,6 @@ $(document).ready(function () {
         if (iso2) {
             clearPreviousCountryData();
             fetchAllCountryData(iso2);
-            updateMapForCountry(iso2);
         }
     });
 });
@@ -156,9 +154,11 @@ function populateCountrySelect(data) {
     dropdown.empty();
     dropdown.append(new Option('Select a Country', ''));
     
+    // Sort features by country name
     const sortedFeatures = data.features.sort((a, b) => 
         a.properties.name.localeCompare(b.properties.name)
     );
+
     sortedFeatures.forEach(feature => {
         const countryName = feature.properties.name;
         const iso2 = feature.properties.iso_a2;
@@ -167,59 +167,14 @@ function populateCountrySelect(data) {
         }
     });
 }
-    function findCountryByPoint(point) {
+
+function findCountryByPoint(point) {
     if (!geoJsonData) return null;
+    
     return geoJsonData.features.find(feature => {
         const polygon = L.geoJSON(feature.geometry);
         return polygon.getBounds().contains(L.latLng(point));
     });
-    }
-
-function updateMapForCountry(iso2) {
-    const country = geoJsonData.features.find(f => f.properties.iso_a2 === iso2);
-
-    if (country) {
-        const bounds = L.geoJSON(country).getBounds();
-        const center = bounds.getCenter();
-        map.setView(center, 5);  // Zoom into country
-        if (capitalMarker) map.removeLayer(capitalMarker);
-
-        const cityIcon = L.icon({
-            iconUrl: 'Images/CityBuildings.png',
-            iconSize: [32, 32],
-            iconAnchor: [16, 32]
-        });
-
-        capitalMarker = L.marker([center.lat, center.lng], { icon: cityIcon })
-            .addTo(map)
-            .bindPopup(`<strong>Country:</strong> ${country.properties.name}`)
-            .openPopup();
-        
-        map.fitBounds(bounds);
-    }
-}
-
-// Geolocation fallback if user denies or is unsupported
-function getLocation() {
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(function (position) {
-            const lat = position.coords.latitude;
-            const lon = position.coords.longitude;
-            map.setView([lat, lon], 13);
-            L.marker([lat, lon]).addTo(map).bindPopup("You are here").openPopup();
-            const country = findCountryByPoint([lat, lon]);
-            if (country) {
-                $('#countrySelect').val(country.properties.iso_a2).change();
-                updateMapForCountry(country.properties.iso_a2);
-            }
-        }, function () {
-            console.error('Geolocation failed');
-            map.setView([51.5074, -0.1278], 10);  // Fallback to London
-        });
-    } else {
-        console.error('Geolocation not supported');
-        map.setView([51.5074, -0.1278], 10);  // Fallback to London
-    }
 }
 
 function loadCurrencies() {

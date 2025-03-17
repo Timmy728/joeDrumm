@@ -308,7 +308,6 @@ function clearPreviousCountryData() {
 }
 
     function fetchAllCountryData(iso2) {
-    displayCountryInfo(iso2);
     displayCapitalCity(iso2);
     displayCapitalOnMap(iso2);
     displayPopulation(iso2);

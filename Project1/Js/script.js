@@ -20,12 +20,17 @@ $(document).ready(function () {
         minZoom: 2
     }).setView([20, 0], 2);
 
-   earthquakeLayer = L.markerClusterGroup({
-        showCoverageOnHover: false,
-        zoomToBoundsOnClick: true,
-        spiderfyOnMaxZoom: true,
-        removeOutsideVisibleBounds: true
-    });
+  // Define overlay maps
+    var overlayMaps = {
+        "Earthquakes": earthquakeLayer
+    };
+
+    // Add the layers control with both basemaps and overlays
+    layerControl = L.control.layers(basemaps, overlayMaps).addTo(map);
+
+    // Add the base layer and earthquake layer to the map
+    streets.addTo(map);
+    map.addLayer(earthquakeLayer);
 
     // Add tile layers
     var streets = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}", {

@@ -41,15 +41,26 @@ $(document).ready(function () {
         "Satellite": satellite
     };
 
-    map.on('locationfound', function (options) {
-        if (geoJsonData) {
-            const point = [options.latitude, options.longitude];
-            const country = findCountryByPoint(point);
-            if (country) {
-                $('#countrySelect').val(country.properties.iso_a2).change();
-            }
-        }
-    });
+    // New function to get the user's geolocation
+    function getLocation() {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(function (position) {
+            const lat = position.coords.latitude;
+            const lon = position.coords.longitude;
+            map.setView([lat, lon], 13);  // Set the map view to user's location
+            L.marker([lat, lon]).addTo(map).bindPopup("You are here").openPopup();
+        }, function () {
+            console.error('Geolocation failed');
+            // Fallback to London if geolocation fails
+            map.setView([51.5074, -0.1278], 10);
+        });
+    } else {
+        console.error('Geolocation not supported');
+        // Fallback to London if geolocation is not supported
+        map.setView([51.5074, -0.1278], 10);
+    }
+}
+
 
     L.control.layers(basemaps).addTo(map);
     streets.addTo(map);
@@ -99,13 +110,16 @@ $(document).ready(function () {
 
     loadCurrencies();
 
+      $(document).ready(function () {
     // Load GeoJSON data and populate countries dropdown
     $.getJSON('https://joedrumm.co.uk/Project1/Data/countryBorders.geo.json', function(data) {
         geoJsonData = data;
         populateCountrySelect(data);
-        map.locate();
+        getLocation();  // Try to get the location on page load
+    });
     });
 
+    
     // Currency modal event handlers
     $('#fromAmount').on('keyup change', function () {
         calcResult();

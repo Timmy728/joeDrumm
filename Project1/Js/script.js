@@ -41,7 +41,7 @@ $(document).ready(function () {
         "Satellite": satellite
     };
 
-      map.on('locationfound', function(options){
+    map.on('locationfound', function(options){
         console.log(options);
 
         $.ajax({
@@ -106,7 +106,7 @@ $(document).ready(function () {
 
     loadCurrencies();
 
-// Populate countries dropdown
+    // Populate countries dropdown
     $.ajax({
         url: 'Php/countryName.php',
         type: 'GET',
@@ -169,7 +169,35 @@ $(document).ready(function () {
     });
 });
 
-    function loadCurrencies() {
+function populateCountrySelect(data) {
+    const dropdown = $('#countrySelect');
+    dropdown.empty();
+    dropdown.append(new Option('Select a Country', ''));
+    
+    // Sort features by country name
+    const sortedFeatures = data.features.sort((a, b) => 
+        a.properties.name.localeCompare(b.properties.name)
+    );
+
+    sortedFeatures.forEach(feature => {
+        const countryName = feature.properties.name;
+        const iso2 = feature.properties.iso_a2;
+        if (countryName && iso2) {
+            dropdown.append(new Option(countryName, iso2));
+        }
+    });
+}
+
+function findCountryByPoint(point) {
+    if (!geoJsonData) return null;
+    
+    return geoJsonData.features.find(feature => {
+        const polygon = L.geoJSON(feature.geometry);
+        return polygon.getBounds().contains(L.latLng(point));
+    });
+}
+
+function loadCurrencies() {
     $.ajax({
         url: "Php/latestExchangeRate.php",
         type: 'GET',
@@ -206,19 +234,19 @@ function calcResult() {
 }
 
 function formatDate(dateString) {
-    return Date.parse(dateString).toString('ddd, dS MMM yyyy');  // Example format: "Tue, 15th Mar 2025"
+    return Date.parse(dateString).toString('ddd, dS MMM yyyy');
 }
 
 function formatTime(dateString) {
-    return Date.parse(dateString).toString('HH:mm, dS MMM yyyy');  // Example format: "14:30, 15th Mar 2025"
+    return Date.parse(dateString).toString('HH:mm, dS MMM yyyy');
 }
 
 function formatNumber(number) {
-    return numeral(number).format('0,0');  // Example format: "1,000" or "1,000,000"
+    return numeral(number).format('0,0');
 }
 
 function formatCurrency(number) {
-    return numeral(number).format('$0,0.00');  // Example format: "$1,000.00"
+    return numeral(number).format('$0,0.00');
 }
 
 function displayWeather(iso2) {
@@ -307,7 +335,25 @@ function clearPreviousCountryData() {
     $('#wikiArticles').html('');
 }
 
-    function fetchAllCountryData(iso2) {
+function fetchAllCountryData(iso2) {
+    const country = geoJsonData.features.find(f => f.properties.iso_a2 === iso2);
+    if (country) {
+        const bounds = L.geoJSON(country).getBounds();
+        placeEarthQuakeMarkers(
+            bounds.getNorth(),
+            bounds.getSouth(),
+            bounds.getEast(),
+            bounds.getWest()
+        );
+        getWikiResults(
+            bounds.getNorth(),
+            bounds.getSouth(),
+            bounds.getEast(),
+            bounds.getWest(),
+            iso2
+        );
+    }
+    displayCountryInfo(iso2);
     displayCapitalCity(iso2);
     displayCapitalOnMap(iso2);
     displayPopulation(iso2);
@@ -316,7 +362,15 @@ function clearPreviousCountryData() {
     displayWikipediaInfo(iso2);
     displayTimezone(iso2);
     updateCountryBorders(iso2);
+}
+
+function displayCountryInfo(iso2) {
+    const country = geoJsonData.features.find(f => f.properties.iso_a2 === iso2);
+    if (country) {
+        $('#countryNames').text(country.properties.name);
+        $('#countryFlag').attr('src', `https://flagcdn.com/w80/${iso2.toLowerCase()}.png`).show();
     }
+}
 
 function displayCapitalCity(iso2) {
     $.get('Php/capitalCities.php', { iso2: iso2 }, function (data) {
@@ -374,15 +428,6 @@ function displayWikipediaInfo(iso2) {
 function displayTimezone(iso2) {
     $.get('Php/Timezone.php', { iso2: iso2 }, function (data) {
         $('#timezone').text(data.timezone);
-    }, 'json');
-}
-
-function displayCurrency(iso2) {
-    $.get('Php/latestExchangeRate.php', { iso2: iso2 }, function (data) {
-        if (data && data.currencyCode) {
-            $('#currencies').val(data.currencyCode);
-            calcResult();
-        }
     }, 'json');
 }
 

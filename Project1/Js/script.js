@@ -366,6 +366,25 @@ function displayCapitalCity(iso2) {
     });
 }
 
+function displayCurrency(iso2) {
+    $.ajax({
+        url: 'Php/LatestExchangeRate.php',  // Replace with your actual API
+        type: 'GET',
+        dataType: 'json',
+        data: { iso2: iso2 },
+        success: function(data) {
+            if (data && data.currency) {
+                $('#currency').text(data.currency);  // Update with correct data
+            } else {
+                $('#currency').text('Currency not available');
+            }
+        },
+        error: function() {
+            $('#currency').text('Currency not available');
+        }
+    });
+}
+
 function displayCapitalOnMap(iso2) {
     $.get('Php/capitalCities.php', { iso2: iso2 }, function (data) {
         if (data && data.capital) {

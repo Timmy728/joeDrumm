@@ -294,7 +294,6 @@ function displayWeather(iso2) {
     });
 }
 
-
 function clearPreviousCountryData() {
     earthquakeLayer.clearLayers();
     if (capitalMarker) {
@@ -319,14 +318,6 @@ function clearPreviousCountryData() {
     displayTimezone(iso2);
     updateCountryBorders(iso2);
     }
-
-function displayCountryInfo(iso2) {
-    const country = geoJsonData.features.find(f => f.properties.iso_a2 === iso2);
-    if (country) {
-        $('#countryNames').text(country.properties.name);
-        $('#countryFlag').attr('src', `https://flagcdn.com/w80/${iso2.toLowerCase()}.png`).show();
-    }
-}
 
 function displayCapitalCity(iso2) {
     $.get('Php/capitalCities.php', { iso2: iso2 }, function (data) {

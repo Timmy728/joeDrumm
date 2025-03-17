@@ -432,28 +432,11 @@ function displayWikipediaInfo(iso2) {
 }
 
 function displayTimezone(iso2) {
-    console.log('Fetching timezone for:', iso2); // Debug log
-    $.ajax({
-        url: 'Php/Timezone.php',
-        type: 'GET',
-        dataType: 'json',
-        data: { countryCode: iso2 },
-        success: function(data) {
-            console.log('Timezone response:', data); // Debug log
-            if (data && data.timezone) {
-                $('#timezone').text(data.timezone);
-            } else {
-                console.warn('No timezone data in response'); // Debug log
-                $('#timezone').text('Not available');
-            }
-        },
-        error: function(xhr, status, error) {
-            console.error('Timezone error:', status, error); // Debug log
-            $('#timezone').text('Not available');
-        }
-    });
+    $.get('Php/Timezone.php', { iso2: iso2 }, function (data) {
+        $('#timezone').text(data.timezone);
+    }, 'json');
 }
-
+   
 function updateCountryBorders(iso2) {
     if (bordersLayer) {
         map.removeLayer(bordersLayer);

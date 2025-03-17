@@ -41,14 +41,21 @@ $(document).ready(function () {
         "Satellite": satellite
     };
 
-    map.on('locationfound', function (options) {
-        if (geoJsonData) {
-            const point = [options.latitude, options.longitude];
-            const country = findCountryByPoint(point);
-            if (country) {
-                $('#countrySelect').val(country.properties.iso_a2).change();
+      map.on('locationfound', function(options){
+        console.log(options);
+
+        $.ajax({
+            url: 'Php/CountryCode.php',
+            type: 'GET',
+            dataType: 'json',
+            data:{lat:options.latitude, lng:options.longitude},
+            success: function (data) {
+               console.log(data);
+               $('#countrySelect').val(data.data.countryCode).change();
+            },error:function(err){
+                console.log(err);
             }
-        }
+        });
     });
 
     L.control.layers(basemaps).addTo(map);
@@ -99,11 +106,24 @@ $(document).ready(function () {
 
     loadCurrencies();
 
-    // Load GeoJSON data and populate countries dropdown
-    $.getJSON('https://joedrumm.co.uk/Project1/Data/countryBorders.geo.json', function(data) {
-        geoJsonData = data;
-        populateCountrySelect(data);
-        map.locate();
+// Populate countries dropdown
+    $.ajax({
+        url: 'Php/countryName.php',
+        type: 'GET',
+        dataType: 'json',
+        success: function (data) {
+            console.log(data);
+            const dropdown = $('#countrySelect');
+            dropdown.empty();
+            dropdown.append(new Option('Select a Country', ''));
+            data.forEach(function (country) {
+                if (country.name && country.iso2) {
+                    dropdown.append(new Option(country.name, country.iso2));
+                }
+            });
+
+            map.locate();
+        }
     });
 
     // Currency modal event handlers
@@ -149,35 +169,7 @@ $(document).ready(function () {
     });
 });
 
-function populateCountrySelect(data) {
-    const dropdown = $('#countrySelect');
-    dropdown.empty();
-    dropdown.append(new Option('Select a Country', ''));
-    
-    // Sort features by country name
-    const sortedFeatures = data.features.sort((a, b) => 
-        a.properties.name.localeCompare(b.properties.name)
-    );
-
-    sortedFeatures.forEach(feature => {
-        const countryName = feature.properties.name;
-        const iso2 = feature.properties.iso_a2;
-        if (countryName && iso2) {
-            dropdown.append(new Option(countryName, iso2));
-        }
-    });
-}
-
-function findCountryByPoint(point) {
-    if (!geoJsonData) return null;
-    
-    return geoJsonData.features.find(feature => {
-        const polygon = L.geoJSON(feature.geometry);
-        return polygon.getBounds().contains(L.latLng(point));
-    });
-}
-
-function loadCurrencies() {
+    function loadCurrencies() {
     $.ajax({
         url: "Php/latestExchangeRate.php",
         type: 'GET',

@@ -436,7 +436,7 @@ function displayTimezone(iso2) {
         url: 'Php/Timezone.php',
         type: 'GET',
         dataType: 'json',
-        data: { iso2: iso2 },
+        data: { countryCode: iso2 },
         success: function(data) {
             if (data && data.timezone) {
                 $('#timezone').text(data.timezone);

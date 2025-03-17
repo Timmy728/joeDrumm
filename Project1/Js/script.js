@@ -323,10 +323,13 @@ function fetchAllCountryData(iso2) {
         dataType: 'json',
         data: { country: iso2 },
         success: function(data) {
-            if (data.data && data.data[0]) {
+            if (data && data.data && data.data[0]) {
                 const bounds = data.data[0];
                 placeEarthQuakeMarkers(bounds.north, bounds.south, bounds.east, bounds.west);
                 getWikiResults(bounds.north, bounds.south, bounds.east, bounds.west, iso2);
+                
+                // Update map view with the country bounds
+                updateCountryBorders(iso2);
             }
         }
     });
@@ -339,7 +342,6 @@ function fetchAllCountryData(iso2) {
     displayExchangeRate(iso2);
     displayWikipediaInfo(iso2);
     displayTimezone(iso2);
-    updateCountryBorders(iso2);
 }
 
 function displayCountryInfo(iso2) {
@@ -353,13 +355,19 @@ function displayCountryInfo(iso2) {
 
 function displayCapitalCity(iso2) {
     $.get('Php/capitalCities.php', { iso2: iso2 }, function (data) {
-        $('#capitalCity').text(data.capital);
-    }, 'json');
+        if (data && data.capital) {
+            $('#capitalCity').text(data.capital);
+        } else {
+            $('#capitalCity').text('Not available');
+        }
+    }, 'json').fail(function() {
+        $('#capitalCity').text('Not available');
+    });
 }
 
 function displayCapitalOnMap(iso2) {
     $.get('Php/capitalCities.php', { iso2: iso2 }, function (data) {
-        if (data.capital) {
+        if (data && data.capital) {
             $.get('Php/countryInfo.php', { country: iso2 }, function(countryData) {
                 if (countryData.data && countryData.data[0]) {
                     const bounds = countryData.data[0];
@@ -382,38 +390,63 @@ function displayCapitalOnMap(iso2) {
 
 function displayPopulation(iso2) {
     $.get('Php/Population.php', { countryCode: iso2 }, function (data) {
-        $('#population').text(formatNumber(data.population));
-    }, 'json');
+        if (data && data.population) {
+            $('#population').text(formatNumber(data.population));
+        } else {
+            $('#population').text('Not available');
+        }
+    }, 'json').fail(function() {
+        $('#population').text('Not available');
+    });
 }
 
 function displayExchangeRate(iso2) {
     $.get('Php/latestExchangeRate.php', { iso2: iso2 }, function (data) {
-        $('#txtCurrencyRate').text(`1 USD = ${formatCurrency(data.exchangeRate)} ${data.currencyCode}`);
-        $('#convertBtn').off('click').on('click', function () {
-            const amount = parseFloat($('#currencyAmount').val());
-            if (!isNaN(amount)) {
-                const convertedAmount = (amount * data.exchangeRate).toFixed(2);
-                $('#convertedCurrency').text(`${formatCurrency(amount)} USD = ${formatCurrency(convertedAmount)} ${data.currencyCode}`);
-            }
-        });
-    }, 'json');
+        if (data && data.exchangeRate && data.currencyCode) {
+            $('#txtCurrencyRate').text(`1 USD = ${formatCurrency(data.exchangeRate)} ${data.currencyCode}`);
+            $('#convertBtn').off('click').on('click', function () {
+                const amount = parseFloat($('#currencyAmount').val());
+                if (!isNaN(amount)) {
+                    const convertedAmount = (amount * data.exchangeRate).toFixed(2);
+                    $('#convertedCurrency').text(`${formatCurrency(amount)} USD = ${formatCurrency(convertedAmount)} ${data.currencyCode}`);
+                }
+            });
+        } else {
+            $('#txtCurrencyRate').text('Exchange rate not available');
+        }
+    }, 'json').fail(function() {
+        $('#txtCurrencyRate').text('Exchange rate not available');
+    });
 }
 
 function displayWikipediaInfo(iso2) {
     $.get('Php/wikipediaSearch.php', { query: iso2 }, function (data) {
-        $('#wikiLink').attr('href', data.url).text(`View ${data.title} on Wikipedia`);
-    }, 'json');
+        if (data && data.url && data.title) {
+            $('#wikiLink').attr('href', data.url).text(`View ${data.title} on Wikipedia`);
+        } else {
+            $('#wikiLink').text('Wikipedia link not available');
+        }
+    }, 'json').fail(function() {
+        $('#wikiLink').text('Wikipedia link not available');
+    });
 }
 
 function displayTimezone(iso2) {
-    $.get('Php/Timezone.php', { iso2: iso2 }, function (data) {
-        if (data && data.timezone) {
-            $('#timezone').text(data.timezone);
-        } else {
+    $.ajax({
+        url: 'Php/Timezone.php',
+        type: 'GET',
+        dataType: 'json',
+        data: { iso2: iso2 },
+        success: function(data) {
+            if (data && data.timezone) {
+                $('#timezone').text(data.timezone);
+            } else {
+                $('#timezone').text('Not available');
+            }
+        },
+        error: function() {
             $('#timezone').text('Not available');
         }
-    }, 'json').fail(function() {
-        $('#timezone').text('Not available');
     });
 }
 
@@ -438,17 +471,9 @@ function updateCountryBorders(iso2) {
             
             // Set appropriate zoom level based on country size
             const bounds = bordersLayer.getBounds();
-            const latSpan = Math.abs(bounds.getNorth() - bounds.getSouth());
-            const lngSpan = Math.abs(bounds.getEast() - bounds.getWest());
-            const maxSpan = Math.max(latSpan, lngSpan);
-            
-            let zoomLevel = 4;
-            if (maxSpan > 50) zoomLevel = 3;
-            if (maxSpan > 100) zoomLevel = 2;
-            
             map.fitBounds(bounds, {
-                maxZoom: zoomLevel,
-                padding: [50, 50]
+                padding: [50, 50],
+                maxZoom: 6  // Limit maximum zoom level
             });
         }
     });

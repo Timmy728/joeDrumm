@@ -12,7 +12,6 @@ let earthquakeLayer;
 let capitalMarker = null;
 let earthquakeMarkers = [];
 let layerControl;
-let geoJsonData = null;
 
 $(document).ready(function () {
     // Initialize the map with maxZoom specified
@@ -41,14 +40,24 @@ $(document).ready(function () {
         "Satellite": satellite
     };
 
-    map.on('locationfound', function (options) {
-        if (geoJsonData) {
-            const point = [options.latitude, options.longitude];
-            const country = findCountryByPoint(point);
-            if (country) {
-                $('#countrySelect').val(country.properties.iso_a2).change();
+    map.on('locationfound', function(options){
+        console.log(options);
+
+        $.ajax({
+            url: 'Php/CountryCode.php',
+            type: 'GET',
+            dataType: 'json',
+            data:{lat:options.latitude, lng:options.longitude},
+            success: function (data) {
+               console.log(data);
+               if (data && data.data && data.data.countryCode) {
+                   $('#countrySelect').val(data.data.countryCode).trigger('change');
+               }
+            },
+            error:function(err){
+                console.log(err);
             }
-        }
+        });
     });
 
     L.control.layers(basemaps).addTo(map);
@@ -99,11 +108,30 @@ $(document).ready(function () {
 
     loadCurrencies();
 
-    // Load GeoJSON data and populate countries dropdown
-    $.getJSON('https://joedrumm.co.uk/Project1/Data/countryBorders.geo.json', function(data) {
-        geoJsonData = data;
-        populateCountrySelect(data);
-        map.locate();
+    // Populate countries dropdown
+    $.ajax({
+        url: 'Php/countryName.php',
+        type: 'GET',
+        dataType: 'json',
+        success: function (data) {
+            console.log(data);
+            const dropdown = $('#countrySelect');
+            dropdown.empty();
+            dropdown.append(new Option('Select a Country', ''));
+            data.forEach(function (country) {
+                if (country.name && country.iso2) {
+                    dropdown.append(new Option(country.name, country.iso2));
+                }
+            });
+
+            map.locate({
+                setView: true,
+                maxZoom: 5  // Reduced zoom level
+            });
+        },
+        error: function(err) {
+            console.error("Error loading countries:", err);
+        }
     });
 
     // Currency modal event handlers
@@ -148,34 +176,6 @@ $(document).ready(function () {
         }
     });
 });
-
-function populateCountrySelect(data) {
-    const dropdown = $('#countrySelect');
-    dropdown.empty();
-    dropdown.append(new Option('Select a Country', ''));
-    
-    // Sort features by country name
-    const sortedFeatures = data.features.sort((a, b) => 
-        a.properties.name.localeCompare(b.properties.name)
-    );
-
-    sortedFeatures.forEach(feature => {
-        const countryName = feature.properties.name;
-        const iso2 = feature.properties.iso_a2;
-        if (countryName && iso2) {
-            dropdown.append(new Option(countryName, iso2));
-        }
-    });
-}
-
-function findCountryByPoint(point) {
-    if (!geoJsonData) return null;
-    
-    return geoJsonData.features.find(feature => {
-        const polygon = L.geoJSON(feature.geometry);
-        return polygon.getBounds().contains(L.latLng(point));
-    });
-}
 
 function loadCurrencies() {
     $.ajax({
@@ -316,23 +316,24 @@ function clearPreviousCountryData() {
 }
 
 function fetchAllCountryData(iso2) {
-    const country = geoJsonData.features.find(f => f.properties.iso_a2 === iso2);
-    if (country) {
-        const bounds = L.geoJSON(country).getBounds();
-        placeEarthQuakeMarkers(
-            bounds.getNorth(),
-            bounds.getSouth(),
-            bounds.getEast(),
-            bounds.getWest()
-        );
-        getWikiResults(
-            bounds.getNorth(),
-            bounds.getSouth(),
-            bounds.getEast(),
-            bounds.getWest(),
-            iso2
-        );
-    }
+    // Get country bounds from the countryInfo endpoint
+    $.ajax({
+        url: 'Php/countryInfo.php',
+        type: 'GET',
+        dataType: 'json',
+        data: { country: iso2 },
+        success: function(data) {
+            if (data && data.data && data.data[0]) {
+                const bounds = data.data[0];
+                placeEarthQuakeMarkers(bounds.north, bounds.south, bounds.east, bounds.west);
+                getWikiResults(bounds.north, bounds.south, bounds.east, bounds.west, iso2);
+                
+                // Update map view with the country bounds
+                updateCountryBorders(iso2);
+            }
+        }
+    });
+
     displayCountryInfo(iso2);
     displayCapitalCity(iso2);
     displayCapitalOnMap(iso2);
@@ -341,74 +342,112 @@ function fetchAllCountryData(iso2) {
     displayExchangeRate(iso2);
     displayWikipediaInfo(iso2);
     displayTimezone(iso2);
-    updateCountryBorders(iso2);
 }
 
 function displayCountryInfo(iso2) {
-    const country = geoJsonData.features.find(f => f.properties.iso_a2 === iso2);
-    if (country) {
-        $('#countryNames').text(country.properties.name);
-        $('#countryFlag').attr('src', `https://flagcdn.com/w80/${iso2.toLowerCase()}.png`).show();
-    }
+    $.get('Php/countryName.php', { iso2: iso2 }, function(data) {
+        if (data && data.name) {
+            $('#countryNames').text(data.name);
+            $('#countryFlag').attr('src', `https://flagcdn.com/w80/${iso2.toLowerCase()}.png`).show();
+        }
+    });
 }
 
 function displayCapitalCity(iso2) {
     $.get('Php/capitalCities.php', { iso2: iso2 }, function (data) {
-        $('#capitalCity').text(data.capital);
-    }, 'json');
+        if (data && data.capital) {
+            $('#capitalCity').text(data.capital);
+        } else {
+            $('#capitalCity').text('Not available');
+        }
+    }, 'json').fail(function() {
+        $('#capitalCity').text('Not available');
+    });
 }
 
 function displayCapitalOnMap(iso2) {
-    const country = geoJsonData.features.find(f => f.properties.iso_a2 === iso2);
-    if (country) {
-        $.get('Php/capitalCities.php', { iso2: iso2 }, function (data) {
-            if (data.capital) {
-                const bounds = L.geoJSON(country).getBounds();
-                const center = bounds.getCenter();
+    $.get('Php/capitalCities.php', { iso2: iso2 }, function (data) {
+        if (data && data.capital) {
+            $.get('Php/countryInfo.php', { country: iso2 }, function(countryData) {
+                if (countryData.data && countryData.data[0]) {
+                    const bounds = countryData.data[0];
+                    const center = L.latLng((bounds.north + bounds.south) / 2, (bounds.east + bounds.west) / 2);
 
-                var cityIcon = L.icon({
-                    iconUrl: 'Images/CityBuildings.png',
-                    iconSize: [32, 32],
-                    iconAnchor: [16, 32]
-                });
+                    var cityIcon = L.icon({
+                        iconUrl: 'Images/CityBuildings.png',
+                        iconSize: [32, 32],
+                        iconAnchor: [16, 32]
+                    });
 
-                capitalMarker = L.marker([center.lat, center.lng], { icon: cityIcon })
-                    .addTo(map)
-                    .bindPopup(`<strong>Capital:</strong> ${data.capital}`);
-            }
-        }, 'json');
-    }
+                    capitalMarker = L.marker(center, { icon: cityIcon })
+                        .addTo(map)
+                        .bindPopup(`<strong>Capital:</strong> ${data.capital}`);
+                }
+            });
+        }
+    }, 'json');
 }
 
 function displayPopulation(iso2) {
     $.get('Php/Population.php', { countryCode: iso2 }, function (data) {
-        $('#population').text(formatNumber(data.population));
-    }, 'json');
+        if (data && data.population) {
+            $('#population').text(formatNumber(data.population));
+        } else {
+            $('#population').text('Not available');
+        }
+    }, 'json').fail(function() {
+        $('#population').text('Not available');
+    });
 }
 
 function displayExchangeRate(iso2) {
     $.get('Php/latestExchangeRate.php', { iso2: iso2 }, function (data) {
-        $('#txtCurrencyRate').text(`1 USD = ${formatCurrency(data.exchangeRate)} ${data.currencyCode}`);
-        $('#convertBtn').off('click').on('click', function () {
-            const amount = parseFloat($('#currencyAmount').val());
-            if (!isNaN(amount)) {
-                const convertedAmount = (amount * data.exchangeRate).toFixed(2);
-                $('#convertedCurrency').text(`${formatCurrency(amount)} USD = ${formatCurrency(convertedAmount)} ${data.currencyCode}`);
-            }
-        });
-    }, 'json');
+        if (data && data.exchangeRate && data.currencyCode) {
+            $('#txtCurrencyRate').text(`1 USD = ${formatCurrency(data.exchangeRate)} ${data.currencyCode}`);
+            $('#convertBtn').off('click').on('click', function () {
+                const amount = parseFloat($('#currencyAmount').val());
+                if (!isNaN(amount)) {
+                    const convertedAmount = (amount * data.exchangeRate).toFixed(2);
+                    $('#convertedCurrency').text(`${formatCurrency(amount)} USD = ${formatCurrency(convertedAmount)} ${data.currencyCode}`);
+                }
+            });
+        } else {
+            $('#txtCurrencyRate').text('Exchange rate not available');
+        }
+    }, 'json').fail(function() {
+        $('#txtCurrencyRate').text('Exchange rate not available');
+    });
 }
 
 function displayWikipediaInfo(iso2) {
     $.get('Php/wikipediaSearch.php', { query: iso2 }, function (data) {
-        $('#wikiLink').attr('href', data.url).text(`View ${data.title} on Wikipedia`);
-    }, 'json');
+        if (data && data.url && data.title) {
+            $('#wikiLink').attr('href', data.url).text(`View ${data.title} on Wikipedia`);
+        } else {
+            $('#wikiLink').text('Wikipedia link not available');
+        }
+    }, 'json').fail(function() {
+        $('#wikiLink').text('Wikipedia link not available');
+    });
 }
 
 function displayTimezone(iso2) {
-    $.get('Php/Timezone.php', { iso2: iso2 }, function (data) {
-        $('#timezone').text(data.timezone);
-    }, 'json');
+    $.ajax({
+        url: 'Php/Timezone.php',
+        type: 'GET',
+        dataType: 'json',
+        data: { countryCode: iso2 },
+        success: function(data) {
+            if (data && data.timezone) {
+                $('#timezone').text(data.timezone);
+            } else {
+                $('#timezone').text('Not available');
+            }
+        },
+        error: function() {
+            $('#timezone').text('Not available');
+        }
+    });
 }
 
 function updateCountryBorders(iso2) {
@@ -416,18 +455,28 @@ function updateCountryBorders(iso2) {
         map.removeLayer(bordersLayer);
     }
     
-    const country = geoJsonData.features.find(f => f.properties.iso_a2 === iso2);
-    if (country) {
-        bordersLayer = L.geoJSON(country, {
-            style: {
-                color: 'blue',
-                weight: 2,
-                fillColor: 'orange',
-                fillOpacity: 0.3
-            }
-        }).addTo(map);
-        map.fitBounds(bordersLayer.getBounds());
-    }
+    $.getJSON('https://joedrumm.co.uk/Project1/Data/countryBorders.geo.json', function(data) {
+        const country = data.features.find(
+            feature => feature.properties.iso_a2 === iso2
+        );
+        if (country) {
+            bordersLayer = L.geoJSON(country, {
+                style: {
+                    color: 'blue',
+                    weight: 2,
+                    fillColor: 'orange',
+                    fillOpacity: 0.3
+                }
+            }).addTo(map);
+            
+            // Set appropriate zoom level based on country size
+            const bounds = bordersLayer.getBounds();
+            map.fitBounds(bounds, {
+                padding: [50, 50],
+                maxZoom: 6  // Limit maximum zoom level
+            });
+        }
+    });
 }
 
 function placeEarthQuakeMarkers(north, south, east, west) {

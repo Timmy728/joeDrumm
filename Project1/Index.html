@@ -31,8 +31,6 @@
         </span>
     </div>
 
-    <!-- Modals Container -->
-    <div id="modals-container">
         <!-- Country Info Modal -->
         <div id="infoModal1" class="modal fade" tabindex="-1">
             <div class="modal-dialog modal-dialog-centered">
@@ -54,7 +52,7 @@
             </div>
         </div>
 
-               <!-- News Modal -->
+        <!-- News Modal -->
         <div id="infoModal2" class="modal fade" tabindex="-1" data-bs-backdrop="false" data-bs-keyboard="false">
             <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
                 <div class="modal-content shadow">
@@ -86,7 +84,7 @@
                         <table class="table table-borderless mb-0">       
                             <tr>
                                 <td rowspan="2" width="50%">
-                                    <img class="img-fluid rounded" src="https://ichef.bbci.co.uk/news/240/cpsprodpb/669D/production/_130096262_img_5432.jpg" alt="" title="">
+                                    <img class="img-fluid rounded" src="https://ichef.bbci.co.uk/news/240/cpsprodpb/669D/production/_130096262_img_5432.jpg" alt="" title=""/>
                                 </td>
                                 <td>
                                     <a href="https://www.bbc.co.uk/news/uk-scotland-glasgow-west-65894201" class="fw-bold fs-6 text-black" target="_blank">Parents 'devastated' as blunder leaves village 1,000 school places short</a>
@@ -105,7 +103,7 @@
                         <table class="table table-borderless mb-0">       
                             <tr>
                                 <td rowspan="2" width="50%">
-                                    <img class="img-fluid rounded" src="https://ichef.bbci.co.uk/news/240/cpsprodpb/1084B/production/_130095676_p0fv8hdd.jpg" alt="" title="">
+                                    <img class="img-fluid rounded" src="https://ichef.bbci.co.uk/news/240/cpsprodpb/1084B/production/_130095676_p0fv8hdd.jpg" alt="" title=""/>
                                 </td>
                                 <td>
                                     <a href="https://www.bbc.co.uk/news/av/world-australia-65912350" class="fw-bold fs-6 text-black" target="_blank">Watch: Tourist fights off feisty kangaroo in Australia</a>
@@ -117,14 +115,13 @@
                                 </td>            
                             </tr>
                         </table>         
-
                         <hr>
                         
                         <!-- fourth item -->
                         <table class="table table-borderless mb-0">       
                             <tr>
                                 <td rowspan="2" width="50%">
-                                    <img class="img-fluid rounded" src="https://ichef.bbci.co.uk/news/240/cpsprodpb/419D/production/_130079761_whatsubject.jpg" alt="" title="">
+                                    <img class="img-fluid rounded" src="https://ichef.bbci.co.uk/news/240/cpsprodpb/419D/production/_130079761_whatsubject.jpg" alt="" title=""/>
                                 </td>
                                 <td>
                                     <a href="https://www.bbc.co.uk/news/business-65861096" class="fw-bold fs-6 text-black" target="_blank">Is the US trying to kill crypto?</a>
@@ -201,7 +198,7 @@
                                         <p id="todayConditions" class="fw-bold fs-6 mt-3"></p>
                                     </div>
                                     <div class="col text-center">
-                                        <img id="todayIcon" class="img-fluid mt-0" src="" alt="" title="">
+                                        <img id="todayIcon" class="img-fluid mt-0" src="" alt="" title=""/>
                                     </div>
                                     <div class="col text-center">
                                         <p class="fw-bold fs-4 mb-0"><span id="todayMaxTemp"></span><sup>o</sup><span class="tempMetric">c</span></p>
@@ -219,7 +216,7 @@
                                 </div>
                                 <div class="row">
                                     <div class="col text-center">
-                                        <img id="day1Icon" src="" alt="" title="">
+                                        <img id="day1Icon" src="" alt="" title=""/>
                                     </div>
                                     <div class="col text-center">
                                         <p class="fw-bold fs-4 mb-0"><span id="day1MaxTemp"></span><sup>o</sup>c</p>
@@ -235,7 +232,7 @@
                                 </div>
                                 <div class="row">
                                     <div class="col text-center">
-                                        <img id="day2Icon" src="" alt="" title="">
+                                        <img id="day2Icon" src="" alt="" title=""/>
                                     </div>
                                     <div class="col text-center">
                                         <p class="fw-bold fs-4 mb-0"><span id="day2MaxTemp"></span><sup>o</sup>c</p>
@@ -251,7 +248,7 @@
                                 </div>
                                 <div class="row">
                                     <div class="col text-center">
-                                        <img id="day3Icon" src="" alt="" title="">
+                                        <img id="day3Icon" src="" alt="" title=""/>
                                     </div>
                                     <div class="col text-center">
                                         <p class="fw-bold fs-4 mb-0"><span id="day3MaxTemp"></span><sup>o</sup>c</p>
@@ -266,11 +263,19 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+                    </div>
                 </div>
             </div>
         </div>
 
-  <!-- Wikipedia Modal -->
+      <!-- Modals Container -->
+    <div id="modals-container">
+        <!-- Trigger Button for Wikipedia Modal -->
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#infoModal5">
+            Open Wikipedia Summary
+        </button>
+
+        <!-- Wikipedia Modal -->
         <div id="infoModal5" class="modal fade" tabindex="-1">
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">

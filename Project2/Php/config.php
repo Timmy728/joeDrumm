@@ -1,6 +1,6 @@
 <?php
 
-	$cd_host = "127.0.0.1"; // Use localhost or 127.0.0.1
+	$cd_host = "localhost";
 	$cd_port = 3306;
 	$cd_socket = "";
 

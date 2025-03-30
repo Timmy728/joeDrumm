@@ -5,8 +5,8 @@
 	$cd_socket = "";
 
 	// XAMPP default credentials
-	$cd_dbname = "companydirectory";
-	$cd_user = "root"; 
-	$cd_password = ""; // Empty password in XAMPP
+	$cd_dbname = "joedybtq_companydirectory";
+	$cd_user = "joedybtq_user1"; 
+	$cd_password = "Timmy@12345678910"; // Empty password in XAMPP
 
 ?>

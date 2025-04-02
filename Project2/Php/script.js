@@ -84,6 +84,20 @@ $("#searchInp").on("keyup", function () {
     });
 });
 
+//Handle for Personnel, Department & location
+$("#addBtn").off("click").on("click", function () {
+  if ($("#personnel-tab-pane").hasClass("active")) {
+    $("#addPersonnelModal").modal("show");
+    loadDepartmentsForDropdown();
+  } else if ($("#departments-tab-pane").hasClass("active")) {
+    $("#addDepartmentModal").modal("show");
+    loadLocationsForDropdown();
+  } else if ($("#locations-tab-pane").hasClass("active")) {
+    $("#addLocationModal").modal("show");
+  }
+});
+
+
 // 🟢 REFRESH BUTTON FUNCTION
 $("#refreshBtn").click(function () {
     if ($("#personnelBtn").hasClass("active")) {
@@ -98,17 +112,6 @@ $("#refreshBtn").click(function () {
 // 🟢 FILTER FUNCTION (Open Modal for Filtering)
 $("#filterBtn").click(function () {
     $("#filterModal").modal("show");
-});
-
-// 🟢 ADD FUNCTION (Open the Correct Add Modal)
-$("#addBtn").click(function () {
-  if ($("#personnel-tab-pane").hasClass("active")) {
-    $("#addPersonnelModal").modal("show");
-  } else if ($("#departments-tab-pane").hasClass("active")) {
-    $("#addDepartmentModal").modal("show");
-  } else if ($("#locations-tab-pane").hasClass("active")) {
-    $("#addLocationModal").modal("show");
-  }
 });
 
 // 🟢 LOAD PERSONNEL FROM DATABASE
@@ -448,13 +451,6 @@ $(document).on("click", ".deleteLocationBtn", function () {
             alert("❌ Failed to check location dependencies.");
         }
     });
-});
-
-
-// 🟢 Open Add Personnel Modal
-$("#addBtn").click(function () {
-    $("#addPersonnelModal").modal("show");
-    loadDepartmentsForDropdown();
 });
 
 // 🟢 Load Departments into Add Personnel Dropdown

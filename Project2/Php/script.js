@@ -4,6 +4,19 @@ $(document).ready(function () {
     loadLocations();
 });
 
+// 🔁 Reload correct table when switching tabs
+$('button[data-bs-toggle="tab"]').on('shown.bs.tab', function (e) {
+    const target = $(e.target).attr('id');
+
+    if (target === "personnelBtn") {
+        loadPersonnel();
+    } else if (target === "departmentsBtn") {
+        loadDepartments();
+    } else if (target === "locationsBtn") {
+        loadLocations();
+    }
+});
+
 // 🟢 SEARCH FUNCTION
 $("#searchInp").on("keyup", function () {
     let searchQuery = $(this).val().trim();

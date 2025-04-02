@@ -102,14 +102,13 @@ $("#filterBtn").click(function () {
 
 // 🟢 ADD FUNCTION (Open the Correct Add Modal)
 $("#addBtn").click(function () {
-    if ($("#personnelBtn").hasClass("active")) {
-        $("#addPersonnelModal").modal("show");
-    } else if ($("#departmentsBtn").hasClass("active")) {
-        $("#addDepartmentModal").modal("show");
-        loadLocationsForDropdown(); 
-    } else {
-        $("#addLocationModal").modal("show");
-    }
+  if ($("#personnel-tab-pane").hasClass("active")) {
+    $("#addPersonnelModal").modal("show");
+  } else if ($("#departments-tab-pane").hasClass("active")) {
+    $("#addDepartmentModal").modal("show");
+  } else if ($("#locations-tab-pane").hasClass("active")) {
+    $("#addLocationModal").modal("show");
+  }
 });
 
 // 🟢 LOAD PERSONNEL FROM DATABASE

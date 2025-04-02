@@ -106,6 +106,7 @@ $("#addBtn").click(function () {
         $("#addPersonnelModal").modal("show");
     } else if ($("#departmentsBtn").hasClass("active")) {
         $("#addDepartmentModal").modal("show");
+        loadLocationsForDropdown(); 
     } else {
         $("#addLocationModal").modal("show");
     }

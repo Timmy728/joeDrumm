@@ -100,6 +100,8 @@ $("#addBtn").click(function () {
 
 // 🟢 LOAD PERSONNEL FROM DATABASE
 function loadPersonnel() {
+    $("#searchInp").val(""); //Clears the search input
+    
     $.ajax({
         url: "Php/getAll.php",
         type: "GET",

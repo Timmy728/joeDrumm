@@ -421,45 +421,64 @@ $(document).on("submit", "#confirmDeleteForm", function (e) {
 });
 
 
-// DELETE DEPARTMENT
+// 🟢 DELETE DEPARTMENT
 $(document).on("click", ".deleteDepartmentBtn", function () {
-    const id = $(this).data("id");
+    const deptID = $(this).data("id");
 
+    // First: check for personnel dependencies
     $.ajax({
         url: "Php/checkDependencies.php",
         type: "POST",
-        data: { departmentID: id },
+        data: { departmentID: deptID },
         dataType: "json",
         success: function (response) {
             if (response.status.hasPersonnel) {
-                alert("❌ Cannot delete. Department has assigned personnel.");
-            } else {
-                $.ajax({
-                    url: "Php/getDepartmentByID.php",
-                    type: "POST",
-                    dataType: "json",
-                    data: { id },
-                    success: function (res) {
-                        if (res.status.code == 200) {
-                            const dept = res.data.department;
-                            $("#confirmDeleteMessage").text(`Delete department "${dept.name}"?`);
-                            $("#deleteEntityID").val(dept.id);
-                            $("#confirmDeleteModal").data("type", "department").modal("show");
-                        } else {
-                            alert("❌ Could not fetch department details.");
-                        }
-                    },
-                    error: function () {
-                        alert("❌ Error fetching department.");
-                    }
-                });
+                // 🚫 Cannot delete — show styled modal message only
+                $("#confirmDeleteMessage").text("❌ Cannot delete this department. It has one or more employees assigned.");
+
+                $("#confirmDeleteModal .modal-footer").html(`
+                    <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">CLOSE</button>
+                `);
+
+                $("#deleteEntityID").val("");
+                $("#confirmDeleteModal").data("type", "").modal("show");
+                return;
             }
+
+            // ✅ Safe to delete — fetch department name
+            $.ajax({
+                url: "Php/getDepartmentByID.php",
+                type: "POST",
+                dataType: "json",
+                data: { id: deptID },
+                success: function (res) {
+                    if (res.status.code == 200) {
+                        const dept = res.data.department;
+                        $("#confirmDeleteMessage").text(`Delete department "${dept.name}"?`);
+                        $("#deleteEntityID").val(dept.id);
+                        $("#confirmDeleteModal").data("type", "department");
+
+                        $("#confirmDeleteModal .modal-footer").html(`
+                            <button type="submit" form="confirmDeleteForm" class="btn btn-outline-danger btn-sm">YES</button>
+                            <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">CANCEL</button>
+                        `);
+
+                        $("#confirmDeleteModal").modal("show");
+                    } else {
+                        alert("❌ Could not fetch department details.");
+                    }
+                },
+                error: function () {
+                    alert("❌ Error fetching department details.");
+                }
+            });
         },
         error: function () {
-            alert("❌ Error checking dependencies.");
+            alert("❌ Failed to check department dependencies.");
         }
     });
 });
+
 
 
 // 🟢 DELETE LOCATION

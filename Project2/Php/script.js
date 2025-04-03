@@ -427,7 +427,7 @@ $(document).on("click", ".deleteDepartmentBtn", function () {
 
     // First: check for personnel dependencies
     $.ajax({
-        url: "Php/checkDependencies.php",
+        url: "Php/checkDepartmentDependencies.php",
         type: "POST",
         data: { departmentID: deptID },
         dataType: "json",

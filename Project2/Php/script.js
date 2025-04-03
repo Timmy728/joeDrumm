@@ -421,22 +421,37 @@ $(document).on("click", ".deleteDepartmentBtn", function () {
     const id = $(this).data("id");
 
     $.ajax({
-        url: "Php/getDepartmentByID.php",
+        url: "Php/checkDependencies.php",
         type: "POST",
+        data: { departmentID: id },
         dataType: "json",
-        data: { id },
-        success: function (res) {
-            if (res.status.code == 200) {
-                const dept = res.data.department;
-                $("#confirmDeleteMessage").text(`Delete department "${dept.name}"?`);
-                $("#deleteEntityID").val(dept.id);
-                $("#confirmDeleteModal").data("type", "department").modal("show");
+        success: function (response) {
+            if (response.status.hasPersonnel) {
+                alert("❌ Cannot delete. Department has assigned personnel.");
             } else {
-                alert("❌ Could not fetch department details.");
+                $.ajax({
+                    url: "Php/getDepartmentByID.php",
+                    type: "POST",
+                    dataType: "json",
+                    data: { id },
+                    success: function (res) {
+                        if (res.status.code == 200) {
+                            const dept = res.data.department;
+                            $("#confirmDeleteMessage").text(`Delete department "${dept.name}"?`);
+                            $("#deleteEntityID").val(dept.id);
+                            $("#confirmDeleteModal").data("type", "department").modal("show");
+                        } else {
+                            alert("❌ Could not fetch department details.");
+                        }
+                    },
+                    error: function () {
+                        alert("❌ Error fetching department.");
+                    }
+                });
             }
         },
         error: function () {
-            alert("❌ Error fetching department.");
+            alert("❌ Error checking dependencies.");
         }
     });
 });
@@ -888,4 +903,3 @@ $(document).off("submit", "#addLocationForm").on("submit", "#addLocationForm", f
       }
     });
   });
-  

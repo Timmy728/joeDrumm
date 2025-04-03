@@ -418,65 +418,62 @@ $(document).on("submit", "#confirmDeleteForm", function (e) {
 
 // DELETE DEPARTMENT
 $(document).on("click", ".deleteDepartmentBtn", function () {
-    let id = $(this).attr("data-id");
+    const id = $(this).data("id");
 
-    if (confirm("Are you sure you want to delete this department?")) {
-        $.ajax({
-            url: "Php/deleteDepartmentByID.php",
-            type: "POST",
-            data: { id: id },
-            dataType: "json",
-            success: function (response) {
-                if (response.status.code === "200") {
-                    alert("✅ Department deleted successfully.");
-                    loadDepartments();
-                } else {
-                    alert("Error: " + response.status.description);
-                }
-            },
-            error: function () {
-                alert("Failed to delete department.");
+    $.ajax({
+        url: "Php/getDepartmentByID.php",
+        type: "POST",
+        dataType: "json",
+        data: { id },
+        success: function (res) {
+            if (res.status.code == 200) {
+                const dept = res.data.department;
+                $("#confirmDeleteMessage").text(`Delete department "${dept.name}"?`);
+                $("#deleteEntityID").val(dept.id);
+                $("#confirmDeleteModal").data("type", "department").modal("show");
+            } else {
+                alert("❌ Could not fetch department details.");
             }
-        });
-    }
+        },
+        error: function () {
+            alert("❌ Error fetching department.");
+        }
+    });
 });
+
 
 // 🟢 DELETE LOCATION
 $(document).on("click", ".deleteLocationBtn", function () {
     const locationID = $(this).data("id");
 
-    if (!locationID) {
-        console.log("❌ No location ID found on button");
-        return;
-    }
     $.ajax({
         url: "Php/checkLocationDependencies.php",
         type: "POST",
         dataType: "json",
-        data: { locationID: locationID },
+        data: { locationID },
         success: function (response) {
             if (response.status.hasDepartments) {
-                alert("❌ Cannot delete this location. It has one or more departments assigned.");
+                alert("❌ Cannot delete location. It has one or more departments assigned.");
             } else {
-                if (confirm("Are you sure you want to delete this location?")) {
-                    $.ajax({
-                        url: "Php/deleteLocationByID.php",
-                        type: "POST",
-                        dataType: "json",
-                        data: { id: locationID },
-                        success: function (res) {
-                            if (res.status.code == 200) {
-                                alert("✅ Location deleted successfully.");
-                                loadLocations();
-                            } else {
-                                alert("❌ Error: " + res.status.description);
-                            }
-                        },
-                        error: function () {
-                            alert("❌ Failed to delete location.");
+                $.ajax({
+                    url: "Php/getLocationByID.php",
+                    type: "POST",
+                    dataType: "json",
+                    data: { id: locationID },
+                    success: function (res) {
+                        if (res.status.code == 200) {
+                            const location = res.data;
+                            $("#confirmDeleteMessage").text(`Delete location "${location.name}"?`);
+                            $("#deleteEntityID").val(location.id);
+                            $("#confirmDeleteModal").data("type", "location").modal("show");
+                        } else {
+                            alert("❌ Could not fetch location.");
                         }
-                    });
-                }
+                    },
+                    error: function () {
+                        alert("❌ Error fetching location.");
+                    }
+                });
             }
         },
         error: function () {
@@ -484,6 +481,8 @@ $(document).on("click", ".deleteLocationBtn", function () {
         }
     });
 });
+
+
 
 // 🟢 Load Departments into Add Personnel Dropdown
 function loadDepartmentsForDropdown() {

@@ -716,38 +716,6 @@ $(document).on("submit", "#editDepartmentForm", function (e) {
     });
 });
 
-// Prevent Deleting Departments with Assigned Personnel
-$(document).on("click", ".deleteDepartmentBtn", function () {
-    let deptID = $(this).attr("data-id");
-
-    $.ajax({
-        url: "Php/checkDependencies.php",
-        type: "POST",
-        data: { departmentID: deptID },
-        dataType: "json",
-        success: function (response) {
-            if (response.status.hasPersonnel) {
-                alert("❌ Cannot delete. Department has assigned personnel.");
-            } else {
-                if (confirm("Are you sure you want to delete this department?")) {
-                    $.ajax({
-                        url: "Php/deleteDepartmentByID.php",
-                        type: "POST",
-                        data: { id: deptID },
-                        success: function (res) {
-                            alert("✅ Department deleted.");
-                            loadDepartments();
-                        },
-                        error: function () {
-                            alert("❌ Failed to delete department.");
-                        }
-                    });
-                }
-            }
-        }
-    });
-});
-
 // Load Locations into the Dropdown
 function loadLocationsForDropdown() {
     $.ajax({

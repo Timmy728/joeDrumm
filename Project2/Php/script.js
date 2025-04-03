@@ -150,10 +150,10 @@ function loadPersonnel() {
                         <td>${person.email}</td>
                         <td class="text-end text-nowrap">
                             <button type="button" class="btn btn-primary btn-sm editPersonnelBtn" data-id="${personID}">
-                                <i class="fa-solid fa-pencil"></i> Edit
+                                <i class="fa-solid fa-pencil"></i>
                             </button>
                             <button type="button" class="btn btn-danger btn-sm deletePersonnelBtn" data-id="${personID}">
-                                <i class="fa-solid fa-trash"></i> Delete
+                                <i class="fa-solid fa-trash"></i>
                             </button>
                         </td>
                     </tr>
@@ -233,10 +233,10 @@ function loadDepartments() {
                         <td>${dept.location}</td>
                         <td class="text-end text-nowrap">
                              <button type="button" class="btn btn-primary btn-sm editDepartmentBtn" data-id="${dept.id}">
-                                <i class="fa-solid fa-pencil"></i> Edit
+                                <i class="fa-solid fa-pencil"></i>
                             </button>
                             <button type="button" class="btn btn-danger btn-sm deleteDepartmentBtn" data-id="${dept.id}">
-                                <i class="fa-solid fa-trash"></i> Delete
+                                <i class="fa-solid fa-trash"></i>
                             </button>
                         </td>
                     </tr>
@@ -265,10 +265,10 @@ function loadLocations() {
                     <td class="align-middle text-nowrap">${location.name}</td>
                     <td class="align-middle text-end text-nowrap">
                         <button type="button" class="btn btn-primary btn-sm editLocationBtn" data-id="${location.id}">
-                            <i class="fa-solid fa-pencil"></i> Edit
+                            <i class="fa-solid fa-pencil"></i>
                         </button>
                         <button type="button" class="btn btn-danger btn-sm deleteLocationBtn" data-id="${location.id}">
-                            <i class="fa-solid fa-trash"></i> Delete
+                            <i class="fa-solid fa-trash"></i>
                         </button>
                     </td>
                 </tr>`;

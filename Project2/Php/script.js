@@ -475,6 +475,9 @@ $(document).on("click", ".deleteLocationBtn", function () {
             if (response.status.hasDepartments) {
                $("#confirmDeleteMessage").text("❌ Cannot delete this location. It has one or more departments assigned.");
                 $("#deleteEntityID").val(""); // Clear just in case
+                // Hide YES button, show only CANCEL (renamed to CLOSE for clarity)
+                $("#confirmDeleteForm").hide();
+                $("#confirmDeleteModal .btn-outline-secondary").text("CLOSE");
                 $("#confirmDeleteModal").data("type", "").modal("show");
                 return;
             } else {
@@ -486,9 +489,12 @@ $(document).on("click", ".deleteLocationBtn", function () {
                     success: function (res) {
                         if (res.status.code == 200) {
                             const location = res.data;
-                            $("#confirmDeleteMessage").text(`Delete location "${location.name}"?`);
-                            $("#deleteEntityID").val(location.id);
-                            $("#confirmDeleteModal").data("type", "location").modal("show");
+                       $("#confirmDeleteMessage").text(`Delete location "${location.name}"?`);
+                       $("#deleteEntityID").val(location.id);
+                      $("#confirmDeleteModal").data("type", "location");
+                      $("#confirmDeleteForm").show();
+                      $("#confirmDeleteModal .btn-outline-secondary").text("CANCEL");
+                      $("#confirmDeleteModal").modal("show");
                         } else {
                             alert("❌ Could not fetch location.");
                         }

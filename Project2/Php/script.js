@@ -473,44 +473,52 @@ $(document).on("click", ".deleteLocationBtn", function () {
         data: { locationID },
         success: function (response) {
             if (response.status.hasDepartments) {
-               $("#confirmDeleteMessage").text("❌ Cannot delete this location. It has one or more departments assigned.");
-                $("#deleteEntityID").val(""); // Clear just in case
-                // Hide YES button, show only CANCEL (renamed to CLOSE for clarity)
-                $("#confirmDeleteForm").hide();
-                $("#confirmDeleteModal .btn-outline-secondary").text("CLOSE");
+                $("#confirmDeleteMessage").text("❌ Cannot delete this location. It has one or more departments assigned.");
+
+                // Replace modal footer with just CLOSE button
+                $("#confirmDeleteModal .modal-footer").html(`
+                    <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">CLOSE</button>
+                `);
+
+                $("#deleteEntityID").val(""); 
                 $("#confirmDeleteModal").data("type", "").modal("show");
                 return;
-            } else {
-                $.ajax({
-                    url: "Php/getLocationByID.php",
-                    type: "POST",
-                    dataType: "json",
-                    data: { id: locationID },
-                    success: function (res) {
-                        if (res.status.code == 200) {
-                            const location = res.data;
-                       $("#confirmDeleteMessage").text(`Delete location "${location.name}"?`);
-                       $("#deleteEntityID").val(location.id);
-                      $("#confirmDeleteModal").data("type", "location");
-                      $("#confirmDeleteForm").show();
-                      $("#confirmDeleteModal .btn-outline-secondary").text("CANCEL");
-                      $("#confirmDeleteModal").modal("show");
-                        } else {
-                            alert("❌ Could not fetch location.");
-                        }
-                    },
-                    error: function () {
-                        alert("❌ Error fetching location.");
-                    }
-                });
             }
+
+            // ELSE — safe to delete
+            $.ajax({
+                url: "Php/getLocationByID.php",
+                type: "POST",
+                dataType: "json",
+                data: { id: locationID },
+                success: function (res) {
+                    if (res.status.code == 200) {
+                        const location = res.data;
+                        $("#confirmDeleteMessage").text(`Delete location "${location.name}"?`);
+                        $("#deleteEntityID").val(location.id);
+                        $("#confirmDeleteModal").data("type", "location");
+
+                        // Restore YES + CANCEL buttons
+                        $("#confirmDeleteModal .modal-footer").html(`
+                            <button type="submit" form="confirmDeleteForm" class="btn btn-outline-danger btn-sm">YES</button>
+                            <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">CANCEL</button>
+                        `);
+
+                        $("#confirmDeleteModal").modal("show");
+                    } else {
+                        alert("❌ Could not fetch location.");
+                    }
+                },
+                error: function () {
+                    alert("❌ Error fetching location.");
+                }
+            });
         },
         error: function () {
             alert("❌ Failed to check location dependencies.");
         }
     });
 });
-
 
 
 // 🟢 Load Departments into Add Personnel Dropdown

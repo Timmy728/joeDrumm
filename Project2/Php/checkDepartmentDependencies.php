@@ -1,7 +1,9 @@
 <?php
-header('Content-Type: application/json');
+ini_set('display_errors', 1);
+error_reporting(E_ALL);
 
-include("db.php"); // Make sure this connects to your database
+header('Content-Type: application/json');
+include("db.php");
 
 $id = $_POST['departmentID'] ?? null;
 
@@ -24,6 +26,6 @@ try {
         ]
     ]);
 } catch (Exception $e) {
-    echo json_encode(["status" => ["code" => 500, "description" => "Database error"]]);
+    echo json_encode(["status" => ["code" => 500, "description" => $e->getMessage()]]);
 }
 ?>

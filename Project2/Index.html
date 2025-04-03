@@ -317,6 +317,29 @@
 </div>
 
 
+<!-- Confirm Delete Modal -->
+<div id="confirmDeleteModal" class="modal fade" tabindex="-1" data-bs-backdrop="false">
+  <div class="modal-dialog modal-sm modal-dialog-centered">
+    <div class="modal-content shadow">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title">CONFIRM DELETE</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p id="confirmDeleteMessage">Are you sure?</p>
+        <form id="confirmDeleteForm">
+          <input type="hidden" id="deleteEntityID">
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="submit" form="confirmDeleteForm" class="btn btn-outline-danger btn-sm">YES</button>
+        <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">CANCEL</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
 <!-- Bootstrap & jQuery Scripts (Load at the Bottom for Performance) -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

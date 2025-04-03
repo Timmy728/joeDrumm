@@ -3,7 +3,7 @@ ini_set('display_errors', 1);
 error_reporting(E_ALL);
 
 header('Content-Type: application/json');
-include("db.php");
+include(__DIR__ . "/db.php");
 
 $id = $_POST['departmentID'] ?? null;
 

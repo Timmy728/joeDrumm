@@ -388,6 +388,11 @@ $(document).on("submit", "#confirmDeleteForm", function (e) {
     const id = $("#deleteEntityID").val();
     const type = $("#confirmDeleteModal").data("type");
 
+        if (!id || !type) {
+        $("#confirmDeleteModal").modal("hide");
+        return;
+        }
+
     let url = "";
     if (type === "personnel") url = "Php/deletePersonnelByID.php";
     else if (type === "department") url = "Php/deleteDepartmentByID.php";
@@ -468,7 +473,10 @@ $(document).on("click", ".deleteLocationBtn", function () {
         data: { locationID },
         success: function (response) {
             if (response.status.hasDepartments) {
-                alert("❌ Cannot delete location. It has one or more departments assigned.");
+               $("#confirmDeleteMessage").text("❌ Cannot delete this location. It has one or more departments assigned.");
+                $("#deleteEntityID").val(""); // Clear just in case
+                $("#confirmDeleteModal").data("type", "").modal("show");
+                return;
             } else {
                 $.ajax({
                     url: "Php/getLocationByID.php",

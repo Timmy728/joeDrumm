@@ -361,28 +361,60 @@ $("#editPersonnelForm").on("submit", function (e) {
 
 // DELETE PERSONNEL
 $(document).on("click", ".deletePersonnelBtn", function () {
-    let id = $(this).attr("data-id");
+    const id = $(this).data("id");
 
-    if (confirm("Are you sure you want to delete this employee?")) {
-        $.ajax({
-            url: "Php/deletePersonnelByID.php",
-            type: "POST",
-            data: { id: id },
-            dataType: "json",
-            success: function (response) {
-                if (response.status === "success") {
-                    alert("Employee deleted successfully.");
-                    loadPersonnel();
-                } else {
-                    alert("Error: " + response.message);
-                }
-            },
-            error: function () {
-                alert("Failed to delete employee.");
+    $.ajax({
+        url: "Php/getPersonnelByID.php",
+        type: "POST",
+        dataType: "json",
+        data: { id },
+        success: function (res) {
+            if (res.status.code == 200) {
+                const person = res.data.personnel[0];
+                $("#confirmDeleteMessage").text(`Are you sure you want to delete ${person.firstName} ${person.lastName}?`);
+                $("#deleteEntityID").val(person.id);
+                $("#confirmDeleteModal").data("type", "personnel").modal("show");
+            } else {
+                alert("❌ Could not fetch person details.");
             }
-        });
-    }
+        }
+    });
 });
+
+//Handle the modal’s form submission
+$(document).on("submit", "#confirmDeleteForm", function (e) {
+    e.preventDefault();
+
+    const id = $("#deleteEntityID").val();
+    const type = $("#confirmDeleteModal").data("type");
+
+    let url = "";
+    if (type === "personnel") url = "Php/deletePersonnelByID.php";
+    else if (type === "department") url = "Php/deleteDepartmentByID.php";
+    else if (type === "location") url = "Php/deleteLocationByID.php";
+
+    $.ajax({
+        url,
+        type: "POST",
+        data: { id },
+        dataType: "json",
+        success: function (res) {
+            if (res.status.code == 200 || res.status === "success") {
+                $("#confirmDeleteModal").modal("hide");
+
+                if (type === "personnel") loadPersonnel();
+                else if (type === "department") loadDepartments();
+                else if (type === "location") loadLocations();
+            } else {
+                alert("❌ Deletion failed.");
+            }
+        },
+        error: function () {
+            alert("❌ Error deleting.");
+        }
+    });
+});
+
 
 // DELETE DEPARTMENT
 $(document).on("click", ".deleteDepartmentBtn", function () {

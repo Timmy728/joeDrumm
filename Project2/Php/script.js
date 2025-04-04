@@ -361,25 +361,36 @@ $("#editPersonnelForm").on("submit", function (e) {
 
 // DELETE PERSONNEL
 $(document).on("click", ".deletePersonnelBtn", function () {
-    const id = $(this).data("id");
+  const id = $(this).data("id");
+  $.ajax({
+    url: "Php/getPersonnelByID.php",
+    type: "POST",
+    data: { id },
+    dataType: "json",
+    success: function (res) {
+      if (res.status.code == 200) {
+        const person = res.data.personnel[0];
 
-    $.ajax({
-        url: "Php/getPersonnelByID.php",
-        type: "POST",
-        dataType: "json",
-        data: { id },
-        success: function (res) {
-            if (res.status.code == 200) {
-                const person = res.data.personnel[0];
-                $("#confirmDeleteMessage").text(`Are you sure you want to delete ${person.firstName} ${person.lastName}?`);
-                $("#deleteEntityID").val(person.id);
-                $("#confirmDeleteModal").data("type", "personnel").modal("show");
-            } else {
-                alert("❌ Could not fetch person details.");
-            }
-        }
-    });
+        $("#confirmDeleteMessage").text(`Delete ${person.firstName} ${person.lastName}?`);
+        $("#deleteEntityID").val(person.id);
+        $("#confirmDeleteModal").data("type", "personnel");
+
+        $("#confirmDeleteModal .modal-footer").html(`
+          <button type="submit" form="confirmDeleteForm" class="btn btn-outline-danger btn-sm">YES</button>
+          <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">CANCEL</button>
+        `);
+
+        $("#confirmDeleteModal").modal("show");
+      } else {
+        alert("❌ Could not fetch person details.");
+      }
+    },
+    error: function () {
+      alert("❌ Error fetching person details.");
+    }
+  });
 });
+
 
 //Handle the modal’s form submission
 $(document).on("submit", "#confirmDeleteForm", function (e) {
@@ -423,120 +434,106 @@ $(document).on("submit", "#confirmDeleteForm", function (e) {
 
 // 🟢 DELETE DEPARTMENT
 $(document).on("click", ".deleteDepartmentBtn", function () {
-    const deptID = $(this).data("id");
-
-    // First: check for personnel dependencies
-    $.ajax({
-        url: "Php/checkDepartmentDependencies.php",
+  const id = $(this).data("id");
+  $.ajax({
+    url: "Php/checkDepartmentDependencies.php",
+    type: "POST",
+    data: { departmentID: id },
+    dataType: "json",
+    success: function (res) {
+      if (res.status.hasPersonnel) {
+        $("#confirmDeleteMessage").text("❌ Cannot delete this department. It has one or more employees assigned.");
+        $("#confirmDeleteModal .modal-footer").html(`
+          <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">CLOSE</button>
+        `);
+        $("#deleteEntityID").val("");
+        $("#confirmDeleteModal").data("type", "").modal("show");
+        return;
+      }
+      $.ajax({
+        url: "Php/getDepartmentByID.php",
         type: "POST",
-        data: { departmentID: deptID },
+        data: { id },
         dataType: "json",
-        success: function (response) {
-            if (response.status.hasPersonnel) {
-                // 🚫 Cannot delete — show styled modal message only
-                $("#confirmDeleteMessage").text("❌ Cannot delete this department. It has one or more employees assigned.");
+        success: function (res) {
+          if (res.status.code == 200) {
+            const dept = res.data.department;
+            $("#confirmDeleteMessage").text(`Delete department \"${dept.name}\"?`);
+            $("#deleteEntityID").val(dept.id);
+            $("#confirmDeleteModal").data("type", "department");
 
-                $("#confirmDeleteModal .modal-footer").html(`
-                    <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">CLOSE</button>
-                `);
+            $("#confirmDeleteModal .modal-footer").html(`
+              <button type="submit" form="confirmDeleteForm" class="btn btn-outline-danger btn-sm">YES</button>
+              <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">CANCEL</button>
+            `);
 
-                $("#deleteEntityID").val("");
-                $("#confirmDeleteModal").data("type", "").modal("show");
-                return;
-            }
-
-            // ✅ Safe to delete — fetch department name
-            $.ajax({
-                url: "Php/getDepartmentByID.php",
-                type: "POST",
-                dataType: "json",
-                data: { id: deptID },
-                success: function (res) {
-                    if (res.status.code == 200) {
-                        const dept = res.data.department;
-                        $("#confirmDeleteMessage").text(`Delete department "${dept.name}"?`);
-                        $("#deleteEntityID").val(dept.id);
-                        $("#confirmDeleteModal").data("type", "department");
-
-                        $("#confirmDeleteModal .modal-footer").html(`
-                            <button type="submit" form="confirmDeleteForm" class="btn btn-outline-danger btn-sm">YES</button>
-                            <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">CANCEL</button>
-                        `);
-
-                        $("#confirmDeleteModal").modal("show");
-                    } else {
-                        alert("❌ Could not fetch department details.");
-                    }
-                },
-                error: function () {
-                    alert("❌ Error fetching department details.");
-                }
-            });
+            $("#confirmDeleteModal").modal("show");
+          } else {
+            alert("❌ Could not fetch department details.");
+          }
         },
         error: function () {
-            alert("❌ Failed to check department dependencies.");
+          alert("❌ Error fetching department details.");
         }
-    });
+      });
+    },
+    error: function () {
+      alert("❌ Failed to check department dependencies.");
+    }
+  });
 });
-
 
 
 // 🟢 DELETE LOCATION
 $(document).on("click", ".deleteLocationBtn", function () {
-    const locationID = $(this).data("id");
+  const id = $(this).data("id");
+  $.ajax({
+    url: "Php/checkLocationDependencies.php",
+    type: "POST",
+    data: { locationID: id },
+    dataType: "json",
+    success: function (res) {
+      if (res.status.hasDepartments) {
+        $("#confirmDeleteMessage").text("❌ Cannot delete this location. It has one or more departments assigned.");
+        $("#confirmDeleteModal .modal-footer").html(`
+          <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">CLOSE</button>
+        `);
+        $("#deleteEntityID").val("");
+        $("#confirmDeleteModal").data("type", "").modal("show");
+        return;
+      }
 
-    $.ajax({
-        url: "Php/checkLocationDependencies.php",
+      $.ajax({
+        url: "Php/getLocationByID.php",
         type: "POST",
+        data: { id },
         dataType: "json",
-        data: { locationID },
-        success: function (response) {
-            if (response.status.hasDepartments) {
-                $("#confirmDeleteMessage").text("❌ Cannot delete this location. It has one or more departments assigned.");
+        success: function (res) {
+          if (res.status.code == 200) {
+            const loc = res.data;
+            $("#confirmDeleteMessage").text(`Delete location \"${loc.name}\"?`);
+            $("#deleteEntityID").val(loc.id);
+            $("#confirmDeleteModal").data("type", "location");
 
-                // Replace modal footer with just CLOSE button
-                $("#confirmDeleteModal .modal-footer").html(`
-                    <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">CLOSE</button>
-                `);
+            $("#confirmDeleteModal .modal-footer").html(`
+              <button type="submit" form="confirmDeleteForm" class="btn btn-outline-danger btn-sm">YES</button>
+              <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">CANCEL</button>
+            `);
 
-                $("#deleteEntityID").val(""); 
-                $("#confirmDeleteModal").data("type", "").modal("show");
-                return;
-            }
-
-            // ELSE — safe to delete
-            $.ajax({
-                url: "Php/getLocationByID.php",
-                type: "POST",
-                dataType: "json",
-                data: { id: locationID },
-                success: function (res) {
-                    if (res.status.code == 200) {
-                        const location = res.data;
-                        $("#confirmDeleteMessage").text(`Delete location "${location.name}"?`);
-                        $("#deleteEntityID").val(location.id);
-                        $("#confirmDeleteModal").data("type", "location");
-
-                        // Restore YES + CANCEL buttons
-                        $("#confirmDeleteModal .modal-footer").html(`
-                            <button type="submit" form="confirmDeleteForm" class="btn btn-outline-danger btn-sm">YES</button>
-                            <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">CANCEL</button>
-                        `);
-
-                        $("#confirmDeleteModal").modal("show");
-                    } else {
-                        alert("❌ Could not fetch location.");
-                    }
-                },
-                error: function () {
-                    alert("❌ Error fetching location.");
-                }
-            });
+            $("#confirmDeleteModal").modal("show");
+          } else {
+            alert("❌ Could not fetch location details.");
+          }
         },
         error: function () {
-            alert("❌ Failed to check location dependencies.");
+          alert("❌ Error fetching location details.");
         }
-    });
+      });
+    },
+    error: function () {
+      alert("❌ Failed to check location dependencies.");
+    }
+  });
 });
 
 

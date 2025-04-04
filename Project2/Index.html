@@ -317,6 +317,42 @@
 </div>
 
 
+<!-- Filter Modal -->
+<div id="filterModal" class="modal fade" tabindex="-1" data-bs-backdrop="false">
+  <div class="modal-dialog modal-sm modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content shadow">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title">Filter by</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form id="filterForm">
+          <div class="form-floating mb-3">
+            <select class="form-select" id="filterDepartment">
+              <option value="">Select Department</option>
+              <!-- Populated dynamically -->
+            </select>
+            <label for="filterDepartment">Department</label>
+          </div>
+
+          <div class="form-floating">
+            <select class="form-select" id="filterLocation">
+              <option value="">Select Location</option>
+              <!-- Populated dynamically -->
+            </select>
+            <label for="filterLocation">Location</label>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-primary btn-sm text-uppercase" id="applyFilterBtn">APPLY</button>
+        <button type="button" class="btn btn-outline-primary btn-sm text-uppercase" data-bs-dismiss="modal">CANCEL</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
 <!-- Confirm Delete Modal -->
 <div id="confirmDeleteModal" class="modal fade" tabindex="-1" data-bs-backdrop="false">
   <div class="modal-dialog modal-sm modal-dialog-centered">

@@ -349,7 +349,7 @@ $("#editPersonnelForm").on("submit", function (e) {
         type: "POST",
         data: formData,
         success: function (response) {
-            alert(response.message);
+            showToast(response.message);
             $("#editPersonnelModal").modal("hide");
             loadPersonnel();
         },
@@ -567,7 +567,7 @@ $("#addPersonnelForm").on("submit", function (e) {
         lastName: $("#addPersonnelLastName").val(),
         jobTitle: $("#addPersonnelJobTitle").val(),
         email: $("#addPersonnelEmailAddress").val(),
-        departmentID: $("#addPersonnelDepartment").val() || null // Null for Unassigned
+        departmentID: $("#addPersonnelDepartment").val() || null
     };
 
     $.ajax({
@@ -577,7 +577,7 @@ $("#addPersonnelForm").on("submit", function (e) {
         dataType: "json",
         success: function (response) {
             if (response.status.code == 200) {
-                alert("✅ Employee added successfully!");
+                showToast("✅ Employee added successfully!");
                 $("#addPersonnelModal").modal("hide");
                 loadPersonnel();
             } else {
@@ -1003,7 +1003,6 @@ $("#applyFilterBtn").on("click", function () {
     }
   });
 });
-
 
 //Helper function
 function showToast(message, type = "success") {

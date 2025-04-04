@@ -912,3 +912,101 @@ $(document).off("submit", "#addLocationForm").on("submit", "#addLocationForm", f
       }
     });
   });
+
+
+// Filter functionality that allows filtering by either Department OR Location, but not both at the same time
+$("#filterModal").on("show.bs.modal", function () {
+  // Load Departments
+  $.getJSON("Php/getAllDepartments.php", function (res) {
+    let deptSelect = $("#filterDepartment");
+    deptSelect.empty().append(`<option value="">Select Department</option>`);
+    res.data.forEach(dept => {
+      deptSelect.append(`<option value="${dept.id}">${dept.name}</option>`);
+    });
+  });
+
+  // Load Locations
+  $.getJSON("Php/getAllLocations.php", function (res) {
+    let locSelect = $("#filterLocation");
+    locSelect.empty().append(`<option value="">Select Location</option>`);
+    res.data.forEach(loc => {
+      locSelect.append(`<option value="${loc.id}">${loc.name}</option>`);
+    });
+  });
+});
+
+
+// Force either/or logic:
+$("#filterDepartment").on("change", function () {
+  if ($(this).val()) {
+    $("#filterLocation").prop("disabled", true).val("");
+  } else {
+    $("#filterLocation").prop("disabled", false);
+  }
+});
+
+$("#filterLocation").on("change", function () {
+  if ($(this).val()) {
+    $("#filterDepartment").prop("disabled", true).val("");
+  } else {
+    $("#filterDepartment").prop("disabled", false);
+  }
+});
+
+
+
+// Handle filter submit button:
+$("#applyFilterBtn").on("click", function () {
+  const deptID = $("#filterDepartment").val();
+  const locID = $("#filterLocation").val();
+
+  if (!deptID && !locID) {
+    alert("❌ Please select either a department or location.");
+    return;
+  }
+
+  $.ajax({
+    url: "Php/filterPersonnel.php",
+    type: "GET",
+    data: {
+      departmentID: deptID,
+      locationID: locID
+    },
+    dataType: "json",
+    success: function (response) {
+      if (response.status.code === 200) {
+        let personnelTable = $("#personnelTableBody");
+        personnelTable.empty();
+
+        if (response.data.length === 0) {
+          personnelTable.append('<tr><td colspan="5" class="text-center">No results found</td></tr>');
+        } else {
+          response.data.forEach(person => {
+            personnelTable.append(`
+              <tr>
+                <td>${person.lastName}, ${person.firstName}</td>
+                <td>${person.department ?? "Unassigned"}</td>
+                <td>${person.location ?? "Unassigned"}</td>
+                <td>${person.email}</td>
+                <td class="text-end text-nowrap">
+                  <button class="btn btn-primary btn-sm editPersonnelBtn" data-id="${person.id}">
+                    <i class="fa-solid fa-pencil"></i>
+                  </button>
+                  <button class="btn btn-danger btn-sm deletePersonnelBtn" data-id="${person.id}">
+                    <i class="fa-solid fa-trash"></i>
+                  </button>
+                </td>
+              </tr>
+            `);
+          });
+        }
+        $("#filterModal").modal("hide");
+      } else {
+        alert("❌ Filter failed.");
+      }
+    },
+    error: function () {
+      alert("❌ Error applying filter.");
+    }
+  });
+});

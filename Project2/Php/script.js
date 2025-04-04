@@ -79,7 +79,7 @@ $("#searchInp").on("keyup", function () {
         },
         error: function (jqXHR, textStatus, errorThrown) {
             console.log("❌ AJAX Error:", textStatus, errorThrown);
-            alert("Error searching personnel.");
+            showToast("Error searching personnel.");
         }
     });
 });
@@ -199,11 +199,11 @@ function loadPersonnel() {
                             $("#editPersonnelModal").modal("show");
 
                         } else {
-                            alert("Error retrieving data.");
+                            showToast("Error retrieving data.");
                         }
                     },
                     error: function () {
-                        alert("Error retrieving data.");
+                        showToast("Error retrieving data.");
                     }
                 });
             });
@@ -213,7 +213,7 @@ function loadPersonnel() {
         },
         error: function (jqXHR, textStatus, errorThrown) {
             console.log("❌ Error loading personnel:", textStatus, errorThrown);
-            alert("Error loading personnel.");
+            showToast("Error loading personnel.");
         }
     });
 }
@@ -245,7 +245,7 @@ function loadDepartments() {
             $("#departmentTableBody").html(html);
         },
         error: function () {
-            alert("Error loading departments.");
+            showToast("Error loading departments.");
         }
     });
 }
@@ -322,11 +322,11 @@ $(document).on("click", ".editPersonnelBtn", function () {
                 $("#editPersonnelModal").modal("show");
             
             } else {
-                alert("Error retrieving data.");
+                showToast("Error retrieving data.");
             }
         },
         error: function () {
-            alert("Error retrieving data.");
+            showToast("Error retrieving data.");
         }
     });
 });
@@ -354,7 +354,7 @@ $("#editPersonnelForm").on("submit", function (e) {
             loadPersonnel();
         },
         error: function () {
-            alert("Error updating personnel.");
+            showToast("Error updating personnel.");
         }
     });
 });
@@ -382,11 +382,11 @@ $(document).on("click", ".deletePersonnelBtn", function () {
 
         $("#confirmDeleteModal").modal("show");
       } else {
-        alert("❌ Could not fetch person details.");
+        showToast("❌ Could not fetch person details.");
       }
     },
     error: function () {
-      alert("❌ Error fetching person details.");
+      showToast("❌ Error fetching person details.");
     }
   });
 });
@@ -422,11 +422,11 @@ $(document).on("submit", "#confirmDeleteForm", function (e) {
                 else if (type === "department") loadDepartments();
                 else if (type === "location") loadLocations();
             } else {
-                alert("❌ Deletion failed.");
+                showToast("❌ Deletion failed.");
             }
         },
         error: function () {
-            alert("❌ Error deleting.");
+            showToast("❌ Error deleting.");
         }
     });
 });
@@ -469,16 +469,16 @@ $(document).on("click", ".deleteDepartmentBtn", function () {
 
             $("#confirmDeleteModal").modal("show");
           } else {
-            alert("❌ Could not fetch department details.");
+            showToast("❌ Could not fetch department details.");
           }
         },
         error: function () {
-          alert("❌ Error fetching department details.");
+          showToast("❌ Error fetching department details.");
         }
       });
     },
     error: function () {
-      alert("❌ Failed to check department dependencies.");
+      showToast("❌ Failed to check department dependencies.");
     }
   });
 });
@@ -522,16 +522,16 @@ $(document).on("click", ".deleteLocationBtn", function () {
 
             $("#confirmDeleteModal").modal("show");
           } else {
-            alert("❌ Could not fetch location details.");
+            showToast("❌ Could not fetch location details.");
           }
         },
         error: function () {
-          alert("❌ Error fetching location details.");
+          showToast("❌ Error fetching location details.");
         }
       });
     },
     error: function () {
-      alert("❌ Failed to check location dependencies.");
+      showToast("❌ Failed to check location dependencies.");
     }
   });
 });
@@ -581,11 +581,11 @@ $("#addPersonnelForm").on("submit", function (e) {
                 $("#addPersonnelModal").modal("hide");
                 loadPersonnel();
             } else {
-                alert("❌ Error: " + response.status.description);
+                showToast("❌ Error: " + response.status.description);
             }
         },
         error: function () {
-            alert("❌ Error adding employee.");
+        showToast ("❌ Error adding employee.");
         }
     });
 });
@@ -616,17 +616,17 @@ $(document).off("submit", "#addDepartmentForm").on("submit", "#addDepartmentForm
             console.log("✅ Insert Response:", response);
 
             if (response.status.code == 200) {
-                alert("✅ Department added successfully!");
+                showToast("✅ Department added successfully!");
                 $("#addDepartmentModal").modal("hide");
                 loadDepartments();
             } else if (response.status.code == 409) {
-                alert("❌ " + response.status.description);
+                showToast("❌ " + response.status.description);
             } else {
-                alert("❌ Error: " + response.status.description);
+                showToast("❌ Error: " + response.status.description);
             }
         },
         error: function () {
-            alert("❌ Error adding department.");
+            showToast("❌ Error adding department.");
         }
     });
 });
@@ -674,11 +674,11 @@ $(document).on("click", ".editDepartmentBtn", function () {
 
                 $("#editDepartmentModal").modal("show");
             } else {
-                alert("❌ Error retrieving department data.");
+                showToast("❌ Error retrieving department data.");
             }
         },
         error: function () {
-            alert("❌ Error retrieving department data.");
+            showToast("❌ Error retrieving department data.");
         }
     });
 });
@@ -700,15 +700,15 @@ $(document).on("submit", "#editDepartmentForm", function (e) {
         dataType: "json",
         success: function (response) {
             if (response.status.code == 200) {
-                alert("✅ Department updated successfully!");
+                showToast("✅ Department updated successfully!");
                 $("#editDepartmentModal").modal("hide");
                 loadDepartments();
             } else {
-                alert("❌ Error: " + response.status.description);
+                showToast("❌ Error: " + response.status.description);
             }
         },
         error: function () {
-            alert("❌ Error updating department.");
+            showToast("❌ Error updating department.");
         }
     });
 });
@@ -779,15 +779,15 @@ $(document).on("submit", "#addLocationForm", function (e) {
         dataType: "json",
         success: function (response) {
             if (response.status.code == 200 || response.status === "success") {
-                alert("✅ Location added!");
+                showToast("✅ Location added!");
                 $("#addLocationModal").modal("hide");
                 loadLocations();
             } else {
-                alert("❌ " + (response.status.description || response.message));
+                showToast("❌ " + (response.status.description || response.message));
             }
         },
         error: function () {
-            alert("❌ Failed to add location.");
+            showToast("❌ Failed to add location.");
         }
     });
 });
@@ -808,11 +808,11 @@ $(document).on("click", ".editLocationBtn", function () {
                 $("#editLocationName").val(res.data.name);
                 $("#editLocationModal").modal("show");
             } else {
-                alert("❌ Location not found.");
+                showToast("❌ Location not found.");
             }
         },
         error: function () {
-            alert("❌ Error fetching location.");
+            showToast("❌ Error fetching location.");
         }
     });
 });
@@ -831,15 +831,15 @@ $(document).on("submit", "#editLocationForm", function (e) {
         dataType: "json",
         success: function (res) {
             if (res.status.code == 200 || res.status === "success") {
-                alert("✅ Location updated!");
+                showToast("✅ Location updated!");
                 $("#editLocationModal").modal("hide");
                 loadLocations();
             } else {
-                alert("❌ " + (res.status.description || res.message));
+                showToast("❌ " + (res.status.description || res.message));
             }
         },
         error: function () {
-            alert("❌ Error updating location.");
+            showToast("❌ Error updating location.");
         }
     });
 });
@@ -876,8 +876,6 @@ $(document).on("click", "#addLocationBtn", function () {
     $("#addLocationModal").modal("show");
   });
 
-  
-
 // 🟢 Handle Add Location Form Submission
 $(document).off("submit", "#addLocationForm").on("submit", "#addLocationForm", function (e) {
     e.preventDefault();
@@ -885,7 +883,7 @@ $(document).off("submit", "#addLocationForm").on("submit", "#addLocationForm", f
     let name = $("#addLocationName").val().trim();
   
     if (name === "") {
-      alert("❌ Location name is required.");
+      showToast("❌ Location name is required.");
       return;
     }
   
@@ -896,16 +894,16 @@ $(document).off("submit", "#addLocationForm").on("submit", "#addLocationForm", f
       dataType: "json",
       success: function (response) {
         if (response.status.code == 200) {
-          alert("✅ Location added successfully!");
+          showToast("✅ Location added successfully!");
           $("#addLocationModal").modal("hide");
           $("#addLocationForm")[0].reset();
           loadLocations();
         } else {
-          alert("❌ Error: " + response.status.description);
+          showToast("❌ Error: " + response.status.description);
         }
       },
       error: function () {
-        alert("❌ Failed to add location.");
+        showToast("❌ Failed to add location.");
       }
     });
   });
@@ -950,15 +948,13 @@ $("#filterLocation").on("change", function () {
   }
 });
 
-
-
 // Handle filter submit button:
 $("#applyFilterBtn").on("click", function () {
   const deptID = $("#filterDepartment").val();
   const locID = $("#filterLocation").val();
 
   if (!deptID && !locID) {
-    alert("❌ Please select either a department or location.");
+    showToast("❌ Please select either a department or location.");
     return;
   }
 
@@ -999,11 +995,27 @@ $("#applyFilterBtn").on("click", function () {
         }
         $("#filterModal").modal("hide");
       } else {
-        alert("❌ Filter failed.");
+        showToast("❌ Filter failed.");
       }
     },
     error: function () {
-      alert("❌ Error applying filter.");
+      showToast("❌ Error applying filter.");
     }
   });
 });
+
+
+//Helper function
+function showToast(message, type = "success") {
+  const toastEl = $("#statusToast");
+  const toastMsg = $("#statusToastMessage");
+
+  toastMsg.text(message);
+
+  // Change toast style based on type
+  toastEl.removeClass("text-bg-success text-bg-danger text-bg-warning");
+  toastEl.addClass(`text-bg-${type}`);
+
+  const toast = new bootstrap.Toast(toastEl[0]);
+  toast.show();
+}

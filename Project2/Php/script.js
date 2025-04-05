@@ -1064,3 +1064,38 @@ $("#editDepartmentModal").on("show.bs.modal", function () {
         });
     });
 });
+
+
+
+
+
+//hidden.bs.modal
+// Reset Add Personnel form
+$('#addPersonnelModal').on('hidden.bs.modal', function () {
+    $('#addPersonnelForm')[0].reset();
+});
+
+// Reset Edit Personnel form
+$('#editPersonnelModal').on('hidden.bs.modal', function () {
+    $('#editPersonnelForm')[0].reset();
+});
+
+// Reset Add Department form
+$('#addDepartmentModal').on('hidden.bs.modal', function () {
+    $('#addDepartmentForm')[0].reset();
+});
+
+// Reset Edit Department form
+$('#editDepartmentModal').on('hidden.bs.modal', function () {
+    $('#editDepartmentForm')[0].reset();
+});
+
+// Reset Add Location form
+$('#addLocationModal').on('hidden.bs.modal', function () {
+    $('#addLocationForm')[0].reset();
+});
+
+// Reset Edit Location form
+$('#editLocationModal').on('hidden.bs.modal', function () {
+    $('#editLocationForm')[0].reset();
+});

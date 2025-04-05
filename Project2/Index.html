@@ -29,7 +29,7 @@
       <div class="col-6 text-end me-2">
         <div class="btn-group" role="group" aria-label="buttons">
           <button id="refreshBtn" type="button" class="btn btn-primary">
-            <i class="fa-solid fa-refresh fa-fw"></i>
+            <i class="fa-solid fa-arrows-rotate fa-fw"></i>
           </button>
           <button id="filterBtn" type="button" class="btn btn-primary">
             <i class="fa-solid fa-filter fa-fw"></i>
@@ -44,12 +44,12 @@
     <ul class="nav nav-tabs" id="myTab" role="tablist">
         <li class="nav-item">
           <button class="nav-link active" id="personnelBtn" data-bs-toggle="tab" data-bs-target="#personnel-tab-pane" type="button">
-            <i class="fa-solid fa-person fa-lg fa-fw"></i><span class="d-none d-sm-block">Personnel</span>
+            <i class="fa-solid fa-users fa-lg fa-fw"></i><span class="d-none d-sm-block">Personnel</span>
           </button>
         </li>
         <li class="nav-item">
           <button class="nav-link" id="departmentsBtn" data-bs-toggle="tab" data-bs-target="#departments-tab-pane" type="button">
-            <i class="fa-solid fa-building fa-lg fa-fw"></i><span class="d-none d-sm-block">Departments</span>
+            <i class="fa-solid fa-building-user fa-lg fa-fw"></i><span class="d-none d-sm-block">Departments</span>
           </button>
         </li>
         <li class="nav-item">
@@ -388,23 +388,12 @@
   </div>
 </div>
 
-//#statusToast for styling & gets rid of joedrumm.co.uk
-<div class="toast-container position-fixed bottom-0 end-0 p-3 z-3">
-  <div id="statusToast" class="toast align-items-center text-bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
-    <div class="d-flex">
-      <div id="statusToastMessage" class="toast-body"></div>
-      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-    </div>
-  </div>
-</div>
-
-    
-
 <!-- jQuery (Local) -->
 <script src="assets/js/jquery.min.js"></script>
 <!-- Bootstrap JS Bundle (Local) -->
 <script src="assets/js/bootstrap.bundle.min.js"></script>
-<script src="Php/script.js"></script>
+<!-- Custom Script -->
+<script type="module" src="/src/assets/js/script.js"></script>
 
 </body>
 </html>

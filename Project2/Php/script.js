@@ -1018,3 +1018,49 @@ function showToast(message, type = "success") {
   const toast = new bootstrap.Toast(toastEl[0]);
   toast.show();
 }
+
+
+
+
+
+// 🟢 Modal open: Rebuild department dropdown for Add Personnel
+$("#addPersonnelModal").on("show.bs.modal", function () {
+    loadDepartmentsForDropdown();
+});
+
+// 🟢 Modal open: Rebuild location dropdown for Add Department
+$("#addDepartmentModal").on("show.bs.modal", function () {
+    loadLocationsForDropdown();
+});
+
+// 🟢 Modal open: Reload departments + set selected one for Edit Personnel
+$("#editPersonnelModal").on("show.bs.modal", function () {
+    const deptSelect = $("#editPersonnelDepartment");
+    const currentValue = deptSelect.val();
+
+    deptSelect.empty();
+
+    $.getJSON("Php/getAllDepartments.php", function (res) {
+        deptSelect.append(`<option value="">Unassigned</option>`);
+        res.data.forEach(dept => {
+            const selected = dept.id == currentValue ? "selected" : "";
+            deptSelect.append(`<option value="${dept.id}" ${selected}>${dept.name}</option>`);
+        });
+    });
+});
+
+// 🟢 Modal open: Reload locations + set selected one for Edit Department
+$("#editDepartmentModal").on("show.bs.modal", function () {
+    const locationSelect = $("#editDepartmentLocation");
+    const currentValue = locationSelect.val();
+
+    locationSelect.empty();
+    locationSelect.append('<option value="">Select a Location</option>');
+
+    $.getJSON("Php/getAllLocations.php", function (res) {
+        res.data.forEach(loc => {
+            const selected = loc.id == currentValue ? "selected" : "";
+            locationSelect.append(`<option value="${loc.id}" ${selected}>${loc.name}</option>`);
+        });
+    });
+});

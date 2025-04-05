@@ -61,7 +61,7 @@ $("#searchInp").on("keyup", function () {
                             <td class="align-middle text-nowrap d-none d-md-table-cell">${person.email}</td>
                             <td class="text-end text-nowrap">
                                 <button type="button" class="btn btn-primary btn-sm editPersonnelBtn" data-id="${person.id}">
-                                    <i class="fa-solid fa-pencil fa-fw"></i>
+                                    <i class="fa-solid fa-pen-to-square fa-fw"></i>
                                 </button>
                                 <button type="button" class="btn btn-danger btn-sm deletePersonnelBtn" data-id="${person.id}">
                                     <i class="fa-solid fa-trash fa-fw"></i>

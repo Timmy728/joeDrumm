@@ -850,8 +850,7 @@ $(document).on("click", ".editLocationBtn", function () {
     const id = $(this).data("id");
 
     $.ajax({
-        url: "Php/get
-LocationByID.php",
+        url: "Php/getLocationByID.php",
         type: "POST",
         data: { id },
         dataType: "json",

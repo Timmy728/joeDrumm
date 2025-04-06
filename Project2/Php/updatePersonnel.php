@@ -1,45 +1,52 @@
 <?php
 header('Content-Type: application/json');
 
-include("db.php"); // Make sure this connects to your DB
+include("db.php");
+
+$response = [];
+
+$requiredFields = ['id', 'firstName', 'lastName', 'jobTitle', 'email', 'departmentID'];
+
+foreach ($requiredFields as $field) {
+    if (!isset($_POST[$field]) || $_POST[$field] === "") {
+        echo json_encode([
+            "status" => [
+                "code" => 500,
+                "description" => "error"
+            ],
+            "message" => "❌ Missing required fields."
+        ]);
+        exit;
+    }
+}
+
+$id = $_POST['id'];
+$firstName = $_POST['firstName'];
+$lastName = $_POST['lastName'];
+$jobTitle = $_POST['jobTitle'];
+$email = $_POST['email'];
+$departmentID = $_POST['departmentID'] === "" ? null : $_POST['departmentID'];
 
 try {
-    // Validate required fields
-    if (!isset($_POST['id'], $_POST['firstName'], $_POST['lastName'], $_POST['jobTitle'], $_POST['email'])) {
-        throw new Exception("Missing required fields.");
-    }
-
-    $id = $_POST['id'];
-    $firstName = trim($_POST['firstName']);
-    $lastName = trim($_POST['lastName']);
-    $jobTitle = trim($_POST['jobTitle']);
-    $email = trim($_POST['email']);
-    $departmentID = isset($_POST['departmentID']) && $_POST['departmentID'] !== "" ? $_POST['departmentID'] : null;
-
-    $query = $conn->prepare(
-        "UPDATE personnel 
-         SET firstName = ?, lastName = ?, jobTitle = ?, email = ?, departmentID = ? 
-         WHERE id = ?"
-    );
+    $query = $conn->prepare("UPDATE personnel SET firstName = ?, lastName = ?, jobTitle = ?, email = ?, departmentID = ? WHERE id = ?");
     $query->bind_param("ssssii", $firstName, $lastName, $jobTitle, $email, $departmentID, $id);
-    
-    if ($query->execute()) {
-        echo json_encode([
-            "status" => ["code" => 200, "description" => "success"],
-            "message" => "✅ Employee updated successfully!"
-        ]);
-    } else {
-        throw new Exception("Database error: " . $query->error);
-    }
+    $query->execute();
 
-    $query->close();
-    $conn->close();
+    echo json_encode([
+        "status" => [
+            "code" => 200,
+            "description" => "success"
+        ],
+        "message" => "✅ Personnel updated successfully!"
+    ]);
 
 } catch (Exception $e) {
     echo json_encode([
-        "status" => ["code" => 500, "description" => "error"],
-        "message" => "❌ " . $e->getMessage()
+        "status" => [
+            "code" => 500,
+            "description" => "query failed"
+        ],
+        "message" => "❌ Error updating personnel: " . $e->getMessage()
     ]);
 }
-  
 ?>

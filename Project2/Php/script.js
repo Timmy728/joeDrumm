@@ -4,6 +4,13 @@ $(document).ready(function () {
     loadLocations();
 });
 
+// ✅ Fix Bootstrap ARIA issue where focus is retained while aria-hidden remains true
+$(".modal").on("shown.bs.modal", function () {
+    $(this).attr("aria-hidden", "false");
+});
+
+
+
 // 🔁 Reload correct table when switching tabs
 $('button[data-bs-toggle="tab"]').on('shown.bs.tab', function (e) {
     const target = $(e.target).attr('id');

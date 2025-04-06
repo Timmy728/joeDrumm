@@ -1,52 +1,61 @@
 <?php
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 header('Content-Type: application/json');
 
 include("db.php");
 
-$response = [];
+$response = [
+    "status" => ["code" => 500, "description" => "error"],
+    "message" => "❌ Something went wrong"
+];
 
-$requiredFields = ['id', 'firstName', 'lastName', 'jobTitle', 'email', 'departmentID'];
+$id = $_POST['id'] ?? null;
+$firstName = $_POST['firstName'] ?? null;
+$lastName = $_POST['lastName'] ?? null;
+$jobTitle = $_POST['jobTitle'] ?? null;
+$email = $_POST['email'] ?? null;
+$departmentID = $_POST['departmentID'] ?? null;
 
-foreach ($requiredFields as $field) {
-    if (!isset($_POST[$field]) || $_POST[$field] === "") {
-        echo json_encode([
-            "status" => [
-                "code" => 500,
-                "description" => "error"
-            ],
-            "message" => "❌ Missing required fields."
-        ]);
-        exit;
-    }
+// Validate required fields
+if (!$id || !$firstName || !$lastName || !$email) {
+    $response['message'] = "❌ Missing required fields.";
+    echo json_encode($response);
+    exit;
 }
 
-$id = $_POST['id'];
-$firstName = $_POST['firstName'];
-$lastName = $_POST['lastName'];
-$jobTitle = $_POST['jobTitle'];
-$email = $_POST['email'];
-$departmentID = $_POST['departmentID'] === "" ? null : $_POST['departmentID'];
+// Allow null for department
+if ($departmentID === "") {
+    $departmentID = null;
+}
 
 try {
-    $query = $conn->prepare("UPDATE personnel SET firstName = ?, lastName = ?, jobTitle = ?, email = ?, departmentID = ? WHERE id = ?");
-    $query->bind_param("ssssii", $firstName, $lastName, $jobTitle, $email, $departmentID, $id);
+    $query = $conn->prepare(
+        "UPDATE personnel 
+         SET firstName = :firstName,
+             lastName = :lastName,
+             jobTitle = :jobTitle,
+             email = :email,
+             departmentID = :departmentID
+         WHERE id = :id"
+    );
+
+    $query->bindParam(':firstName', $firstName);
+    $query->bindParam(':lastName', $lastName);
+    $query->bindParam(':jobTitle', $jobTitle);
+    $query->bindParam(':email', $email);
+    $query->bindParam(':departmentID', $departmentID);
+    $query->bindParam(':id', $id);
+
     $query->execute();
 
-    echo json_encode([
-        "status" => [
-            "code" => 200,
-            "description" => "success"
-        ],
-        "message" => "✅ Personnel updated successfully!"
-    ]);
-
-} catch (Exception $e) {
-    echo json_encode([
-        "status" => [
-            "code" => 500,
-            "description" => "query failed"
-        ],
-        "message" => "❌ Error updating personnel: " . $e->getMessage()
-    ]);
+    $response["status"]["code"] = 200;
+    $response["status"]["description"] = "success";
+    $response["message"] = "✅ Personnel updated successfully!";
+} catch (PDOException $e) {
+    $response["message"] = "❌ " . $e->getMessage();
 }
+
+echo json_encode($response);
 ?>

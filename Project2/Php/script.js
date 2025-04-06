@@ -45,7 +45,13 @@ $("#searchInp").on("keyup", function () {
                 if (!response.data || !Array.isArray(response.data.found)) {
                     console.log("⚠️ No valid personnel data found.");
                     const row = document.createElement('tr');
-                    row.innerHTML = '<td colspan="5" class="text-center">No results found</td>';
+                    
+                    const cell = document.createElement('td');
+                    cell.colSpan = 5;
+                    cell.className = 'text-center';
+                    cell.textContent = 'No results found';
+                    row.appendChild(cell);
+
                     fragment.appendChild(row);
                     personnelTable.appendChild(fragment);
                     return;
@@ -998,7 +1004,13 @@ $("#applyFilterBtn").on("click", function () {
 
                 if (response.data.length === 0) {
                     const row = document.createElement('tr');
-                    row.innerHTML = '<td colspan="5" class="text-center">No results found</td>';
+                    
+                    const cell = document.createElement('td');
+                    cell.colSpan = 5;
+                    cell.className = 'text-center';
+                    cell.textContent = 'No results found';
+                    row.appendChild(cell);
+
                     fragment.appendChild(row);
                 } else {
                     response.data.forEach(person => {

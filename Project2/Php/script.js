@@ -1112,3 +1112,24 @@ $('#addLocationModal').on('hidden.bs.modal', function () {
 $('#editLocationModal').on('hidden.bs.modal', function () {
     $('#editLocationForm')[0].reset();
 });
+
+
+document.addEventListener('DOMContentLoaded', function () {
+    const modals = document.querySelectorAll('.modal');
+
+    modals.foreach(modal => {
+        modal.addEventListener('shown.bs.modal', function() {
+            const firstInput = this.querySelector('input, button');
+            if (firstInput) {
+                firstInput.focus();
+            }
+        });
+
+        modal.addEventListener('hidden.bs.modal', function() {
+            const triggerElement = document.querySelector('[data-bs-target="#${modal.id}"]);
+             if (triggerElement) {
+               triggerElement.focus();
+             }                                             
+        });
+    });
+});

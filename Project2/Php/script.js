@@ -1114,20 +1114,29 @@ $('#editLocationModal').on('hidden.bs.modal', function () {
 });
 
 
+
+
 document.addEventListener('DOMContentLoaded', function() {
   const modals = document.querySelectorAll('.modal');
   
   modals.forEach(modal => {
+    // Store the element that triggered the modal
+    let triggerElement = null;
+
+    modal.addEventListener('show.bs.modal', function(event) {
+      // Store the element that triggered the modal
+      triggerElement = event.relatedTarget;
+    });
+
     modal.addEventListener('shown.bs.modal', function() {
       // Focus the first input or button in the modal
-      const firstInput = this.querySelector('input, button');
+      const firstInput = this.querySelector('input:not([type="hidden"]), select, button:not([data-bs-dismiss="modal"])');
       if (firstInput) {
         firstInput.focus();
       }
     });
-
-       modal.addEventListener('hidden.bs.modal', function() {
-      const triggerElement = document.querySelector(`[data-bs-target="#${modal.id}"]`);
+    modal.addEventListener('hidden.bs.modal', function() {
+      // Return focus to the trigger element when modal closes
       if (triggerElement) {
         triggerElement.focus();
       }

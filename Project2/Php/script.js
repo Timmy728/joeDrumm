@@ -1114,16 +1114,17 @@ $('#editLocationModal').on('hidden.bs.modal', function () {
 });
 
 
-document.addEventListener('DOMContentLoaded', function () {
-    const modals = document.querySelectorAll('.modal');
-
-    modals.foreach(modal => {
-        modal.addEventListener('shown.bs.modal', function() {
-            const firstInput = this.querySelector('input, button');
-            if (firstInput) {
-                firstInput.focus();
-            }
-        });
+document.addEventListener('DOMContentLoaded', function() {
+  const modals = document.querySelectorAll('.modal');
+  
+  modals.forEach(modal => {
+    modal.addEventListener('shown.bs.modal', function() {
+      // Focus the first input or button in the modal
+      const firstInput = this.querySelector('input, button');
+      if (firstInput) {
+        firstInput.focus();
+      }
+    });
 
        modal.addEventListener('hidden.bs.modal', function() {
       const triggerElement = document.querySelector(`[data-bs-target="#${modal.id}"]`);

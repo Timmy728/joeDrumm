@@ -1125,11 +1125,11 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
 
-        modal.addEventListener('hidden.bs.modal', function() {
-            const triggerElement = document.querySelector('[data-bs-target="#${modal.id}"]);
-             if (triggerElement) {
-               triggerElement.focus();
-             }                                             
-        });
+       modal.addEventListener('hidden.bs.modal', function() {
+      const triggerElement = document.querySelector(`[data-bs-target="#${modal.id}"]`);
+      if (triggerElement) {
+        triggerElement.focus();
+      }
     });
+  });
 });

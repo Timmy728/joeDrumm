@@ -78,12 +78,12 @@
         <tbody id="departmentTableBody">
 
           <!-- Add Department Modal -->
-<div id="addDepartmentModal" class="modal fade" tabindex="-1" data-bs-backdrop="false">
-  <div class="modal-dialog modal-sm modal-dialog-centered modal-dialog-scrollable">
+<div id="addDepartmentModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="addDepartmentModalLabel">
+  <div class="modal-dialog modal-sm modal-dialog-centered modal-dialog-scrollable" role="document">
     <div class="modal-content shadow">
       <div class="modal-header bg-primary text-white">
-        <h5 class="modal-title">Add Department</h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        <h5 class="modal-title" id="addDepartmentModalLabel">Add Department</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
 
       <div class="modal-body">
@@ -243,12 +243,12 @@
 </div>
 
 <!-- Edit Personnel Modal -->
-<div id="editPersonnelModal" class="modal fade" tabindex="-1" data-bs-backdrop="false">
-  <div class="modal-dialog modal-sm modal-dialog-centered modal-dialog-scrollable">
+<div id="editPersonnelModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="editPersonnelModalLabel">
+  <div class="modal-dialog modal-sm modal-dialog-centered modal-dialog-scrollable" role="document">
     <div class="modal-content shadow">
       <div class="modal-header bg-primary text-white">
-        <h5 class="modal-title">Edit Employee</h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        <h5 class="modal-title" id=editPersonnelModalLabel">Edit Employee</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
 
       <div class="modal-body">
@@ -355,12 +355,12 @@
 
 
 <!-- Confirm Delete Modal -->
-<div id="confirmDeleteModal" class="modal fade" tabindex="-1" data-bs-backdrop="false">
-  <div class="modal-dialog modal-sm modal-dialog-centered">
+<div id="confirmDeleteModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="confirmDeleteModalLabel">
+  <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
     <div class="modal-content shadow">
       <div class="modal-header bg-danger text-white">
-        <h5 class="modal-title">CONFIRM DELETE</h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        <h5 class="modal-title" id="confirmDeleteModalLabel">CONFIRM DELETE</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
         <p id="confirmDeleteMessage">Are you sure?</p>

@@ -956,35 +956,31 @@ $("#filterModal").on("show.bs.modal", function () {
 // Handle filter changes
 $("#filterDepartment").on("change", function () {
     const deptID = $(this).val();
-    $("#filterLocation").val("all");
+    $("#filterLocation").val("all").prop('disabled', deptID !== 'all');
+    $(this).prop('disabled', false);
     
-    // Visual feedback
+    const filterData = {};
     if (deptID !== 'all') {
-        $("#filterLocation").prop('disabled', true);
-        $(this).prop('disabled', false);
-    } else {
-        $("#filterLocation, #filterDepartment").prop('disabled', false);
+        filterData.departmentID = deptID;
     }
     
-    applyFilter(deptID, "all");
+    applyFilter(filterData);
 });
 
 $("#filterLocation").on("change", function () {
     const locID = $(this).val();
-    $("#filterDepartment").val("all");
+    $("#filterDepartment").val("all").prop('disabled', locID !== 'all');
+    $(this).prop('disabled', false);
     
-    // Visual feedback
+    const filterData = {};
     if (locID !== 'all') {
-        $("#filterDepartment").prop('disabled', true);
-        $(this).prop('disabled', false);
-    } else {
-        $("#filterLocation, #filterDepartment").prop('disabled', false);
+        filterData.locationID = locID;
     }
     
-    applyFilter("all", locID);
+    applyFilter(filterData);
 });
 
-function applyFilter(deptID, locID) {
+function applyFilter(filterData) {
     // Show loading state
     const personnelTable = $("#personnelTableBody")[0];
     personnelTable.innerHTML = '<tr><td colspan="5" class="text-center">Loading...</td></tr>';
@@ -992,10 +988,7 @@ function applyFilter(deptID, locID) {
     $.ajax({
         url: "Php/filterPersonnel.php",
         type: "GET",
-        data: {
-            departmentID: deptID === 'all' ? '' : deptID,
-            locationID: locID === 'all' ? '' : locID
-        },
+        data: filterData,
         dataType: "json",
         success: function (response) {
             console.log("Filter response:", response); // Debug log
@@ -1003,7 +996,7 @@ function applyFilter(deptID, locID) {
             const fragment = document.createDocumentFragment();
             personnelTable.innerHTML = '';
 
-            if (response && response.status && response.status.code === 200) {
+            if (response.status.code === 200) {
                 if (!response.data || response.data.length === 0) {
                     const row = document.createElement('tr');
                     const cell = document.createElement('td');
@@ -1066,12 +1059,11 @@ function applyFilter(deptID, locID) {
                     });
                 }
             } else {
-                console.error("Invalid response format:", response); // Debug log
                 const row = document.createElement('tr');
                 const cell = document.createElement('td');
                 cell.colSpan = 5;
                 cell.className = 'text-center text-danger';
-                cell.textContent = 'Error loading results';
+                cell.textContent = response.status.description || 'Error loading results';
                 row.appendChild(cell);
                 fragment.appendChild(row);
             }
@@ -1079,7 +1071,7 @@ function applyFilter(deptID, locID) {
             personnelTable.appendChild(fragment);
         },
         error: function (jqXHR, textStatus, errorThrown) {
-            console.error("Filter error:", textStatus, errorThrown); // Debug log
+            console.error("Filter error:", textStatus, errorThrown);
             personnelTable.innerHTML = '<tr><td colspan="5" class="text-center text-danger">Error loading results</td></tr>';
             showToast("❌ Error applying filter", "danger");
         }

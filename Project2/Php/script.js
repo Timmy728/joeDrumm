@@ -914,6 +914,10 @@ $(document).off("submit", "#addLocationForm").on("submit", "#addLocationForm", f
 
 // Filter functionality
 $("#filterModal").on("show.bs.modal", function () {
+    // Store current values
+    const currentDepartment = $('#filterDepartment').val();
+    const currentLocation = $('#filterLocation').val();
+
     // Load Departments
     $.getJSON("Php/getAllDepartments.php", function (res) {
         let deptSelect = $("#filterDepartment");
@@ -921,6 +925,8 @@ $("#filterModal").on("show.bs.modal", function () {
         res.data.forEach(dept => {
             deptSelect.append(`<option value="${dept.id}">${dept.name}</option>`);
         });
+        // Restore previous selection
+        deptSelect.val(currentDepartment);
     });
 
     // Load Locations
@@ -930,6 +936,8 @@ $("#filterModal").on("show.bs.modal", function () {
         res.data.forEach(loc => {
             locSelect.append(`<option value="${loc.id}">${loc.name}</option>`);
         });
+        // Restore previous selection
+        locSelect.val(currentLocation);
     });
 });
 
@@ -937,16 +945,12 @@ $("#filterModal").on("show.bs.modal", function () {
 $("#filterDepartment").on("change", function () {
     const deptID = $(this).val();
     $("#filterLocation").val("all");
-    $("#filterLocation").addClass("opacity-50");
-    $("#filterDepartment").removeClass("opacity-50");
     applyFilter(deptID, "all");
 });
 
 $("#filterLocation").on("change", function () {
     const locID = $(this).val();
     $("#filterDepartment").val("all");
-    $("#filterDepartment").addClass("opacity-50");
-    $("#filterLocation").removeClass("opacity-50");
     applyFilter("all", locID);
 });
 
@@ -1029,9 +1033,6 @@ function applyFilter(deptID, locID) {
                     });
                 }
                 personnelTable.appendChild(fragment);
-                $("#filterModal").modal("hide");
-            } else {
-                showToast("❌ Filter failed.");
             }
         },
         error: function () {

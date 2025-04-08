@@ -950,6 +950,7 @@ $("#filterDepartment").on("change", function () {
     const deptID = $(this).val();
     $("#filterLocation").val("all");
     $("#filterLocation").css('opacity', deptID === 'all' ? '1' : '0.5');
+    $("#filterDepartment").css('opacity', '1');
     applyFilter(deptID, "all");
 });
 
@@ -957,6 +958,7 @@ $("#filterLocation").on("change", function () {
     const locID = $(this).val();
     $("#filterDepartment").val("all");
     $("#filterDepartment").css('opacity', locID === 'all' ? '1' : '0.5');
+    $("#filterLocation").css('opacity', '1');
     applyFilter("all", locID);
 });
 
@@ -975,15 +977,13 @@ function applyFilter(deptID, locID) {
                 const fragment = document.createDocumentFragment();
                 personnelTable.innerHTML = '';
 
-                if (response.data.length === 0) {
+                if (!response.data || response.data.length === 0) {
                     const row = document.createElement('tr');
-                    
                     const cell = document.createElement('td');
                     cell.colSpan = 5;
                     cell.className = 'text-center';
                     cell.textContent = 'No results found';
                     row.appendChild(cell);
-
                     fragment.appendChild(row);
                 } else {
                     response.data.forEach(person => {
@@ -1039,7 +1039,12 @@ function applyFilter(deptID, locID) {
                     });
                 }
                 personnelTable.appendChild(fragment);
-                $("#filterModal").modal("hide");
+
+                // Close the modal after successful filtering
+                const filterModal = bootstrap.Modal.getInstance(document.getElementById('filterModal'));
+                if (filterModal) {
+                    filterModal.hide();
+                }
             } else {
                 showToast("❌ Filter failed.");
             }

@@ -914,52 +914,47 @@ $(document).off("submit", "#addLocationForm").on("submit", "#addLocationForm", f
 
 // Filter functionality
 $("#filterModal").on("show.bs.modal", function () {
+    // Store current values
+    const currentDepartment = $('#filterDepartment').val();
+    const currentLocation = $('#filterLocation').val();
+
     // Load Departments
     $.getJSON("Php/getAllDepartments.php", function (res) {
         let deptSelect = $("#filterDepartment");
-        deptSelect.empty().append(`<option value="">Select Department</option>`);
+        deptSelect.empty().append(`<option value="all">All</option>`);
         res.data.forEach(dept => {
             deptSelect.append(`<option value="${dept.id}">${dept.name}</option>`);
         });
+        // Restore previous selection
+        deptSelect.val(currentDepartment || 'all');
     });
 
     // Load Locations
     $.getJSON("Php/getAllLocations.php", function (res) {
         let locSelect = $("#filterLocation");
-        locSelect.empty().append(`<option value="">Select Location</option>`);
+        locSelect.empty().append(`<option value="all">All</option>`);
         res.data.forEach(loc => {
             locSelect.append(`<option value="${loc.id}">${loc.name}</option>`);
         });
+        // Restore previous selection
+        locSelect.val(currentLocation || 'all');
     });
 });
 
-// Force either/or logic:
+// Handle filter changes
 $("#filterDepartment").on("change", function () {
-    if ($(this).val()) {
-        $("#filterLocation").prop("disabled", true).val("");
-    } else {
-        $("#filterLocation").prop("disabled", false);
-    }
+    const deptID = $(this).val();
+    $("#filterLocation").val("all");
+    applyFilter(deptID, "all");
 });
 
 $("#filterLocation").on("change", function () {
-    if ($(this).val()) {
-        $("#filterDepartment").prop("disabled", true).val("");
-    } else {
-        $("#filterDepartment").prop("disabled", false);
-    }
+    const locID = $(this).val();
+    $("#filterDepartment").val("all");
+    applyFilter("all", locID);
 });
 
-// Handle filter submit button:
-$("#applyFilterBtn").on("click", function () {
-    const deptID = $("#filterDepartment").val();
-    const locID = $("#filterLocation").val();
-
-    if (!deptID && !locID) {
-        showToast("❌ Please select either a department or location.");
-        return;
-    }
-
+function applyFilter(deptID, locID) {
     $.ajax({
         url: "Php/filterPersonnel.php",
         type: "GET",
@@ -974,15 +969,13 @@ $("#applyFilterBtn").on("click", function () {
                 const fragment = document.createDocumentFragment();
                 personnelTable.innerHTML = '';
 
-                if (response.data.length === 0) {
+                if (!response.data || response.data.length === 0) {
                     const row = document.createElement('tr');
-                    
                     const cell = document.createElement('td');
                     cell.colSpan = 5;
                     cell.className = 'text-center';
                     cell.textContent = 'No results found';
                     row.appendChild(cell);
-
                     fragment.appendChild(row);
                 } else {
                     response.data.forEach(person => {
@@ -1007,36 +1000,44 @@ $("#applyFilterBtn").on("click", function () {
                         const actionsCell = document.createElement('td');
                         actionsCell.className = 'text-end text-nowrap';
                         
-                        const editBtn = document.createElement('button');
-                        editBtn.type = 'button';
-                        editBtn.className = 'btn btn-primary btn-sm editPersonnelBtn';
-                        editBtn.dataset.id = person.id;
-                        editBtn.innerHTML = '<i class="fa-solid fa-pencil"></i>';
+                        const editButton = document.createElement('button');
+                        editButton.type = 'button';
+                        editButton.className = 'btn btn-outline-primary myBtn me-1';
+                        editButton.setAttribute('data-bs-toggle', 'modal');
+                        editButton.setAttribute('data-bs-target', '#editPersonnelModal');
+                        editButton.setAttribute('data-id', person.id);
+
+                        const editIcon = document.createElement('i');
+                        editIcon.className = 'fa-solid fa-pencil fa-fw';
+                        editButton.appendChild(editIcon);
                         
-                        const deleteBtn = document.createElement('button');
-                        deleteBtn.type = 'button';
-                        deleteBtn.className = 'btn btn-danger btn-sm deletePersonnelBtn';
-                        deleteBtn.dataset.id = person.id;
-                        deleteBtn.innerHTML = '<i class="fa-solid fa-trash"></i>';
+                        const deleteButton = document.createElement('button');
+                        deleteButton.type = 'button';
+                        deleteButton.className = 'btn btn-outline-primary myBtn';
+                        deleteButton.setAttribute('data-bs-toggle', 'modal');
+                        deleteButton.setAttribute('data-bs-target', '#deleteConfirmModal');
+                        deleteButton.setAttribute('data-id', person.id);
+                        deleteButton.setAttribute('data-type', 'personnel');
+
+                        const deleteIcon = document.createElement('i');
+                        deleteIcon.className = 'fa-solid fa-trash fa-fw';
+                        deleteButton.appendChild(deleteIcon);
                         
-                        actionsCell.appendChild(editBtn);
-                        actionsCell.appendChild(deleteBtn);
+                        actionsCell.appendChild(editButton);
+                        actionsCell.appendChild(deleteButton);
                         row.appendChild(actionsCell);
 
                         fragment.appendChild(row);
                     });
                 }
                 personnelTable.appendChild(fragment);
-                $("#filterModal").modal("hide");
-            } else {
-                showToast("❌ Filter failed.");
             }
         },
         error: function () {
-            showToast("❌ Error applying filter.");
+            showToast("❌ Error applying filter.", "danger");
         }
     });
-});
+}
 
 // Modal Reset Handlers
 $('#addPersonnelModal').on('hidden.bs.modal', function () {

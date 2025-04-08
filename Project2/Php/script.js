@@ -925,7 +925,7 @@ $("#filterModal").on("show.bs.modal", function () {
         dataType: "json",
         success: function (res) {
             let deptSelect = $("#filterDepartment");
-            deptSelect.empty().append(`<option value="all">All</option>`);
+            deptSelect.empty().append(`<option value="all">All Departments</option>`);
             
             if (res && res.data && Array.isArray(res.data)) {
                 res.data.forEach(dept => {
@@ -938,6 +938,9 @@ $("#filterModal").on("show.bs.modal", function () {
                     deptSelect.val('all');
                 }
             }
+
+            // Update select states
+            updateFilterSelects();
         },
         error: function (jqXHR, textStatus, errorThrown) {
             console.error("Error loading departments:", textStatus, errorThrown);
@@ -952,7 +955,7 @@ $("#filterModal").on("show.bs.modal", function () {
         dataType: "json",
         success: function (res) {
             let locSelect = $("#filterLocation");
-            locSelect.empty().append(`<option value="all">All</option>`);
+            locSelect.empty().append(`<option value="all">All Locations</option>`);
             
             if (res && res.data && Array.isArray(res.data)) {
                 res.data.forEach(loc => {
@@ -965,6 +968,9 @@ $("#filterModal").on("show.bs.modal", function () {
                     locSelect.val('all');
                 }
             }
+
+            // Update select states
+            updateFilterSelects();
         },
         error: function (jqXHR, textStatus, errorThrown) {
             console.error("Error loading locations:", textStatus, errorThrown);
@@ -973,20 +979,56 @@ $("#filterModal").on("show.bs.modal", function () {
     });
 });
 
+function updateFilterSelects() {
+    const deptSelect = $("#filterDepartment");
+    const locSelect = $("#filterLocation");
+    
+    const deptVal = deptSelect.val();
+    const locVal = locSelect.val();
+
+    if (deptVal !== 'all') {
+        // If department is selected, disable location
+        locSelect.prop('disabled', true);
+        locSelect.addClass('opacity-50');
+    } else if (locVal !== 'all') {
+        // If location is selected, disable department
+        deptSelect.prop('disabled', true);
+        deptSelect.addClass('opacity-50');
+    } else {
+        // If neither is selected, enable both
+        deptSelect.prop('disabled', false);
+        locSelect.prop('disabled', false);
+        deptSelect.removeClass('opacity-50');
+        locSelect.removeClass('opacity-50');
+    }
+}
+
 // Handle filter changes
 $("#filterDepartment").on("change", function () {
     const deptID = $(this).val();
-    $("#filterLocation").val("all");
+    if (deptID !== 'all') {
+        $("#filterLocation").val('all');
+    }
+    updateFilterSelects();
     applyFilter(deptID, "all");
 });
 
 $("#filterLocation").on("change", function () {
     const locID = $(this).val();
-    $("#filterDepartment").val("all");
+    if (locID !== 'all') {
+        $("#filterDepartment").val('all');
+    }
+    updateFilterSelects();
     applyFilter("all", locID);
 });
 
 function applyFilter(deptID, locID) {
+    // Don't apply filter if both are selected
+    if (deptID !== 'all' && locID !== 'all') {
+        showToast("Please select either department or location, not both", "error");
+        return;
+    }
+
     console.log("Applying filter with:", { deptID, locID });
 
     $.ajax({

@@ -2,14 +2,21 @@ $(document).ready(function () {
     loadPersonnel();
     loadDepartments();
     loadLocations();
+
+    // Initialize all modals with default options
+    const modalOptions = {
+        backdrop: false,
+        keyboard: true
+    };
+
+    document.querySelectorAll('.modal').forEach(modalEl => {
+        new bootstrap.Modal(modalEl, modalOptions);
+    });
 });
 
 // ✅ Fix Bootstrap ARIA issue where focus is retained while aria-hidden remains true
 $(".modal").on("shown.bs.modal", function () {
     $(this).attr("aria-hidden", "false");
-    // Remove backdrop and add primary background
-    $(this).data('bs.modal')._config.backdrop = false;
-    $(this).find('.modal-header').addClass('bg-primary text-white');
 });
 
 // 🔁 Reload correct table when switching tabs
@@ -920,6 +927,8 @@ $("#filterModal").on("show.bs.modal", function () {
         });
         // Restore previous selection
         deptSelect.val(currentDepartment);
+        // Update opacity based on location selection
+        deptSelect.css('opacity', $('#filterLocation').val() === 'all' ? '1' : '0.5');
     });
 
     // Load Locations
@@ -931,12 +940,9 @@ $("#filterModal").on("show.bs.modal", function () {
         });
         // Restore previous selection
         locSelect.val(currentLocation);
+        // Update opacity based on department selection
+        locSelect.css('opacity', $('#filterDepartment').val() === 'all' ? '1' : '0.5');
     });
-
-    // Remove backdrop
-    $(this).data('bs.modal')._config.backdrop = false;
-    // Add primary background to header
-    $(this).find('.modal-header').addClass('bg-primary text-white');
 });
 
 // Handle filter changes
@@ -1080,8 +1086,6 @@ document.addEventListener('DOMContentLoaded', function() {
         modal.addEventListener('show.bs.modal', function(event) {
             // Store the element that triggered the modal
             triggerElement = event.relatedTarget;
-            // Remove backdrop
-            $(this).data('bs.modal')._config.backdrop = false;
             // Add primary background to header
             $(this).find('.modal-header').addClass('bg-primary text-white');
         });

@@ -926,13 +926,7 @@ $("#filterModal").on("show.bs.modal", function () {
             deptSelect.append(`<option value="${dept.id}">${dept.name}</option>`);
         });
         // Restore previous selection
-        deptSelect.val(currentDepartment || 'all');
-        
-        // Apply visual state
-        if (currentDepartment && currentDepartment !== 'all') {
-            $("#filterLocation").prop('disabled', true);
-            $("#filterDepartment").prop('disabled', false);
-        }
+        deptSelect.val(currentDepartment);
     });
 
     // Load Locations
@@ -943,45 +937,24 @@ $("#filterModal").on("show.bs.modal", function () {
             locSelect.append(`<option value="${loc.id}">${loc.name}</option>`);
         });
         // Restore previous selection
-        locSelect.val(currentLocation || 'all');
-        
-        // Apply visual state
-        if (currentLocation && currentLocation !== 'all') {
-            $("#filterDepartment").prop('disabled', true);
-            $("#filterLocation").prop('disabled', false);
-        }
+        locSelect.val(currentLocation);
     });
 });
 
 // Handle filter changes
 $("#filterDepartment").on("change", function () {
     const deptID = $(this).val();
-    $("#filterLocation").val("all").prop('disabled', deptID !== 'all');
-    $(this).prop('disabled', false);
-    
-    const filterData = {};
-    if (deptID !== 'all') {
-        filterData.departmentID = deptID;
-    }
-    
-    applyFilter(filterData);
+    $("#filterLocation").val("all");
+    applyFilter({ departmentID: deptID === 'all' ? null : deptID });
 });
 
 $("#filterLocation").on("change", function () {
     const locID = $(this).val();
-    $("#filterDepartment").val("all").prop('disabled', locID !== 'all');
-    $(this).prop('disabled', false);
-    
-    const filterData = {};
-    if (locID !== 'all') {
-        filterData.locationID = locID;
-    }
-    
-    applyFilter(filterData);
+    $("#filterDepartment").val("all");
+    applyFilter({ locationID: locID === 'all' ? null : locID });
 });
 
 function applyFilter(filterData) {
-    // Show loading state
     const personnelTable = $("#personnelTableBody")[0];
     personnelTable.innerHTML = '<tr><td colspan="5" class="text-center">Loading...</td></tr>';
 
@@ -991,8 +964,6 @@ function applyFilter(filterData) {
         data: filterData,
         dataType: "json",
         success: function (response) {
-            console.log("Filter response:", response); // Debug log
-            
             const fragment = document.createDocumentFragment();
             personnelTable.innerHTML = '';
 
@@ -1009,25 +980,26 @@ function applyFilter(filterData) {
                     response.data.forEach(person => {
                         const row = document.createElement('tr');
                         
-                        const nameCell = document.createElement('td');
-                        nameCell.textContent = `${person.lastName}, ${person.firstName}`;
-                        row.appendChild(nameCell);
+                        // Create cells
+                        const cells = [
+                            `${person.lastName}, ${person.firstName}`,
+                            person.department ?? "Unassigned",
+                            person.location ?? "Unassigned",
+                            person.email
+                        ].map(text => {
+                            const cell = document.createElement('td');
+                            cell.textContent = text;
+                            return cell;
+                        });
+                        
+                        // Add cells to row
+                        cells.forEach(cell => row.appendChild(cell));
 
-                        const deptCell = document.createElement('td');
-                        deptCell.textContent = person.department ?? "Unassigned";
-                        row.appendChild(deptCell);
-
-                        const locCell = document.createElement('td');
-                        locCell.textContent = person.location ?? "Unassigned";
-                        row.appendChild(locCell);
-
-                        const emailCell = document.createElement('td');
-                        emailCell.textContent = person.email;
-                        row.appendChild(emailCell);
-
+                        // Create actions cell
                         const actionsCell = document.createElement('td');
                         actionsCell.className = 'text-end text-nowrap';
-                        
+
+                        // Create edit button
                         const editButton = document.createElement('button');
                         editButton.type = 'button';
                         editButton.className = 'btn btn-outline-primary myBtn me-1';
@@ -1038,10 +1010,11 @@ function applyFilter(filterData) {
                         const editIcon = document.createElement('i');
                         editIcon.className = 'fa-solid fa-pencil fa-fw';
                         editButton.appendChild(editIcon);
-                        
+
+                        // Create delete button
                         const deleteButton = document.createElement('button');
                         deleteButton.type = 'button';
-                        deleteButton.className = 'btn btn-outline-primary myBtn';
+                        deleteButton.className = 'btn btn-primary';
                         deleteButton.setAttribute('data-bs-toggle', 'modal');
                         deleteButton.setAttribute('data-bs-target', '#deleteConfirmModal');
                         deleteButton.setAttribute('data-id', person.id);
@@ -1050,7 +1023,8 @@ function applyFilter(filterData) {
                         const deleteIcon = document.createElement('i');
                         deleteIcon.className = 'fa-solid fa-trash fa-fw';
                         deleteButton.appendChild(deleteIcon);
-                        
+
+                        // Add buttons to actions cell
                         actionsCell.appendChild(editButton);
                         actionsCell.appendChild(deleteButton);
                         row.appendChild(actionsCell);
@@ -1070,14 +1044,12 @@ function applyFilter(filterData) {
             
             personnelTable.appendChild(fragment);
         },
-        error: function (jqXHR, textStatus, errorThrown) {
-            console.error("Filter error:", textStatus, errorThrown);
+        error: function () {
             personnelTable.innerHTML = '<tr><td colspan="5" class="text-center text-danger">Error loading results</td></tr>';
             showToast("❌ Error applying filter", "danger");
         }
     });
 }
-
 
 // Modal Reset Handlers
 $('#addPersonnelModal').on('hidden.bs.modal', function () {

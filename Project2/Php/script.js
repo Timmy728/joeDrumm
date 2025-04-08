@@ -930,8 +930,8 @@ $("#filterModal").on("show.bs.modal", function () {
         
         // Apply visual state
         if (currentDepartment && currentDepartment !== 'all') {
-            $("#filterLocation").addClass('text-muted');
-            $("#filterDepartment").removeClass('text-muted');
+            $("#filterLocation").prop('disabled', true);
+            $("#filterDepartment").prop('disabled', false);
         }
     });
 
@@ -947,8 +947,8 @@ $("#filterModal").on("show.bs.modal", function () {
         
         // Apply visual state
         if (currentLocation && currentLocation !== 'all') {
-            $("#filterDepartment").addClass('text-muted');
-            $("#filterLocation").removeClass('text-muted');
+            $("#filterDepartment").prop('disabled', true);
+            $("#filterLocation").prop('disabled', false);
         }
     });
 });
@@ -960,10 +960,10 @@ $("#filterDepartment").on("change", function () {
     
     // Visual feedback
     if (deptID !== 'all') {
-        $("#filterLocation").addClass('text-muted');
-        $("#filterDepartment").removeClass('text-muted');
+        $("#filterLocation").prop('disabled', true);
+        $(this).prop('disabled', false);
     } else {
-        $("#filterLocation, #filterDepartment").removeClass('text-muted');
+        $("#filterLocation, #filterDepartment").prop('disabled', false);
     }
     
     applyFilter(deptID, "all");
@@ -975,10 +975,10 @@ $("#filterLocation").on("change", function () {
     
     // Visual feedback
     if (locID !== 'all') {
-        $("#filterDepartment").addClass('text-muted');
-        $("#filterLocation").removeClass('text-muted');
+        $("#filterDepartment").prop('disabled', true);
+        $(this).prop('disabled', false);
     } else {
-        $("#filterLocation, #filterDepartment").removeClass('text-muted');
+        $("#filterLocation, #filterDepartment").prop('disabled', false);
     }
     
     applyFilter("all", locID);
@@ -993,15 +993,17 @@ function applyFilter(deptID, locID) {
         url: "Php/filterPersonnel.php",
         type: "GET",
         data: {
-            departmentID: deptID,
-            locationID: locID
+            departmentID: deptID === 'all' ? '' : deptID,
+            locationID: locID === 'all' ? '' : locID
         },
         dataType: "json",
         success: function (response) {
+            console.log("Filter response:", response); // Debug log
+            
             const fragment = document.createDocumentFragment();
             personnelTable.innerHTML = '';
 
-            if (response.status.code === 200) {
+            if (response && response.status && response.status.code === 200) {
                 if (!response.data || response.data.length === 0) {
                     const row = document.createElement('tr');
                     const cell = document.createElement('td');
@@ -1064,6 +1066,7 @@ function applyFilter(deptID, locID) {
                     });
                 }
             } else {
+                console.error("Invalid response format:", response); // Debug log
                 const row = document.createElement('tr');
                 const cell = document.createElement('td');
                 cell.colSpan = 5;
@@ -1075,12 +1078,14 @@ function applyFilter(deptID, locID) {
             
             personnelTable.appendChild(fragment);
         },
-        error: function () {
+        error: function (jqXHR, textStatus, errorThrown) {
+            console.error("Filter error:", textStatus, errorThrown); // Debug log
             personnelTable.innerHTML = '<tr><td colspan="5" class="text-center text-danger">Error loading results</td></tr>';
             showToast("❌ Error applying filter", "danger");
         }
     });
 }
+
 
 // Modal Reset Handlers
 $('#addPersonnelModal').on('hidden.bs.modal', function () {

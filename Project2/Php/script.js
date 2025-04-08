@@ -914,123 +914,43 @@ $(document).off("submit", "#addLocationForm").on("submit", "#addLocationForm", f
 
 // Filter functionality
 $("#filterModal").on("show.bs.modal", function () {
-    // Store current values
-    const currentDepartment = $('#filterDepartment').val();
-    const currentLocation = $('#filterLocation').val();
-
     // Load Departments
-    $.ajax({
-        url: "Php/getAllDepartments.php",
-        type: "GET",
-        dataType: "json",
-        success: function (res) {
-            let deptSelect = $("#filterDepartment");
-            deptSelect.empty().append(`<option value="all">All Departments</option>`);
-            
-            if (res && res.data && Array.isArray(res.data)) {
-                res.data.forEach(dept => {
-                    deptSelect.append(`<option value="${dept.id}">${dept.name}</option>`);
-                });
-                // Restore previous selection if valid
-                if (currentDepartment && res.data.some(dept => dept.id === currentDepartment)) {
-                    deptSelect.val(currentDepartment);
-                } else {
-                    deptSelect.val('all');
-                }
-            }
-
-            // Update select states
-            updateFilterSelects();
-        },
-        error: function (jqXHR, textStatus, errorThrown) {
-            console.error("Error loading departments:", textStatus, errorThrown);
-            showToast("Error loading departments", "error");
-        }
+    $.getJSON("Php/getAllDepartments.php", function (res) {
+        let deptSelect = $("#filterDepartment");
+        deptSelect.empty().append(`<option value="all">All</option>`);
+        res.data.forEach(dept => {
+            deptSelect.append(`<option value="${dept.id}">${dept.name}</option>`);
+        });
     });
 
     // Load Locations
-    $.ajax({
-        url: "Php/getAllLocations.php",
-        type: "GET",
-        dataType: "json",
-        success: function (res) {
-            let locSelect = $("#filterLocation");
-            locSelect.empty().append(`<option value="all">All Locations</option>`);
-            
-            if (res && res.data && Array.isArray(res.data)) {
-                res.data.forEach(loc => {
-                    locSelect.append(`<option value="${loc.id}">${loc.name}</option>`);
-                });
-                // Restore previous selection if valid
-                if (currentLocation && res.data.some(loc => loc.id === currentLocation)) {
-                    locSelect.val(currentLocation);
-                } else {
-                    locSelect.val('all');
-                }
-            }
-
-            // Update select states
-            updateFilterSelects();
-        },
-        error: function (jqXHR, textStatus, errorThrown) {
-            console.error("Error loading locations:", textStatus, errorThrown);
-            showToast("Error loading locations", "error");
-        }
+    $.getJSON("Php/getAllLocations.php", function (res) {
+        let locSelect = $("#filterLocation");
+        locSelect.empty().append(`<option value="all">All</option>`);
+        res.data.forEach(loc => {
+            locSelect.append(`<option value="${loc.id}">${loc.name}</option>`);
+        });
     });
 });
-
-function updateFilterSelects() {
-    const deptSelect = $("#filterDepartment");
-    const locSelect = $("#filterLocation");
-    
-    const deptVal = deptSelect.val();
-    const locVal = locSelect.val();
-
-    if (deptVal !== 'all') {
-        // If department is selected, disable location
-        locSelect.prop('disabled', true);
-        locSelect.addClass('opacity-50');
-    } else if (locVal !== 'all') {
-        // If location is selected, disable department
-        deptSelect.prop('disabled', true);
-        deptSelect.addClass('opacity-50');
-    } else {
-        // If neither is selected, enable both
-        deptSelect.prop('disabled', false);
-        locSelect.prop('disabled', false);
-        deptSelect.removeClass('opacity-50');
-        locSelect.removeClass('opacity-50');
-    }
-}
 
 // Handle filter changes
 $("#filterDepartment").on("change", function () {
     const deptID = $(this).val();
-    if (deptID !== 'all') {
-        $("#filterLocation").val('all');
-    }
-    updateFilterSelects();
+    $("#filterLocation").val("all");
+    $("#filterLocation").addClass("opacity-50");
+    $("#filterDepartment").removeClass("opacity-50");
     applyFilter(deptID, "all");
 });
 
 $("#filterLocation").on("change", function () {
     const locID = $(this).val();
-    if (locID !== 'all') {
-        $("#filterDepartment").val('all');
-    }
-    updateFilterSelects();
+    $("#filterDepartment").val("all");
+    $("#filterDepartment").addClass("opacity-50");
+    $("#filterLocation").removeClass("opacity-50");
     applyFilter("all", locID);
 });
 
 function applyFilter(deptID, locID) {
-    // Don't apply filter if both are selected
-    if (deptID !== 'all' && locID !== 'all') {
-        showToast("Please select either department or location, not both", "error");
-        return;
-    }
-
-    console.log("Applying filter with:", { deptID, locID });
-
     $.ajax({
         url: "Php/filterPersonnel.php",
         type: "GET",
@@ -1040,94 +960,82 @@ function applyFilter(deptID, locID) {
         },
         dataType: "json",
         success: function (response) {
-            console.log("Filter response:", response);
+            if (response.status.code === 200) {
+                const personnelTable = $("#personnelTableBody")[0];
+                const fragment = document.createDocumentFragment();
+                personnelTable.innerHTML = '';
 
-            if (!response || !response.status) {
-                showToast("Invalid response from server", "error");
-                return;
-            }
-
-            const personnelTable = $("#personnelTableBody")[0];
-            const fragment = document.createDocumentFragment();
-            personnelTable.innerHTML = '';
-
-            if (!response.data || !Array.isArray(response.data) || response.data.length === 0) {
-                const row = document.createElement('tr');
-                const cell = document.createElement('td');
-                cell.colSpan = 5;
-                cell.className = 'text-center';
-                cell.textContent = 'No results found';
-                row.appendChild(cell);
-                fragment.appendChild(row);
-            } else {
-                response.data.forEach(person => {
+                if (!response.data || response.data.length === 0) {
                     const row = document.createElement('tr');
                     
-                    const nameCell = document.createElement('td');
-                    nameCell.textContent = `${person.lastName}, ${person.firstName}`;
-                    row.appendChild(nameCell);
-
-                    const deptCell = document.createElement('td');
-                    deptCell.textContent = person.department ?? "Unassigned";
-                    row.appendChild(deptCell);
-
-                    const locCell = document.createElement('td');
-                    locCell.textContent = person.location ?? "Unassigned";
-                    row.appendChild(locCell);
-
-                    const emailCell = document.createElement('td');
-                    emailCell.textContent = person.email;
-                    row.appendChild(emailCell);
-
-                    const actionsCell = document.createElement('td');
-                    actionsCell.className = 'text-end text-nowrap';
-                    
-                    const editButton = document.createElement('button');
-                    editButton.type = 'button';
-                    editButton.className = 'btn btn-outline-primary myBtn me-1';
-                    editButton.setAttribute('data-bs-toggle', 'modal');
-                    editButton.setAttribute('data-bs-target', '#editPersonnelModal');
-                    editButton.setAttribute('data-id', person.id);
-
-                    const editIcon = document.createElement('i');
-                    editIcon.className = 'fa-solid fa-pencil fa-fw';
-                    editButton.appendChild(editIcon);
-                    
-                    const deleteButton = document.createElement('button');
-                    deleteButton.type = 'button';
-                    deleteButton.className = 'btn btn-outline-primary myBtn';
-                    deleteButton.setAttribute('data-bs-toggle', 'modal');
-                    deleteButton.setAttribute('data-bs-target', '#deleteConfirmModal');
-                    deleteButton.setAttribute('data-id', person.id);
-                    deleteButton.setAttribute('data-type', 'personnel');
-
-                    const deleteIcon = document.createElement('i');
-                    deleteIcon.className = 'fa-solid fa-trash fa-fw';
-                    deleteButton.appendChild(deleteIcon);
-                    
-                    actionsCell.appendChild(editButton);
-                    actionsCell.appendChild(deleteButton);
-                    row.appendChild(actionsCell);
+                    const cell = document.createElement('td');
+                    cell.colSpan = 5;
+                    cell.className = 'text-center';
+                    cell.textContent = 'No results found';
+                    row.appendChild(cell);
 
                     fragment.appendChild(row);
-                });
-            }
-            personnelTable.appendChild(fragment);
+                } else {
+                    response.data.forEach(person => {
+                        const row = document.createElement('tr');
+                        
+                        const nameCell = document.createElement('td');
+                        nameCell.textContent = `${person.lastName}, ${person.firstName}`;
+                        row.appendChild(nameCell);
 
-            // Close modal only on successful filter
-            if (response.status.code === 200) {
-                const filterModal = bootstrap.Modal.getInstance(document.getElementById('filterModal'));
-                if (filterModal) {
-                    filterModal.hide();
+                        const deptCell = document.createElement('td');
+                        deptCell.textContent = person.department ?? "Unassigned";
+                        row.appendChild(deptCell);
+
+                        const locCell = document.createElement('td');
+                        locCell.textContent = person.location ?? "Unassigned";
+                        row.appendChild(locCell);
+
+                        const emailCell = document.createElement('td');
+                        emailCell.textContent = person.email;
+                        row.appendChild(emailCell);
+
+                        const actionsCell = document.createElement('td');
+                        actionsCell.className = 'text-end text-nowrap';
+                        
+                        const editButton = document.createElement('button');
+                        editButton.type = 'button';
+                        editButton.className = 'btn btn-outline-primary myBtn me-1';
+                        editButton.setAttribute('data-bs-toggle', 'modal');
+                        editButton.setAttribute('data-bs-target', '#editPersonnelModal');
+                        editButton.setAttribute('data-id', person.id);
+
+                        const editIcon = document.createElement('i');
+                        editIcon.className = 'fa-solid fa-pencil fa-fw';
+                        editButton.appendChild(editIcon);
+                        
+                        const deleteButton = document.createElement('button');
+                        deleteButton.type = 'button';
+                        deleteButton.className = 'btn btn-outline-primary myBtn';
+                        deleteButton.setAttribute('data-bs-toggle', 'modal');
+                        deleteButton.setAttribute('data-bs-target', '#deleteConfirmModal');
+                        deleteButton.setAttribute('data-id', person.id);
+                        deleteButton.setAttribute('data-type', 'personnel');
+
+                        const deleteIcon = document.createElement('i');
+                        deleteIcon.className = 'fa-solid fa-trash fa-fw';
+                        deleteButton.appendChild(deleteIcon);
+                        
+                        actionsCell.appendChild(editButton);
+                        actionsCell.appendChild(deleteButton);
+                        row.appendChild(actionsCell);
+
+                        fragment.appendChild(row);
+                    });
                 }
-                showToast("Filter applied successfully", "success");
+                personnelTable.appendChild(fragment);
+                $("#filterModal").modal("hide");
             } else {
-                showToast(response.status.description || "Filter failed", "error");
+                showToast("❌ Filter failed.");
             }
         },
-        error: function (jqXHR, textStatus, errorThrown) {
-            console.error("Filter error:", { textStatus, errorThrown });
-            showToast("Error applying filter", "error");
+        error: function () {
+            showToast("❌ Error applying filter.");
         }
     });
 }

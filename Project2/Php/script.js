@@ -926,7 +926,7 @@ $("#filterModal").on("show.bs.modal", function () {
             deptSelect.append(`<option value="${dept.id}">${dept.name}</option>`);
         });
         // Restore previous selection
-        deptSelect.val(currentDepartment);
+        deptSelect.val(currentDepartment || 'all');
     });
 
     // Load Locations
@@ -937,7 +937,7 @@ $("#filterModal").on("show.bs.modal", function () {
             locSelect.append(`<option value="${loc.id}">${loc.name}</option>`);
         });
         // Restore previous selection
-        locSelect.val(currentLocation);
+        locSelect.val(currentLocation || 'all');
     });
 });
 
@@ -971,13 +971,11 @@ function applyFilter(deptID, locID) {
 
                 if (!response.data || response.data.length === 0) {
                     const row = document.createElement('tr');
-                    
                     const cell = document.createElement('td');
                     cell.colSpan = 5;
                     cell.className = 'text-center';
                     cell.textContent = 'No results found';
                     row.appendChild(cell);
-
                     fragment.appendChild(row);
                 } else {
                     response.data.forEach(person => {
@@ -1036,7 +1034,7 @@ function applyFilter(deptID, locID) {
             }
         },
         error: function () {
-            showToast("❌ Error applying filter.");
+            showToast("❌ Error applying filter.", "danger");
         }
     });
 }

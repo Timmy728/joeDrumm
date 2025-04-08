@@ -9,8 +9,6 @@ $(".modal").on("shown.bs.modal", function () {
     $(this).attr("aria-hidden", "false");
 });
 
-
-
 // 🔁 Reload correct table when switching tabs
 $('button[data-bs-toggle="tab"]').on('shown.bs.tab', function (e) {
     const target = $(e.target).attr('id');
@@ -98,20 +96,31 @@ $("#searchInp").on("keyup", function () {
                         const actionsCell = document.createElement('td');
                         actionsCell.className = 'text-end text-nowrap';
                         
-                        const editBtn = document.createElement('button');
-                        editBtn.type = 'button';
-                        editBtn.className = 'btn btn-primary btn-sm editPersonnelBtn';
-                        editBtn.dataset.id = person.id;
-                        editBtn.innerHTML = '<i class="fa-solid fa-pen-to-square fa-fw"></i>';
+                        const editButton = document.createElement('button');
+                        editButton.type = 'button';
+                        editButton.className = 'btn btn-outline-primary myBtn me-1';
+                        editButton.setAttribute('data-bs-toggle', 'modal');
+                        editButton.setAttribute('data-bs-target', '#editPersonnelModal');
+                        editButton.setAttribute('data-id', person.id);
+
+                        const editIcon = document.createElement('i');
+                        editIcon.className = 'fa-solid fa-pen-to-square fa-fw';
+                        editButton.appendChild(editIcon);
                         
-                        const deleteBtn = document.createElement('button');
-                        deleteBtn.type = 'button';
-                        deleteBtn.className = 'btn btn-danger btn-sm deletePersonnelBtn';
-                        deleteBtn.dataset.id = person.id;
-                        deleteBtn.innerHTML = '<i class="fa-solid fa-trash fa-fw"></i>';
+                        const deleteButton = document.createElement('button');
+                        deleteButton.type = 'button';
+                        deleteButton.className = 'btn btn-outline-primary myBtn';
+                        deleteButton.setAttribute('data-bs-toggle', 'modal');
+                        deleteButton.setAttribute('data-bs-target', '#deleteConfirmModal');
+                        deleteButton.setAttribute('data-id', person.id);
+                        deleteButton.setAttribute('data-type', 'personnel');
+
+                        const deleteIcon = document.createElement('i');
+                        deleteIcon.className = 'fa-solid fa-trash fa-fw';
+                        deleteButton.appendChild(deleteIcon);
                         
-                        actionsCell.appendChild(editBtn);
-                        actionsCell.appendChild(deleteBtn);
+                        actionsCell.appendChild(editButton);
+                        actionsCell.appendChild(deleteButton);
                         row.appendChild(actionsCell);
 
                         fragment.appendChild(row);
@@ -208,20 +217,31 @@ function loadPersonnel() {
                 const actionsCell = document.createElement('td');
                 actionsCell.className = 'text-end text-nowrap';
                 
-                const editBtn = document.createElement('button');
-                editBtn.type = 'button';
-                editBtn.className = 'btn btn-primary btn-sm editPersonnelBtn';
-                editBtn.dataset.id = person.id;
-                editBtn.innerHTML = '<i class="fa-solid fa-pencil"></i>';
+                const editButton = document.createElement('button');
+                editButton.type = 'button';
+                editButton.className = 'btn btn-outline-primary myBtn me-1';
+                editButton.setAttribute('data-bs-toggle', 'modal');
+                editButton.setAttribute('data-bs-target', '#editPersonnelModal');
+                editButton.setAttribute('data-id', person.id);
+
+                const editIcon = document.createElement('i');
+                editIcon.className = 'fa-solid fa-pencil fa-fw';
+                editButton.appendChild(editIcon);
                 
-                const deleteBtn = document.createElement('button');
-                deleteBtn.type = 'button';
-                deleteBtn.className = 'btn btn-danger btn-sm deletePersonnelBtn';
-                deleteBtn.dataset.id = person.id;
-                deleteBtn.innerHTML = '<i class="fa-solid fa-trash"></i>';
+                const deleteButton = document.createElement('button');
+                deleteButton.type = 'button';
+                deleteButton.className = 'btn btn-outline-primary myBtn';
+                deleteButton.setAttribute('data-bs-toggle', 'modal');
+                deleteButton.setAttribute('data-bs-target', '#deleteConfirmModal');
+                deleteButton.setAttribute('data-id', person.id);
+                deleteButton.setAttribute('data-type', 'personnel');
+
+                const deleteIcon = document.createElement('i');
+                deleteIcon.className = 'fa-solid fa-trash fa-fw';
+                deleteButton.appendChild(deleteIcon);
                 
-                actionsCell.appendChild(editBtn);
-                actionsCell.appendChild(deleteBtn);
+                actionsCell.appendChild(editButton);
+                actionsCell.appendChild(deleteButton);
                 row.appendChild(actionsCell);
 
                 fragment.appendChild(row);
@@ -310,20 +330,31 @@ function loadDepartments() {
                 const actionsCell = document.createElement('td');
                 actionsCell.className = 'text-end text-nowrap';
                 
-                const editBtn = document.createElement('button');
-                editBtn.type = 'button';
-                editBtn.className = 'btn btn-primary btn-sm editDepartmentBtn';
-                editBtn.dataset.id = dept.id;
-                editBtn.innerHTML = '<i class="fa-solid fa-pencil"></i>';
+                const editButton = document.createElement('button');
+                editButton.type = 'button';
+                editButton.className = 'btn btn-outline-primary myBtn me-1';
+                editButton.setAttribute('data-bs-toggle', 'modal');
+                editButton.setAttribute('data-bs-target', '#editDepartmentModal');
+                editButton.setAttribute('data-id', dept.id);
+
+                const editIcon = document.createElement('i');
+                editIcon.className = 'fa-solid fa-pencil fa-fw';
+                editButton.appendChild(editIcon);
                 
-                const deleteBtn = document.createElement('button');
-                deleteBtn.type = 'button';
-                deleteBtn.className = 'btn btn-danger btn-sm deleteDepartmentBtn';
-                deleteBtn.dataset.id = dept.id;
-                deleteBtn.innerHTML = '<i class="fa-solid fa-trash"></i>';
+                const deleteButton = document.createElement('button');
+                deleteButton.type = 'button';
+                deleteButton.className = 'btn btn-outline-primary myBtn';
+                deleteButton.setAttribute('data-bs-toggle', 'modal');
+                deleteButton.setAttribute('data-bs-target', '#deleteConfirmModal');
+                deleteButton.setAttribute('data-id', dept.id);
+                deleteButton.setAttribute('data-type', 'department');
+
+                const deleteIcon = document.createElement('i');
+                deleteIcon.className = 'fa-solid fa-trash fa-fw';
+                deleteButton.appendChild(deleteIcon);
                 
-                actionsCell.appendChild(editBtn);
-                actionsCell.appendChild(deleteBtn);
+                actionsCell.appendChild(editButton);
+                actionsCell.appendChild(deleteButton);
                 row.appendChild(actionsCell);
 
                 fragment.appendChild(row);
@@ -359,20 +390,31 @@ function loadLocations() {
                 const actionsCell = document.createElement('td');
                 actionsCell.className = 'align-middle text-end text-nowrap';
                 
-                const editBtn = document.createElement('button');
-                editBtn.type = 'button';
-                editBtn.className = 'btn btn-primary btn-sm editLocationBtn';
-                editBtn.dataset.id = location.id;
-                editBtn.innerHTML = '<i class="fa-solid fa-pencil"></i>';
+                const editButton = document.createElement('button');
+                editButton.type = 'button';
+                editButton.className = 'btn btn-outline-primary myBtn me-1';
+                editButton.setAttribute('data-bs-toggle', 'modal');
+                editButton.setAttribute('data-bs-target', '#editLocationModal');
+                editButton.setAttribute('data-id', location.id);
+
+                const editIcon = document.createElement('i');
+                editIcon.className = 'fa-solid fa-pencil fa-fw';
+                editButton.appendChild(editIcon);
                 
-                const deleteBtn = document.createElement('button');
-                deleteBtn.type = 'button';
-                deleteBtn.className = 'btn btn-danger btn-sm deleteLocationBtn';
-                deleteBtn.dataset.id = location.id;
-                deleteBtn.innerHTML = '<i class="fa-solid fa-trash"></i>';
+                const deleteButton = document.createElement('button');
+                deleteButton.type = 'button';
+                deleteButton.className = 'btn btn-outline-primary myBtn';
+                deleteButton.setAttribute('data-bs-toggle', 'modal');
+                deleteButton.setAttribute('data-bs-target', '#deleteConfirmModal');
+                deleteButton.setAttribute('data-id', location.id);
+                deleteButton.setAttribute('data-type', 'location');
+
+                const deleteIcon = document.createElement('i');
+                deleteIcon.className = 'fa-solid fa-trash fa-fw';
+                deleteButton.appendChild(deleteIcon);
                 
-                actionsCell.appendChild(editBtn);
-                actionsCell.appendChild(deleteBtn);
+                actionsCell.appendChild(editButton);
+                actionsCell.appendChild(deleteButton);
                 row.appendChild(actionsCell);
 
                 fragment.appendChild(row);
@@ -478,8 +520,8 @@ $(document).on("click", ".deletePersonnelBtn", function () {
                 $("#confirmDeleteModal").data("type", "personnel");
 
                 $("#confirmDeleteModal .modal-footer").html(`
-                    <button type="submit" form="confirmDeleteForm" class="btn btn-outline-danger btn-sm">YES</button>
-                    <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">CANCEL</button>
+                    <button type="submit" form="confirmDeleteForm" class="btn btn-outline-primary myBtn">YES</button>
+                    <button type="button" class="btn btn-outline-primary myBtn" data-bs-dismiss="modal">CANCEL</button>
                 `);
 
                 $("#confirmDeleteModal").modal("show");
@@ -544,7 +586,7 @@ $(document).on("click", ".deleteDepartmentBtn", function () {
             if (res.status.hasPersonnel) {
                 $("#confirmDeleteMessage").text("❌ Cannot delete this department. It has one or more employees assigned.");
                 $("#confirmDeleteModal .modal-footer").html(`
-                    <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">CLOSE</button>
+                    <button type="button" class="btn btn-outline-primary myBtn" data-bs-dismiss="modal">CLOSE</button>
                 `);
                 $("#deleteEntityID").val("");
                 $("#confirmDeleteModal").data("type", "").modal("show");
@@ -563,8 +605,8 @@ $(document).on("click", ".deleteDepartmentBtn", function () {
                         $("#confirmDeleteModal").data("type", "department");
 
                         $("#confirmDeleteModal .modal-footer").html(`
-                            <button type="submit" form="confirmDeleteForm" class="btn btn-outline-danger btn-sm">YES</button>
-                            <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">CANCEL</button>
+                            <button type="submit" form="confirmDeleteForm" class="btn btn-outline-primary myBtn">YES</button>
+                            <button type="button" class="btn btn-outline-primary myBtn" data-bs-dismiss="modal">CANCEL</button>
                         `);
 
                         $("#confirmDeleteModal").modal("show");
@@ -595,7 +637,7 @@ $(document).on("click", ".deleteLocationBtn", function () {
             if (res.status.hasDepartments) {
                 $("#confirmDeleteMessage").text("❌ Cannot delete this location. It has one or more departments assigned.");
                 $("#confirmDeleteModal .modal-footer").html(`
-                    <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">CLOSE</button>
+                    <button type="button" class="btn btn-outline-primary myBtn" data-bs-dismiss="modal">CLOSE</button>
                 `);
                 $("#deleteEntityID").val("");
                 $("#confirmDeleteModal").data("type", "").modal("show");
@@ -615,8 +657,8 @@ $(document).on("click", ".deleteLocationBtn", function () {
                         $("#confirmDeleteModal").data("type", "location");
 
                         $("#confirmDeleteModal .modal-footer").html(`
-                            <button type="submit" form="confirmDeleteForm" class="btn btn-outline-danger btn-sm">YES</button>
-                            <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">CANCEL</button>
+                            <button type="submit" form="confirmDeleteForm" class="btn btn-outline-primary myBtn">YES</button>
+                            <button type="button" class="btn btn-outline-primary myBtn" data-bs-dismiss="modal">CANCEL</button>
                         `);
 
                         $("#confirmDeleteModal").modal("show");
@@ -949,52 +991,47 @@ $(document).off("submit", "#addLocationForm").on("submit", "#addLocationForm", f
 
 // Filter functionality
 $("#filterModal").on("show.bs.modal", function () {
+    // Store current values
+    const currentDepartment = $('#filterDepartment').val();
+    const currentLocation = $('#filterLocation').val();
+
     // Load Departments
     $.getJSON("Php/getAllDepartments.php", function (res) {
         let deptSelect = $("#filterDepartment");
-        deptSelect.empty().append(`<option value="">Select Department</option>`);
+        deptSelect.empty().append(`<option value="all">All</option>`);
         res.data.forEach(dept => {
             deptSelect.append(`<option value="${dept.id}">${dept.name}</option>`);
         });
+        // Restore previous selection
+        deptSelect.val(currentDepartment);
     });
 
     // Load Locations
     $.getJSON("Php/getAllLocations.php", function (res) {
         let locSelect = $("#filterLocation");
-        locSelect.empty().append(`<option value="">Select Location</option>`);
+        locSelect.empty().append(`<option value="all">All</option>`);
         res.data.forEach(loc => {
             locSelect.append(`<option value="${loc.id}">${loc.name}</option>`);
         });
+        // Restore previous selection
+        locSelect.val(currentLocation);
     });
 });
 
-// Force either/or logic:
+// Handle filter changes
 $("#filterDepartment").on("change", function () {
-    if ($(this).val()) {
-        $("#filterLocation").prop("disabled", true).val("");
-    } else {
-        $("#filterLocation").prop("disabled", false);
-    }
+    const deptID = $(this).val();
+    $("#filterLocation").val("all");
+    applyFilter(deptID, "all");
 });
 
 $("#filterLocation").on("change", function () {
-    if ($(this).val()) {
-        $("#filterDepartment").prop("disabled", true).val("");
-    } else {
-        $("#filterDepartment").prop("disabled", false);
-    }
+    const locID = $(this).val();
+    $("#filterDepartment").val("all");
+    applyFilter("all", locID);
 });
 
-// Handle filter submit button:
-$("#applyFilterBtn").on("click", function () {
-    const deptID = $("#filterDepartment").val();
-    const locID = $("#filterLocation").val();
-
-    if (!deptID && !locID) {
-        showToast("❌ Please select either a department or location.");
-        return;
-    }
-
+function applyFilter(deptID, locID) {
     $.ajax({
         url: "Php/filterPersonnel.php",
         type: "GET",
@@ -1042,20 +1079,31 @@ $("#applyFilterBtn").on("click", function () {
                         const actionsCell = document.createElement('td');
                         actionsCell.className = 'text-end text-nowrap';
                         
-                        const editBtn = document.createElement('button');
-                        editBtn.type = 'button';
-                        editBtn.className = 'btn btn-primary btn-sm editPersonnelBtn';
-                        editBtn.dataset.id = person.id;
-                        editBtn.innerHTML = '<i class="fa-solid fa-pencil"></i>';
+                        const editButton = document.createElement('button');
+                        editButton.type = 'button';
+                        editButton.className = 'btn btn-outline-primary myBtn me-1';
+                        editButton.setAttribute('data-bs-toggle', 'modal');
+                        editButton.setAttribute('data-bs-target', '#editPersonnelModal');
+                        editButton.setAttribute('data-id', person.id);
+
+                        const editIcon = document.createElement('i');
+                        editIcon.className = 'fa-solid fa-pencil fa-fw';
+                        editButton.appendChild(editIcon);
                         
-                        const deleteBtn = document.createElement('button');
-                        deleteBtn.type = 'button';
-                        deleteBtn.className = 'btn btn-danger btn-sm deletePersonnelBtn';
-                        deleteBtn.dataset.id = person.id;
-                        deleteBtn.innerHTML = '<i class="fa-solid fa-trash"></i>';
+                        const deleteButton = document.createElement('button');
+                        deleteButton.type = 'button';
+                        deleteButton.className = 'btn btn-outline-primary myBtn';
+                        deleteButton.setAttribute('data-bs-toggle', 'modal');
+                        deleteButton.setAttribute('data-bs-target', '#deleteConfirmModal');
+                        deleteButton.setAttribute('data-id', person.id);
+                        deleteButton.setAttribute('data-type', 'personnel');
+
+                        const deleteIcon = document.createElement('i');
+                        deleteIcon.className = 'fa-solid fa-trash fa-fw';
+                        deleteButton.appendChild(deleteIcon);
                         
-                        actionsCell.appendChild(editBtn);
-                        actionsCell.appendChild(deleteBtn);
+                        actionsCell.appendChild(editButton);
+                        actionsCell.appendChild(deleteButton);
                         row.appendChild(actionsCell);
 
                         fragment.appendChild(row);
@@ -1071,21 +1119,6 @@ $("#applyFilterBtn").on("click", function () {
             showToast("❌ Error applying filter.");
         }
     });
-});
-
-//Helper function
-function showToast(message, type = "success") {
-    const toastEl = $("#statusToast");
-    const toastMsg = $("#statusToastMessage");
-
-    toastMsg.text(message);
-
-    // Change toast style based on type
-    toastEl.removeClass("text-bg-success text-bg-danger text-bg-warning");
-    toastEl.addClass(`text-bg-${type}`);
-
-    const toast = new bootstrap.Toast(toastEl[0]);
-    toast.show();
 }
 
 // Modal Reset Handlers
@@ -1113,33 +1146,51 @@ $('#editLocationModal').on('hidden.bs.modal', function () {
     $('#editLocationForm')[0].reset();
 });
 
-
-
-
+// Modal focus management
 document.addEventListener('DOMContentLoaded', function() {
-  const modals = document.querySelectorAll('.modal');
-  
-  modals.forEach(modal => {
-    // Store the element that triggered the modal
-    let triggerElement = null;
+    const modals = document.querySelectorAll('.modal');
+    
+    modals.forEach(modal => {
+        // Store the element that triggered the modal
+        let triggerElement = null;
 
-    modal.addEventListener('show.bs.modal', function(event) {
-      // Store the element that triggered the modal
-      triggerElement = event.relatedTarget;
-    });
+        modal.addEventListener('show.bs.modal', function(event) {
+            // Store the element that triggered the modal
+            triggerElement = event.relatedTarget;
+            // Remove backdrop
+            $(this).attr('data-bs-backdrop', 'false');
+            // Add primary background to header
+            $(this).find('.modal-header').addClass('bg-primary text-white');
+        });
 
-    modal.addEventListener('shown.bs.modal', function() {
-      // Focus the first input or button in the modal
-      const firstInput = this.querySelector('input:not([type="hidden"]), select, button:not([data-bs-dismiss="modal"])');
-      if (firstInput) {
-        firstInput.focus();
-      }
+        modal.addEventListener('shown.bs.modal', function() {
+            // Focus the first input or button in the modal
+            const firstInput = this.querySelector('input:not([type="hidden"]), select, button:not([data-bs-dismiss="modal"])');
+            if (firstInput) {
+                firstInput.focus();
+            }
+        });
+
+        modal.addEventListener('hidden.bs.modal', function() {
+            // Return focus to the trigger element when modal closes
+            if (triggerElement) {
+                triggerElement.focus();
+            }
+        });
     });
-    modal.addEventListener('hidden.bs.modal', function() {
-      // Return focus to the trigger element when modal closes
-      if (triggerElement) {
-        triggerElement.focus();
-      }
-    });
-  });
 });
+
+//Helper function
+function showToast(message, type = "success") {
+    const toastEl = $("#statusToast");
+    const toastMsg = $("#statusToastMessage");
+
+    toastMsg.text(message);
+
+    // Change toast style based on type
+    toastEl.removeClass("text-bg-success text-bg-danger text-bg-warning");
+    toastEl.addClass(`text-bg-${type}`);
+
+    const toast = new bootstrap.Toast(toastEl[0]);
+    toast.show();
+}

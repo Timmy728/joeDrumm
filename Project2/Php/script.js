@@ -927,6 +927,12 @@ $("#filterModal").on("show.bs.modal", function () {
         });
         // Restore previous selection
         deptSelect.val(currentDepartment || 'all');
+        
+        // Apply visual state
+        if (currentDepartment && currentDepartment !== 'all') {
+            $("#filterLocation").addClass('text-muted');
+            $("#filterDepartment").removeClass('text-muted');
+        }
     });
 
     // Load Locations
@@ -938,6 +944,12 @@ $("#filterModal").on("show.bs.modal", function () {
         });
         // Restore previous selection
         locSelect.val(currentLocation || 'all');
+        
+        // Apply visual state
+        if (currentLocation && currentLocation !== 'all') {
+            $("#filterDepartment").addClass('text-muted');
+            $("#filterLocation").removeClass('text-muted');
+        }
     });
 });
 
@@ -945,16 +957,38 @@ $("#filterModal").on("show.bs.modal", function () {
 $("#filterDepartment").on("change", function () {
     const deptID = $(this).val();
     $("#filterLocation").val("all");
+    
+    // Visual feedback
+    if (deptID !== 'all') {
+        $("#filterLocation").addClass('text-muted');
+        $("#filterDepartment").removeClass('text-muted');
+    } else {
+        $("#filterLocation, #filterDepartment").removeClass('text-muted');
+    }
+    
     applyFilter(deptID, "all");
 });
 
 $("#filterLocation").on("change", function () {
     const locID = $(this).val();
     $("#filterDepartment").val("all");
+    
+    // Visual feedback
+    if (locID !== 'all') {
+        $("#filterDepartment").addClass('text-muted');
+        $("#filterLocation").removeClass('text-muted');
+    } else {
+        $("#filterLocation, #filterDepartment").removeClass('text-muted');
+    }
+    
     applyFilter("all", locID);
 });
 
 function applyFilter(deptID, locID) {
+    // Show loading state
+    const personnelTable = $("#personnelTableBody")[0];
+    personnelTable.innerHTML = '<tr><td colspan="5" class="text-center">Loading...</td></tr>';
+
     $.ajax({
         url: "Php/filterPersonnel.php",
         type: "GET",
@@ -964,11 +998,10 @@ function applyFilter(deptID, locID) {
         },
         dataType: "json",
         success: function (response) {
-            if (response.status.code === 200) {
-                const personnelTable = $("#personnelTableBody")[0];
-                const fragment = document.createDocumentFragment();
-                personnelTable.innerHTML = '';
+            const fragment = document.createDocumentFragment();
+            personnelTable.innerHTML = '';
 
+            if (response.status.code === 200) {
                 if (!response.data || response.data.length === 0) {
                     const row = document.createElement('tr');
                     const cell = document.createElement('td');
@@ -1030,11 +1063,21 @@ function applyFilter(deptID, locID) {
                         fragment.appendChild(row);
                     });
                 }
-                personnelTable.appendChild(fragment);
+            } else {
+                const row = document.createElement('tr');
+                const cell = document.createElement('td');
+                cell.colSpan = 5;
+                cell.className = 'text-center text-danger';
+                cell.textContent = 'Error loading results';
+                row.appendChild(cell);
+                fragment.appendChild(row);
             }
+            
+            personnelTable.appendChild(fragment);
         },
         error: function () {
-            showToast("❌ Error applying filter.", "danger");
+            personnelTable.innerHTML = '<tr><td colspan="5" class="text-center text-danger">Error loading results</td></tr>';
+            showToast("❌ Error applying filter", "danger");
         }
     });
 }

@@ -919,29 +919,57 @@ $("#filterModal").on("show.bs.modal", function () {
     const currentLocation = $('#filterLocation').val();
 
     // Load Departments
-    $.getJSON("Php/getAllDepartments.php", function (res) {
-        let deptSelect = $("#filterDepartment");
-        deptSelect.empty().append(`<option value="all">All</option>`);
-        res.data.forEach(dept => {
-            deptSelect.append(`<option value="${dept.id}">${dept.name}</option>`);
-        });
-        // Restore previous selection
-        deptSelect.val(currentDepartment);
-        // Update opacity based on location selection
-        deptSelect.css('opacity', $('#filterLocation').val() === 'all' ? '1' : '0.5');
+    $.ajax({
+        url: "Php/getAllDepartments.php",
+        type: "GET",
+        dataType: "json",
+        success: function (res) {
+            let deptSelect = $("#filterDepartment");
+            deptSelect.empty().append(`<option value="all">All</option>`);
+            
+            if (res && res.data && Array.isArray(res.data)) {
+                res.data.forEach(dept => {
+                    deptSelect.append(`<option value="${dept.id}">${dept.name}</option>`);
+                });
+                // Restore previous selection if valid
+                if (currentDepartment && res.data.some(dept => dept.id === currentDepartment)) {
+                    deptSelect.val(currentDepartment);
+                } else {
+                    deptSelect.val('all');
+                }
+            }
+        },
+        error: function (jqXHR, textStatus, errorThrown) {
+            console.error("Error loading departments:", textStatus, errorThrown);
+            showToast("Error loading departments", "error");
+        }
     });
 
     // Load Locations
-    $.getJSON("Php/getAllLocations.php", function (res) {
-        let locSelect = $("#filterLocation");
-        locSelect.empty().append(`<option value="all">All</option>`);
-        res.data.forEach(loc => {
-            locSelect.append(`<option value="${loc.id}">${loc.name}</option>`);
-        });
-        // Restore previous selection
-        locSelect.val(currentLocation);
-        // Update opacity based on department selection
-        locSelect.css('opacity', $('#filterDepartment').val() === 'all' ? '1' : '0.5');
+    $.ajax({
+        url: "Php/getAllLocations.php",
+        type: "GET",
+        dataType: "json",
+        success: function (res) {
+            let locSelect = $("#filterLocation");
+            locSelect.empty().append(`<option value="all">All</option>`);
+            
+            if (res && res.data && Array.isArray(res.data)) {
+                res.data.forEach(loc => {
+                    locSelect.append(`<option value="${loc.id}">${loc.name}</option>`);
+                });
+                // Restore previous selection if valid
+                if (currentLocation && res.data.some(loc => loc.id === currentLocation)) {
+                    locSelect.val(currentLocation);
+                } else {
+                    locSelect.val('all');
+                }
+            }
+        },
+        error: function (jqXHR, textStatus, errorThrown) {
+            console.error("Error loading locations:", textStatus, errorThrown);
+            showToast("Error loading locations", "error");
+        }
     });
 });
 
@@ -949,20 +977,18 @@ $("#filterModal").on("show.bs.modal", function () {
 $("#filterDepartment").on("change", function () {
     const deptID = $(this).val();
     $("#filterLocation").val("all");
-    $("#filterLocation").css('opacity', deptID === 'all' ? '1' : '0.5');
-    $("#filterDepartment").css('opacity', '1');
     applyFilter(deptID, "all");
 });
 
 $("#filterLocation").on("change", function () {
     const locID = $(this).val();
     $("#filterDepartment").val("all");
-    $("#filterDepartment").css('opacity', locID === 'all' ? '1' : '0.5');
-    $("#filterLocation").css('opacity', '1');
     applyFilter("all", locID);
 });
 
 function applyFilter(deptID, locID) {
+    console.log("Applying filter with:", { deptID, locID });
+
     $.ajax({
         url: "Php/filterPersonnel.php",
         type: "GET",
@@ -972,85 +998,94 @@ function applyFilter(deptID, locID) {
         },
         dataType: "json",
         success: function (response) {
-            if (response.status.code === 200) {
-                const personnelTable = $("#personnelTableBody")[0];
-                const fragment = document.createDocumentFragment();
-                personnelTable.innerHTML = '';
+            console.log("Filter response:", response);
 
-                if (!response.data || response.data.length === 0) {
+            if (!response || !response.status) {
+                showToast("Invalid response from server", "error");
+                return;
+            }
+
+            const personnelTable = $("#personnelTableBody")[0];
+            const fragment = document.createDocumentFragment();
+            personnelTable.innerHTML = '';
+
+            if (!response.data || !Array.isArray(response.data) || response.data.length === 0) {
+                const row = document.createElement('tr');
+                const cell = document.createElement('td');
+                cell.colSpan = 5;
+                cell.className = 'text-center';
+                cell.textContent = 'No results found';
+                row.appendChild(cell);
+                fragment.appendChild(row);
+            } else {
+                response.data.forEach(person => {
                     const row = document.createElement('tr');
-                    const cell = document.createElement('td');
-                    cell.colSpan = 5;
-                    cell.className = 'text-center';
-                    cell.textContent = 'No results found';
-                    row.appendChild(cell);
+                    
+                    const nameCell = document.createElement('td');
+                    nameCell.textContent = `${person.lastName}, ${person.firstName}`;
+                    row.appendChild(nameCell);
+
+                    const deptCell = document.createElement('td');
+                    deptCell.textContent = person.department ?? "Unassigned";
+                    row.appendChild(deptCell);
+
+                    const locCell = document.createElement('td');
+                    locCell.textContent = person.location ?? "Unassigned";
+                    row.appendChild(locCell);
+
+                    const emailCell = document.createElement('td');
+                    emailCell.textContent = person.email;
+                    row.appendChild(emailCell);
+
+                    const actionsCell = document.createElement('td');
+                    actionsCell.className = 'text-end text-nowrap';
+                    
+                    const editButton = document.createElement('button');
+                    editButton.type = 'button';
+                    editButton.className = 'btn btn-outline-primary myBtn me-1';
+                    editButton.setAttribute('data-bs-toggle', 'modal');
+                    editButton.setAttribute('data-bs-target', '#editPersonnelModal');
+                    editButton.setAttribute('data-id', person.id);
+
+                    const editIcon = document.createElement('i');
+                    editIcon.className = 'fa-solid fa-pencil fa-fw';
+                    editButton.appendChild(editIcon);
+                    
+                    const deleteButton = document.createElement('button');
+                    deleteButton.type = 'button';
+                    deleteButton.className = 'btn btn-outline-primary myBtn';
+                    deleteButton.setAttribute('data-bs-toggle', 'modal');
+                    deleteButton.setAttribute('data-bs-target', '#deleteConfirmModal');
+                    deleteButton.setAttribute('data-id', person.id);
+                    deleteButton.setAttribute('data-type', 'personnel');
+
+                    const deleteIcon = document.createElement('i');
+                    deleteIcon.className = 'fa-solid fa-trash fa-fw';
+                    deleteButton.appendChild(deleteIcon);
+                    
+                    actionsCell.appendChild(editButton);
+                    actionsCell.appendChild(deleteButton);
+                    row.appendChild(actionsCell);
+
                     fragment.appendChild(row);
-                } else {
-                    response.data.forEach(person => {
-                        const row = document.createElement('tr');
-                        
-                        const nameCell = document.createElement('td');
-                        nameCell.textContent = `${person.lastName}, ${person.firstName}`;
-                        row.appendChild(nameCell);
+                });
+            }
+            personnelTable.appendChild(fragment);
 
-                        const deptCell = document.createElement('td');
-                        deptCell.textContent = person.department ?? "Unassigned";
-                        row.appendChild(deptCell);
-
-                        const locCell = document.createElement('td');
-                        locCell.textContent = person.location ?? "Unassigned";
-                        row.appendChild(locCell);
-
-                        const emailCell = document.createElement('td');
-                        emailCell.textContent = person.email;
-                        row.appendChild(emailCell);
-
-                        const actionsCell = document.createElement('td');
-                        actionsCell.className = 'text-end text-nowrap';
-                        
-                        const editButton = document.createElement('button');
-                        editButton.type = 'button';
-                        editButton.className = 'btn btn-outline-primary myBtn me-1';
-                        editButton.setAttribute('data-bs-toggle', 'modal');
-                        editButton.setAttribute('data-bs-target', '#editPersonnelModal');
-                        editButton.setAttribute('data-id', person.id);
-
-                        const editIcon = document.createElement('i');
-                        editIcon.className = 'fa-solid fa-pencil fa-fw';
-                        editButton.appendChild(editIcon);
-                        
-                        const deleteButton = document.createElement('button');
-                        deleteButton.type = 'button';
-                        deleteButton.className = 'btn btn-outline-primary myBtn';
-                        deleteButton.setAttribute('data-bs-toggle', 'modal');
-                        deleteButton.setAttribute('data-bs-target', '#deleteConfirmModal');
-                        deleteButton.setAttribute('data-id', person.id);
-                        deleteButton.setAttribute('data-type', 'personnel');
-
-                        const deleteIcon = document.createElement('i');
-                        deleteIcon.className = 'fa-solid fa-trash fa-fw';
-                        deleteButton.appendChild(deleteIcon);
-                        
-                        actionsCell.appendChild(editButton);
-                        actionsCell.appendChild(deleteButton);
-                        row.appendChild(actionsCell);
-
-                        fragment.appendChild(row);
-                    });
-                }
-                personnelTable.appendChild(fragment);
-
-                // Close the modal after successful filtering
+            // Close modal only on successful filter
+            if (response.status.code === 200) {
                 const filterModal = bootstrap.Modal.getInstance(document.getElementById('filterModal'));
                 if (filterModal) {
                     filterModal.hide();
                 }
+                showToast("Filter applied successfully", "success");
             } else {
-                showToast("❌ Filter failed.");
+                showToast(response.status.description || "Filter failed", "error");
             }
         },
-        error: function () {
-            showToast("❌ Error applying filter.");
+        error: function (jqXHR, textStatus, errorThrown) {
+            console.error("Filter error:", { textStatus, errorThrown });
+            showToast("Error applying filter", "error");
         }
     });
 }

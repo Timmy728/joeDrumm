@@ -108,7 +108,7 @@ $("#searchInp").on("keyup", function () {
                         
                         const editButton = document.createElement('button');
                         editButton.type = 'button';
-                        editButton.className = 'btn btn-outline-primary myBtn me-1';
+                        editButton.className = 'btn btn-primary me-1';
                         editButton.setAttribute('data-bs-toggle', 'modal');
                         editButton.setAttribute('data-bs-target', '#editPersonnelModal');
                         editButton.setAttribute('data-id', person.id);
@@ -119,7 +119,7 @@ $("#searchInp").on("keyup", function () {
                         
                         const deleteButton = document.createElement('button');
                         deleteButton.type = 'button';
-                        deleteButton.className = 'btn btn-outline-primary myBtn';
+                        deleteButton.className = 'btn btn-primary';
                         deleteButton.setAttribute('data-bs-toggle', 'modal');
                         deleteButton.setAttribute('data-bs-target', '#deleteConfirmModal');
                         deleteButton.setAttribute('data-id', person.id);
@@ -229,7 +229,7 @@ function loadPersonnel() {
                 
                 const editButton = document.createElement('button');
                 editButton.type = 'button';
-                editButton.className = 'btn btn-outline-primary myBtn me-1';
+                editButton.className = 'btn btn-primary me-1';
                 editButton.setAttribute('data-bs-toggle', 'modal');
                 editButton.setAttribute('data-bs-target', '#editPersonnelModal');
                 editButton.setAttribute('data-id', person.id);
@@ -240,7 +240,7 @@ function loadPersonnel() {
                 
                 const deleteButton = document.createElement('button');
                 deleteButton.type = 'button';
-                deleteButton.className = 'btn btn-outline-primary myBtn';
+                deleteButton.className = 'btn btn-primary';
                 deleteButton.setAttribute('data-bs-toggle', 'modal');
                 deleteButton.setAttribute('data-bs-target', '#deleteConfirmModal');
                 deleteButton.setAttribute('data-id', person.id);
@@ -293,7 +293,7 @@ function loadDepartments() {
                 
                 const editButton = document.createElement('button');
                 editButton.type = 'button';
-                editButton.className = 'btn btn-outline-primary myBtn me-1';
+                editButton.className = 'btn btn-primary me-1';
                 editButton.setAttribute('data-bs-toggle', 'modal');
                 editButton.setAttribute('data-bs-target', '#editDepartmentModal');
                 editButton.setAttribute('data-id', dept.id);
@@ -304,7 +304,7 @@ function loadDepartments() {
                 
                 const deleteButton = document.createElement('button');
                 deleteButton.type = 'button';
-                deleteButton.className = 'btn btn-outline-primary myBtn';
+                deleteButton.className = 'btn btn-primary';
                 deleteButton.setAttribute('data-bs-toggle', 'modal');
                 deleteButton.setAttribute('data-bs-target', '#deleteConfirmModal');
                 deleteButton.setAttribute('data-id', dept.id);
@@ -353,7 +353,7 @@ function loadLocations() {
                 
                 const editButton = document.createElement('button');
                 editButton.type = 'button';
-                editButton.className = 'btn btn-outline-primary myBtn me-1';
+                editButton.className = 'btn btn-primary me-1';
                 editButton.setAttribute('data-bs-toggle', 'modal');
                 editButton.setAttribute('data-bs-target', '#editLocationModal');
                 editButton.setAttribute('data-id', location.id);
@@ -364,7 +364,7 @@ function loadLocations() {
                 
                 const deleteButton = document.createElement('button');
                 deleteButton.type = 'button';
-                deleteButton.className = 'btn btn-outline-primary myBtn';
+                deleteButton.className = 'btn btn-primary';
                 deleteButton.setAttribute('data-bs-toggle', 'modal');
                 deleteButton.setAttribute('data-bs-target', '#deleteConfirmModal');
                 deleteButton.setAttribute('data-id', location.id);
@@ -1002,7 +1002,7 @@ function applyFilter(filterData) {
                         // Create edit button
                         const editButton = document.createElement('button');
                         editButton.type = 'button';
-                        editButton.className = 'btn btn-outline-primary myBtn me-1';
+                        editButton.className = 'btn btn-primary me-1';
                         editButton.setAttribute('data-bs-toggle', 'modal');
                         editButton.setAttribute('data-bs-target', '#editPersonnelModal');
                         editButton.setAttribute('data-id', person.id);

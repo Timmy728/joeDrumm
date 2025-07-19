@@ -108,13 +108,15 @@ $(document).ready(function () {
 
     loadCurrencies();
 
-    // Populate countries dropdown
-    $.ajax({
-        url: 'Php/countryName.php',
-        type: 'GET',
-        dataType: 'json',
-        success: function (data) {
-            console.log(data);
+   // Populate countries dropdown
+$.ajax({
+    url: 'Php/countryName.php',
+    type: 'GET',
+    dataType: 'json',
+    success: function (data) {
+        console.log("Countries data:", data);
+        
+        if (Array.isArray(data)) {
             const dropdown = $('#countrySelect');
             dropdown.empty();
             dropdown.append(new Option('Select a Country', ''));
@@ -126,13 +128,17 @@ $(document).ready(function () {
 
             map.locate({
                 setView: true,
-                maxZoom: 5  // Reduced zoom level
+                maxZoom: 5
             });
-        },
-        error: function(err) {
-            console.error("Error loading countries:", err);
+        } else {
+            console.error("❌ Unexpected response format: Expected an array but got:", data);
         }
-    });
+    },
+    error: function(err) {
+        console.error("Error loading countries:", err);
+    }
+});
+
 
     // Currency modal event handlers
     $('#fromAmount').on('keyup change', function () {

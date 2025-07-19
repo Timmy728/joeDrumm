@@ -83,22 +83,25 @@ function getCountryByISO2($iso2) {
     curl_close($curl);
     $data = json_decode($response, true);
 
-    if (!$data || $httpCode !== 200 || empty($data[0])) {
+    if (!$data || $httpCode !== 200) {
         echo json_encode(["error" => "API error. Status code: " . $httpCode]);
         exit;
     }
 
-    $country = $data[0];
+    // Handle object or array format
+    $country = is_array($data) ? $data[0] : $data;
+
     echo json_encode([
-        "name" => $country['name']['common'],
-        "iso2" => $country['cca2'],
-        "iso3" => $country['cca3'],
+        "name" => $country['name']['common'] ?? "N/A",
+        "iso2" => $country['cca2'] ?? "N/A",
+        "iso3" => $country['cca3'] ?? "N/A",
         "capital" => $country['capital'][0] ?? "N/A",
         "population" => $country['population'] ?? "N/A",
         "timezone" => $country['timezones'][0] ?? "N/A",
     ]);
     exit;
 }
+
 
 // Handle requests
 if (isset($_GET['iso2']) && !empty(trim($_GET['iso2']))) {

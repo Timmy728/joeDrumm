@@ -3,7 +3,7 @@ header('Content-Type: application/json'); // Ensure JSON response
 
 // Function to fetch countries
 function getFilteredCountries() {
-    $url = "https://restcountries.com/v3.1/all";
+    $url = "https://restcountries.com/v3.1/all?fields=cca2,name,independent";
 
     $curl = curl_init();
     curl_setopt_array($curl, [
@@ -33,32 +33,22 @@ function getFilteredCountries() {
 
     foreach ($data as $country) {
         if (isset($country['cca2'], $country['name']['common'])) {
-            $iso2 = $country['cca2'];
-            $name = $country['name']['common'];
-
-            // Exclude small territories and dependencies
-            if (!isset($country['independent']) || $country['independent'] !== true) {
-                continue; // Skip non-independent territories
-            }
+            if (!isset($country['independent']) || $country['independent'] !== true) continue;
 
             $countries[] = [
-                "iso2" => $iso2,
-                "name" => $name
+                "iso2" => $country['cca2'],
+                "name" => $country['name']['common']
             ];
         }
     }
 
-    // Sort countries alphabetically by name
-    usort($countries, function ($a, $b) {
-        return strcmp($a['name'], $b['name']);
-    });
-
-    // Limit to 150-220 countries (Adjust the number if needed)
+    usort($countries, fn($a, $b) => strcmp($a['name'], $b['name']));
     $countries = array_slice($countries, 0, 200);
 
     echo json_encode($countries);
     exit;
 }
+
 
 // If 'iso2' is provided, fetch details for that specific country
 function getCountryByISO2($iso2) {
